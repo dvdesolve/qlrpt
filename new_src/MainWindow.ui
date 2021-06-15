@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>950</height>
+    <width>1381</width>
+    <height>911</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,66 +30,54 @@
           <attribute name="title">
            <string>Receiver</string>
           </attribute>
-          <layout class="QGridLayout" name="gridLayout_4">
-           <item row="0" column="0" colspan="3">
-            <widget class="QPushButton" name="StartStopBtn">
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="4" column="2" rowspan="2">
+            <widget class="QLabel" name="RcvSamplingRateLbl">
              <property name="enabled">
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Start</string>
+              <string>Sampling rate:</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_9">
+           <item row="6" column="0">
+            <widget class="QRadioButton" name="AGCRB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
-              <string>Source:</string>
+              <string>AGC</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
            <item row="1" column="1" colspan="2">
-            <widget class="QComboBox" name="SourceCB">
+            <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
              <item>
-              <property name="text">
-               <string>I/Q file</string>
-              </property>
+              <widget class="QComboBox" name="SourceCombB">
+               <item>
+                <property name="text">
+                 <string>I/Q file</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>QPSK file</string>
+                </property>
+               </item>
+              </widget>
              </item>
              <item>
-              <property name="text">
-               <string>QPSK file</string>
-              </property>
+              <widget class="QPushButton" name="BrowseSrcFileBtn">
+               <property name="text">
+                <string>Select</string>
+               </property>
+              </widget>
              </item>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_10">
-             <property name="text">
-              <string>Frequency:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDoubleSpinBox" name="RcvFrequencySB">
-             <property name="suffix">
-              <string> kHz</string>
-             </property>
-             <property name="decimals">
-              <number>3</number>
-             </property>
-             <property name="minimum">
-              <double>130000.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>140000.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>100.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>137100.000000000000000</double>
-             </property>
-            </widget>
+            </layout>
            </item>
            <item row="2" column="2">
             <spacer name="horizontalSpacer">
@@ -104,15 +92,48 @@
              </property>
             </spacer>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string>Bandwidth:</string>
+           <item row="5" column="1">
+            <widget class="QComboBox" name="DecimationCombB">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
+             <item>
+              <property name="text">
+               <string>1</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>4</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>8</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>16</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>32</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item row="3" column="1">
             <widget class="QDoubleSpinBox" name="RcvBandwidthSB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="suffix">
               <string> kHz</string>
              </property>
@@ -133,6 +154,33 @@
              </property>
             </widget>
            </item>
+           <item row="4" column="1">
+            <widget class="QComboBox" name="RcvInputRateCombB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QRadioButton" name="ManualRB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Manual</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="RcvBandwidthLbl">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Bandwidth:</string>
+             </property>
+            </widget>
+           </item>
            <item row="3" column="2">
             <spacer name="horizontalSpacer_2">
              <property name="orientation">
@@ -146,24 +194,89 @@
              </property>
             </spacer>
            </item>
-           <item row="4" column="0">
-            <widget class="QRadioButton" name="AGCRB">
-             <property name="text">
-              <string>AGC</string>
+           <item row="0" column="0" colspan="3">
+            <widget class="QPushButton" name="StartStopBtn">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
-             <property name="checked">
-              <bool>true</bool>
+             <property name="text">
+              <string>Start</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="RcvInputRateLbl">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Input rate:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QCheckBox" name="BiasTee">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Bias tee</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="RcvFrequencyLbl">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Frequency:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Source:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="RcvFrequencySB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="suffix">
+              <string> kHz</string>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="minimum">
+              <double>130000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>140000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>100.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>137100.000000000000000</double>
              </property>
             </widget>
            </item>
            <item row="5" column="0">
-            <widget class="QRadioButton" name="ManualRB">
+            <widget class="QLabel" name="DecimationLbl">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
-              <string>Manual</string>
+              <string>Decimation:</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="1" colspan="2">
+           <item row="7" column="1" colspan="2">
             <widget class="QSlider" name="RcvGainSlider">
              <property name="enabled">
               <bool>false</bool>
@@ -179,16 +292,6 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
-            <widget class="QCheckBox" name="checkBox">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Bias tee</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="tab_2">
@@ -196,25 +299,6 @@
            <string>Demodulator</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="1" column="2">
-            <widget class="QDoubleSpinBox" name="PLLUnlockedSB">
-             <property name="decimals">
-              <number>2</number>
-             </property>
-             <property name="minimum">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>2.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="value">
-              <double>0.830000000000000</double>
-             </property>
-            </widget>
-           </item>
            <item row="6" column="0">
             <widget class="QCheckBox" name="InterleavedCB">
              <property name="text">
@@ -222,10 +306,37 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_12">
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="RRCOrderSB">
+             <property name="maximum">
+              <number>256</number>
+             </property>
+             <property name="value">
+              <number>32</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QCheckBox" name="OffsetCB">
              <property name="text">
-              <string>Costas bandwidth:</string>
+              <string>Offset QPSK</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QSpinBox" name="InterpolationFactorSB">
+             <property name="maximum">
+              <number>32</number>
+             </property>
+             <property name="value">
+              <number>4</number>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>Interpolation factor:</string>
              </property>
             </widget>
            </item>
@@ -248,46 +359,6 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="PLLBandwidthSB">
-             <property name="suffix">
-              <string> Hz</string>
-             </property>
-             <property name="decimals">
-              <number>1</number>
-             </property>
-             <property name="minimum">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>500.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>100.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="OffsetCB">
-             <property name="text">
-              <string>Offset QPSK</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QCheckBox" name="DiffcodedCB">
-             <property name="text">
-              <string>Differential coding</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_16">
-             <property name="text">
-              <string>PLL locked/unlocked threshold:</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_14">
              <property name="text">
@@ -295,10 +366,22 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_13">
-             <property name="text">
-              <string>Interpolation factor:</string>
+           <item row="1" column="2">
+            <widget class="QDoubleSpinBox" name="PLLUnlockedSB">
+             <property name="decimals">
+              <number>2</number>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>2.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.830000000000000</double>
              </property>
             </widget>
            </item>
@@ -321,25 +404,58 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="RRCOrderSB">
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="PLLBandwidthSB">
+             <property name="suffix">
+              <string> Hz</string>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
              <property name="maximum">
-              <number>256</number>
+              <double>500.000000000000000</double>
              </property>
              <property name="value">
-              <number>32</number>
+              <double>100.000000000000000</double>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
-            <widget class="QSpinBox" name="InterpolationFactorSB">
-             <property name="maximum">
-              <number>32</number>
-             </property>
-             <property name="value">
-              <number>4</number>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_16">
+             <property name="text">
+              <string>PLL locked/unlocked threshold:</string>
              </property>
             </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Costas bandwidth:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QCheckBox" name="DiffcodedCB">
+             <property name="text">
+              <string>Differential coding</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0" colspan="3">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -369,25 +485,46 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1260</width>
-            <height>828</height>
+            <width>1817</width>
+            <height>714</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="spacing">
+            <number>1</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1,0">
              <item>
-              <widget class="QWidget" name="LRPTChan64Widget" native="true">
+              <widget class="LRPTChanWidget" name="LRPTChan64Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>200</width>
+                 <width>300</width>
                  <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>300</width>
+                 <height>16777215</height>
                 </size>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label">
+              <widget class="QLabel" name="APID64Lbl">
                <property name="text">
                 <string>APID 64</string>
                </property>
@@ -398,17 +535,23 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_6" stretch="1,0">
              <item>
-              <widget class="QWidget" name="LRPTChan65Widget" native="true">
+              <widget class="LRPTChanWidget" name="LRPTChan65Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>200</width>
+                 <width>300</width>
                  <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>300</width>
+                 <height>16777215</height>
                 </size>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_4">
+              <widget class="QLabel" name="APID65Lbl">
                <property name="text">
                 <string>APID 65</string>
                </property>
@@ -419,17 +562,23 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,0">
              <item>
-              <widget class="QWidget" name="LRPTChan66Widget" native="true">
+              <widget class="LRPTChanWidget" name="LRPTChan66Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>200</width>
+                 <width>300</width>
                  <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>300</width>
+                 <height>16777215</height>
                 </size>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_5">
+              <widget class="QLabel" name="APID66Lbl">
                <property name="text">
                 <string>APID 66</string>
                </property>
@@ -440,17 +589,23 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_8" stretch="1,0">
              <item>
-              <widget class="QWidget" name="LRPTChan67Widget" native="true">
+              <widget class="LRPTChanWidget" name="LRPTChan67Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>200</width>
+                 <width>300</width>
                  <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>300</width>
+                 <height>16777215</height>
                 </size>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_18">
+              <widget class="QLabel" name="APID67Lbl">
                <property name="text">
                 <string>APID 67</string>
                </property>
@@ -461,17 +616,23 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,0">
              <item>
-              <widget class="QWidget" name="LRPTChan68Widget" native="true">
+              <widget class="LRPTChanWidget" name="LRPTChan68Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>200</width>
+                 <width>300</width>
                  <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>300</width>
+                 <height>16777215</height>
                 </size>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_19">
+              <widget class="QLabel" name="APID68Lbl">
                <property name="text">
                 <string>APID 68</string>
                </property>
@@ -482,17 +643,23 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_10" stretch="1,0">
              <item>
-              <widget class="QWidget" name="LRPTChan69Widget" native="true">
+              <widget class="LRPTChanWidget" name="LRPTChan69Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>200</width>
+                 <width>300</width>
                  <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>300</width>
+                 <height>16777215</height>
                 </size>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_20">
+              <widget class="QLabel" name="APID69Lbl">
                <property name="text">
                 <string>APID 69</string>
                </property>
@@ -504,16 +671,128 @@
          </widget>
         </widget>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QGroupBox" name="LiveImageryGB">
+           <property name="title">
+            <string>Live APIDs</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QCheckBox" name="APID64ShowCB">
+              <property name="text">
+               <string>64</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="APID65ShowCB">
+              <property name="text">
+               <string>65</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="APID66ShowCB">
+              <property name="text">
+               <string>66</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="APID67ShowCB">
+              <property name="text">
+               <string>67</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="APID68ShowCB">
+              <property name="text">
+               <string>68</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="APID69ShowCB">
+              <property name="text">
+               <string>69</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QGroupBox" name="LogGB">
+      <property name="title">
+       <string>Log</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPlainTextEdit" name="LogText">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
     <item row="1" column="0">
      <widget class="QGroupBox" name="StatusGB">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="title">
        <string>Status</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
+      <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0">
+       <item row="1" column="3">
+        <widget class="QLabel" name="PhaseErrorLbl">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
         <widget class="QGroupBox" name="FFTGB">
          <property name="title">
           <string>FFT</string>
@@ -550,7 +829,48 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="3" column="1" colspan="2">
+        <widget class="QProgressBar" name="ALCLevelBar">
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="textVisible">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLabel" name="SignalQualityLbl">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QLabel" name="ALCLevelLbl">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" colspan="2">
+        <widget class="QProgressBar" name="ALCGainBar">
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="textVisible">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QLabel" name="ALCGainLbl">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2" colspan="2">
         <widget class="QGroupBox" name="QPSKGB">
          <property name="title">
           <string>QPSK</string>
@@ -587,223 +907,65 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="SummaryStatusGB">
-         <property name="title">
-          <string>Summary</string>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>ALC gain:</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="1">
-           <widget class="QLabel" name="PLLFreqLbl">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="ALCLevelLbl">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>ALC gain:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Signal quality:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QProgressBar" name="PhaseErrorBar">
-            <property name="value">
-             <number>0</number>
-            </property>
-            <property name="textVisible">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QProgressBar" name="ALCLevelBar">
-            <property name="value">
-             <number>0</number>
-            </property>
-            <property name="textVisible">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="ALCGainLbl">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>PLL frequency:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QProgressBar" name="SignalQualityBar">
-            <property name="value">
-             <number>0</number>
-            </property>
-            <property name="textVisible">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>PLL phase error:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="PhaseErrorLbl">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>ALC level:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QProgressBar" name="ALCGainBar">
-            <property name="value">
-             <number>0</number>
-            </property>
-            <property name="textVisible">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QLabel" name="SignalQualityLbl">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0" colspan="3">
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::MinimumExpanding</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QProgressBar" name="PhaseErrorBar">
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="textVisible">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>PLL frequency:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Signal quality:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>PLL phase error:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>ALC level:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" colspan="2">
+        <widget class="QProgressBar" name="SignalQualityBar">
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="textVisible">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QGroupBox" name="LiveImageryGB">
-         <property name="title">
-          <string>Live imagery</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_14">
-          <item>
-           <widget class="QCheckBox" name="APID64ShowCB">
-            <property name="text">
-             <string>APID 64</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="APID65ShowCB">
-            <property name="text">
-             <string>APID 65</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="APID66ShowCB">
-            <property name="text">
-             <string>APID 66</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="APID67ShowCB">
-            <property name="text">
-             <string>APID 67</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="APID68ShowCB">
-            <property name="text">
-             <string>APID 68</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="APID69ShowCB">
-            <property name="text">
-             <string>APID 69</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QGroupBox" name="LogGB">
-      <property name="title">
-       <string>Log</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QPlainTextEdit" name="LogText">
-         <property name="readOnly">
-          <bool>true</bool>
+        <widget class="QLabel" name="PLLFreqLbl">
+         <property name="text">
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -817,7 +979,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
+     <width>1381</width>
      <height>22</height>
     </rect>
    </property>
@@ -832,7 +994,6 @@
      <string>Help</string>
     </property>
     <addaction name="AboutAct"/>
-    <addaction name="AboutQtAct"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
@@ -867,17 +1028,22 @@
    <header>QPSKWidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>LRPTChanWidget</class>
+   <extends>QWidget</extends>
+   <header>LRPTChanWidget.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>StartStopBtn</tabstop>
-  <tabstop>SourceCB</tabstop>
+  <tabstop>SourceCombB</tabstop>
   <tabstop>RcvFrequencySB</tabstop>
   <tabstop>RcvBandwidthSB</tabstop>
   <tabstop>AGCRB</tabstop>
   <tabstop>ManualRB</tabstop>
-  <tabstop>RcvGainSlider</tabstop>
-  <tabstop>checkBox</tabstop>
+  <tabstop>BiasTee</tabstop>
   <tabstop>PLLBandwidthSB</tabstop>
   <tabstop>PLLLockedSB</tabstop>
   <tabstop>PLLUnlockedSB</tabstop>
@@ -887,11 +1053,6 @@
   <tabstop>OffsetCB</tabstop>
   <tabstop>DiffcodedCB</tabstop>
   <tabstop>InterleavedCB</tabstop>
-  <tabstop>APID64ShowCB</tabstop>
-  <tabstop>APID65ShowCB</tabstop>
-  <tabstop>APID66ShowCB</tabstop>
-  <tabstop>APID67ShowCB</tabstop>
-  <tabstop>APID68ShowCB</tabstop>
   <tabstop>APID69ShowCB</tabstop>
   <tabstop>LogText</tabstop>
   <tabstop>scrollArea</tabstop>

@@ -18,6 +18,8 @@ set(PROJECT_SOURCES
         main.cpp
         FFTWidget.cpp
         FFTWidget.h
+        LRPTChanWidget.h
+        LRPTChanWidget.cpp
         MainWindow.cpp
         MainWindow.h
         MainWindow.ui

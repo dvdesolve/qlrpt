@@ -21,6 +21,13 @@ private:
     QLabel *PLLStatusLbl;
     QLabel *FramingStatusLbl;
     QLabel *PacketsLbl;
+
+private slots:
+    /* Handle source change */
+    void setNewSource(int src);
+
+    /* Set live LRPT imagery area */
+    void setLiveAPIDsImagery();
 };
 
 /**************************************************************************************************/
