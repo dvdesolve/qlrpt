@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1381</width>
+    <width>1082</width>
     <height>911</height>
    </rect>
   </property>
@@ -485,7 +485,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1817</width>
+            <width>1218</width>
             <height>714</height>
            </rect>
           </property>
@@ -511,13 +511,13 @@
               <widget class="LRPTChanWidget" name="LRPTChan64Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -538,13 +538,13 @@
               <widget class="LRPTChanWidget" name="LRPTChan65Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -565,13 +565,13 @@
               <widget class="LRPTChanWidget" name="LRPTChan66Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -592,13 +592,13 @@
               <widget class="LRPTChanWidget" name="LRPTChan67Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -619,13 +619,13 @@
               <widget class="LRPTChanWidget" name="LRPTChan68Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -646,13 +646,13 @@
               <widget class="LRPTChanWidget" name="LRPTChan69Widget" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>300</width>
+                 <width>200</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -666,6 +666,19 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -979,7 +992,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1381</width>
+     <width>1082</width>
      <height>22</height>
     </rect>
    </property>
@@ -1002,11 +1015,6 @@
   <action name="AboutAct">
    <property name="text">
     <string>About</string>
-   </property>
-  </action>
-  <action name="AboutQtAct">
-   <property name="text">
-    <string>About Qt</string>
    </property>
   </action>
   <action name="ExitAct">
