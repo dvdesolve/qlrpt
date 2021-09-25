@@ -19,28 +19,25 @@
 
 /**************************************************************************************************/
 
-#include "GlobalObjects.h"
-#include "MainWindow.h"
-
-#include <QApplication>
+#ifndef GLOBALOBJECTS_H
+#define GLOBALOBJECTS_H
 
 /**************************************************************************************************/
 
-int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
+#include <lrpt.h>
 
-    int initRes = initGlobalObjects();
+/**************************************************************************************************/
 
-    if (initRes != 0) {
-        deinitGlobalObjects();
+extern lrpt_error_t *liblrptErr;
+extern lrpt_iq_rb_t *iqRB;
+extern lrpt_qpsk_rb_t *qpskRB;
 
-        return initRes;
-    }
+/**************************************************************************************************/
 
-    MainWindow w;
-    w.show();
+int initGlobalObjects(void);
 
-    deinitGlobalObjects();
+void deinitGlobalObjects(void);
 
-    return a.exec();
-}
+/**************************************************************************************************/
+
+#endif

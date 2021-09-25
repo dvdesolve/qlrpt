@@ -50,15 +50,15 @@ private:
     bool processing = false;
 
     /* Processing data */
-    bool PLLStatus = false;
-    double PLLFreq = 0; /* In Hz */
-    double PLLPhaseErr = 0;
-    double ALCGain = 0; /* In dB */
-    int SignalQ = 0; /* In percents */
-    int SignalLvl = 0; /* In units of samples amplitude */
-    bool FramingStatus = false;
-    int PacketsGood = 0;
-    int PacketsTotal = 0;
+    bool pllStatus = false;
+    double pllFreq = 0; /* In Hz */
+    double pllPhaseErr = 0;
+    double alcGain = 0; /* In dB */
+    int sigQ = 0; /* In percents */
+    int sigLvl = 0; /* In units of samples amplitude */
+    bool framingStatus = false;
+    int nPacketsGood = 0;
+    int nPacketsTotal = 0;
 
     /* Status bar labels */
     QLabel *PLLStatusLbl;

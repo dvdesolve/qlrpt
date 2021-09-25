@@ -19,21 +19,25 @@
 find_package(PkgConfig REQUIRED)
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
+pkg_check_modules(LIBLRPT REQUIRED liblrpt)
 
 
 # sources
 set(glrpt_SOURCES
     main.cpp
+    GlobalObjects.cpp
+    MainWindow.cpp
     FFTWidget.cpp
     LRPTChanWidget.cpp
-    MainWindow.cpp
     QPSKWidget.cpp
+
 )
 
 set(glrpt_HEADERS
+    GlobalObjects.h
+    MainWindow.h
     FFTWidget.h
     LRPTChanWidget.h
-    MainWindow.h
     QPSKWidget.h
 )
 
@@ -57,8 +61,17 @@ add_executable(glrpt ${glrpt_SOURCES} ${glrpt_HEADERS} ${glrpt_FORMS})
 target_compile_options(glrpt PRIVATE -Wall -pedantic)
 
 
+# where to find external includes
+target_include_directories(glrpt SYSTEM PRIVATE ${LIBLRPT_INCLUDE_DIRS})
+
+
+# where to find external libraries
+target_link_directories(glrpt PRIVATE ${LIBLRPT_LIBRARY_DIRS})
+
+
 # link libraries
 target_link_libraries(glrpt PRIVATE Qt5::Widgets)
+target_link_libraries(glrpt PRIVATE ${LIBLRPT_LIBRARIES})
 
 
 # install executable
