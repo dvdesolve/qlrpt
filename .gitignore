@@ -1,5 +1,7 @@
-# build root
+# build roots
 build/
+build-debug/
+build-release/
 
 # compilation database
 src/compile_commands.json
@@ -9,3 +11,6 @@ src/.clangd/
 
 # clang cache
 .cache
+
+# Qt Creator project settings
+CMakeLists.txt.user
