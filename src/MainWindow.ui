@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>852</height>
+    <width>993</width>
+    <height>875</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,17 +31,22 @@
            <string>Main</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="1" column="0">
-            <widget class="QLabel" name="SrcLbl">
-             <property name="text">
-              <string>Source:</string>
+           <item row="4" column="0" colspan="2">
+            <widget class="QPlainTextEdit" name="SrcInfoText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="SrcFilepathLbl">
-             <property name="text">
-              <string>File path:</string>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>150</height>
+              </size>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -49,6 +54,27 @@
             <widget class="QPushButton" name="StartStopBtn">
              <property name="text">
               <string>Start</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QLineEdit" name="SrcFilepath"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="SrcFileBrowseBtn">
+               <property name="text">
+                <string>Select</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="SrcLbl">
+             <property name="text">
+              <string>Source:</string>
              </property>
             </widget>
            </item>
@@ -86,32 +112,12 @@
              </item>
             </layout>
            </item>
-           <item row="2" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QLineEdit" name="SrcFilepath"/>
-             </item>
-             <item>
-              <widget class="QPushButton" name="SrcFileBrowseBtn">
-               <property name="text">
-                <string>Select</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
+           <item row="2" column="0">
+            <widget class="QLabel" name="SrcFilepathLbl">
+             <property name="text">
+              <string>File path:</string>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -120,55 +126,41 @@
            <string>SDR</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="0" column="2">
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>55</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="1" column="2">
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>55</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="SDRBandwidthSB">
-             <property name="suffix">
-              <string> kHz</string>
-             </property>
-             <property name="decimals">
-              <number>3</number>
-             </property>
-             <property name="minimum">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>200.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>10.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>120.000000000000000</double>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Input rate/decimation:</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
+           <item row="5" column="0">
+            <widget class="QCheckBox" name="SDRBiasTee">
+             <property name="text">
+              <string>Bias tee</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1" colspan="2">
+            <widget class="QSlider" name="SDRGainSlider">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TicksBelow</enum>
+             </property>
+             <property name="tickInterval">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Frequency/bandwidth:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
             <widget class="QComboBox" name="SDRDecimationCombB">
              <item>
               <property name="text">
@@ -202,49 +194,15 @@
              </item>
             </widget>
            </item>
-           <item row="6" column="1" colspan="2">
-            <widget class="QSlider" name="SDRGainSlider">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="tickPosition">
-              <enum>QSlider::TicksBelow</enum>
-             </property>
-             <property name="tickInterval">
-              <number>20</number>
+           <item row="4" column="0">
+            <widget class="QRadioButton" name="SDRGainManualRB">
+             <property name="text">
+              <string>Manual</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Bandwidth:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QRadioButton" name="SDRGainAutoRB">
-             <property name="text">
-              <string>AGC</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Input rate:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Frequency:</string>
-             </property>
-            </widget>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="SDRInputRateCombB"/>
            </item>
            <item row="0" column="1">
             <widget class="QDoubleSpinBox" name="SDRFrequencySB">
@@ -268,36 +226,57 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
-            <widget class="QCheckBox" name="SDRBiasTee">
-             <property name="text">
-              <string>Bias tee</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QRadioButton" name="SDRGainManualRB">
-             <property name="text">
-              <string>Manual</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="SDRInputRateCombB"/>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Decimation:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="2">
+           <item row="2" column="0" colspan="2">
             <widget class="QLabel" name="RcvSamplingRateLbl">
              <property name="text">
               <string>Sampling rate:</string>
              </property>
             </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QDoubleSpinBox" name="SDRBandwidthSB">
+             <property name="suffix">
+              <string> kHz</string>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>200.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>10.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>120.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QRadioButton" name="SDRGainAutoRB">
+             <property name="text">
+              <string>AGC</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0" colspan="3">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -515,7 +494,7 @@
             <x>0</x>
             <y>0</y>
             <width>1818</width>
-            <height>653</height>
+            <height>676</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout">
@@ -824,27 +803,6 @@
        <string>Status</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>PLL phase error:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Signal quality/level:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLabel" name="SignalLevelLbl">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="0" colspan="2">
         <widget class="QGroupBox" name="FFTPlotGB">
          <property name="title">
@@ -882,14 +840,31 @@
          </layout>
         </widget>
        </item>
+       <item row="0" column="3">
+        <widget class="QLabel" name="PhaseErrorValLbl">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QProgressBar" name="PhaseErrorBar">
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="textVisible">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
        <item row="2" column="2" colspan="2">
-        <widget class="QGroupBox" name="QPSKConstellationGB">
+        <widget class="QGroupBox" name="QPSKGB">
          <property name="title">
-          <string>QPSK constellation</string>
+          <string>QPSK</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_13">
           <item>
-           <widget class="QFrame" name="QPSKConstellationFrame">
+           <widget class="QFrame" name="QPSKFrame">
             <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
@@ -898,7 +873,7 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
-              <widget class="QPSKWidget" name="QPSKConstellationPlot" native="true">
+              <widget class="QPSKWidget" name="QPSKPlot" native="true">
                <property name="minimumSize">
                 <size>
                  <width>150</width>
@@ -919,20 +894,10 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="3">
-        <widget class="QLabel" name="PhaseErrorLbl">
+       <item row="1" column="3">
+        <widget class="QLabel" name="SignalLevelValLbl">
          <property name="text">
           <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" colspan="2">
-        <widget class="QProgressBar" name="PhaseErrorBar">
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="textVisible">
-          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -946,6 +911,20 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="SignalQualityLevelLbl">
+         <property name="text">
+          <string>Signal quality/level:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="PhaseErrorLbl">
+         <property name="text">
+          <string>PLL phase error:</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -956,7 +935,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
+     <width>993</width>
      <height>29</height>
     </rect>
    </property>
@@ -1015,9 +994,7 @@
   <tabstop>SrcFilepath</tabstop>
   <tabstop>SrcFileBrowseBtn</tabstop>
   <tabstop>SDRFrequencySB</tabstop>
-  <tabstop>SDRBandwidthSB</tabstop>
   <tabstop>SDRInputRateCombB</tabstop>
-  <tabstop>SDRDecimationCombB</tabstop>
   <tabstop>SDRGainAutoRB</tabstop>
   <tabstop>SDRGainManualRB</tabstop>
   <tabstop>SDRGainSlider</tabstop>

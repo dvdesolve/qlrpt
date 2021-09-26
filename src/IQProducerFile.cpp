@@ -19,30 +19,39 @@
 
 /**************************************************************************************************/
 
-#ifndef GLOBALOBJECTS_H
-#define GLOBALOBJECTS_H
+#include "IQProducerFile.h"
 
-/**************************************************************************************************/
-
-#include <QSemaphore>
+#include "GlobalObjects.h"
 
 #include <lrpt.h>
 
 /**************************************************************************************************/
 
-extern lrpt_iq_rb_t *iqRB;
-
-extern QSemaphore *iqRBUsed;
-extern QSemaphore *iqRBFree;
-
-extern lrpt_qpsk_rb_t *qpskRB;
+IQProducerFile::IQProducerFile(lrpt_iq_file_t *iqFile) {
+    this->iqFile = iqFile;
+}
 
 /**************************************************************************************************/
 
-int initGlobalObjects(void);
+void IQProducerFile::run() {
+    /* TODO use stored settings instead */
+    int mtu = 131072;
 
-void deinitGlobalObjects(void);
+    /* TODO error reporting */
+    /* TODO check for NULL iqData */
+    lrpt_iq_data_t *iqData = lrpt_iq_data_alloc(mtu, NULL);
 
-/**************************************************************************************************/
+    const uint64_t dataLen = lrpt_iq_file_length(iqFile);
+    uint64_t totDataRead = 0;
+    size_t iqDataLen = 0;
 
-#endif
+    while (totDataRead < dataLen) {
+        lrpt_iq_data_read_from_file(iqData, iqFile, mtu, false, NULL);
+        iqDataLen = lrpt_iq_data_length(iqData);
+        totDataRead += iqDataLen;
+
+        iqRBFree->acquire(iqDataLen);
+        lrpt_iq_rb_push(iqRB, iqData, iqDataLen, NULL);
+        iqRBUsed->release(iqDataLen);
+    }
+}

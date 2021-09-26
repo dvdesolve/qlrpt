@@ -21,12 +21,23 @@
 
 #include "MainWindow.h"
 
+#include "GlobalObjects.h"
+
+#include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QSettings>
+#include <QStandardPaths>
+
+#include <lrpt.h>
 
 /**************************************************************************************************/
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
+
+    /* Read stored settings */
+    restoreSettings();
 
     /* TODO scan for SoapySDR sources and add them to the sources list */
 
@@ -87,7 +98,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     updateUIState();
 }
 
+/**************************************************************************************************/
+
 MainWindow::~MainWindow() {
+}
+
+/**************************************************************************************************/
+
+void MainWindow::restoreSettings() {
+    QSettings s("desolve", "glrpt");
+
+    lastSrcFileDir = s.value(
+                "Paths/LastSrcDir",
+                QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
 }
 
 /**************************************************************************************************/
@@ -106,11 +129,21 @@ void MainWindow::updateUIState(void) {
             SrcFilepath->setDisabled(true);
             SrcFileBrowseBtn->setDisabled(true);
 
+            SrcInfoText->setDisabled(true);
+
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(true);
             DecoderTab->setDisabled(true);
 
             StatusGB->setDisabled(true);
+            FFTPlotGB->setDisabled(true);
+            QPSKGB->setDisabled(true);
+            PhaseErrorLbl->setDisabled(true);
+            PhaseErrorBar->setDisabled(true);
+            PhaseErrorValLbl->setDisabled(true);
+            SignalQualityLevelLbl->setDisabled(true);
+            SignalQualityBar->setDisabled(true);
+            SignalLevelValLbl->setDisabled(true);
             LRPTGB->setDisabled(true);
 
             PLLStatusLbl->setDisabled(true);
@@ -133,11 +166,21 @@ void MainWindow::updateUIState(void) {
             SrcFilepath->setDisabled(processing);
             SrcFileBrowseBtn->setDisabled(processing);
 
+            SrcInfoText->setEnabled(true);
+
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(processing);
             DecoderTab->setDisabled(processing);
 
             StatusGB->setEnabled(processing);
+            FFTPlotGB->setEnabled(true);
+            QPSKGB->setEnabled(true);
+            PhaseErrorLbl->setEnabled(true);
+            PhaseErrorBar->setEnabled(true);
+            PhaseErrorValLbl->setEnabled(true);
+            SignalQualityLevelLbl->setEnabled(true);
+            SignalQualityBar->setEnabled(true);
+            SignalLevelValLbl->setEnabled(true);
             LRPTGB->setEnabled(processing);
 
             PLLStatusLbl->setEnabled(processing);
@@ -160,11 +203,21 @@ void MainWindow::updateUIState(void) {
             SrcFilepath->setDisabled(processing);
             SrcFileBrowseBtn->setDisabled(processing);
 
+            SrcInfoText->setEnabled(true);
+
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(true);
             DecoderTab->setDisabled(processing);
 
             StatusGB->setEnabled(processing);
+            FFTPlotGB->setDisabled(true);
+            QPSKGB->setEnabled(true);
+            PhaseErrorLbl->setDisabled(true);
+            PhaseErrorBar->setDisabled(true);
+            PhaseErrorValLbl->setDisabled(true);
+            SignalQualityLevelLbl->setEnabled(true);
+            SignalQualityBar->setEnabled(true);
+            SignalLevelValLbl->setDisabled(true);
             LRPTGB->setEnabled(processing);
 
             PLLStatusLbl->setDisabled(true);
@@ -176,7 +229,7 @@ void MainWindow::updateUIState(void) {
             break;
         }
 
-        case SrcType::SDR_RECEIVER: {
+        case SrcType::SDR_RECEIVER: { /* TODO need to control specific GUI elements (such as bias tee) depending on receiver's capabilities */
             StartStopBtn->setEnabled(true);
 
             SrcLbl->setDisabled(processing);
@@ -186,6 +239,8 @@ void MainWindow::updateUIState(void) {
             SrcFilepathLbl->setDisabled(true);
             SrcFilepath->setDisabled(true);
             SrcFileBrowseBtn->setDisabled(true);
+
+            SrcInfoText->setEnabled(true);
 
             SDRTab->setEnabled(true);
 
@@ -205,6 +260,14 @@ void MainWindow::updateUIState(void) {
             DecoderTab->setDisabled(processing);
 
             StatusGB->setEnabled(processing);
+            FFTPlotGB->setEnabled(true);
+            QPSKGB->setEnabled(true);
+            PhaseErrorLbl->setEnabled(true);
+            PhaseErrorBar->setEnabled(true);
+            PhaseErrorValLbl->setEnabled(true);
+            SignalQualityLevelLbl->setEnabled(true);
+            SignalQualityBar->setEnabled(true);
+            SignalLevelValLbl->setEnabled(true);
             LRPTGB->setEnabled(processing);
 
             PLLStatusLbl->setEnabled(processing);
@@ -221,7 +284,12 @@ void MainWindow::updateUIState(void) {
 /**************************************************************************************************/
 
 void MainWindow::setNewSource(int src) {
-    /* TODO implement */
+    /* TODO implement SDR source selection */
+
+    /* Clear previously filled data in source fields */
+    SrcFilepath->clear();
+    SrcInfoText->clear();
+
     if (src == -1) /* No source (default) */
         srcMode = SrcType::NONE;
     if (src == 0) /* I/Q file */
@@ -254,19 +322,100 @@ void MainWindow::browseSrcFile(void) {
         break;
     }
 
-    /* TODO use last directory from settings */
     QString fileName = QFileDialog::getOpenFileName(
                 this,
                 tr("Select source file"),
-                QString(),
+                lastSrcFileDir,
                 filter);
 
     if (!fileName.isEmpty()) {
+        /* Update UI elements */
         SrcFilepath->setText(fileName);
         StartStopBtn->setEnabled(true);
-    }
 
-    /* TODO show info about file in GUI, if possible */
+        /* Error object for reporting */
+        lrpt_error_t *err = lrpt_error_init();
+
+        /* Convert QString to C string (with UTF-8 support) */
+        QByteArray fileNameUTF8 = fileName.toUtf8();
+        const char *fileNameCString = fileNameUTF8.data();
+
+        switch (srcMode) {
+            case IQ_FILE: {
+                lrpt_iq_file_t *f = lrpt_iq_file_open_r(fileNameCString, err);
+
+                if (!f) {
+                    QMessageBox::critical(
+                                this,
+                                tr("glrpt error"),
+                                tr("Error while opening I/Q data file %1:\n").arg(fileName) +
+                                ((err) ? QString::fromUtf8(lrpt_error_message(err)) : ""),
+                                QMessageBox::Close);
+
+                    lrpt_error_deinit(err);
+
+                    return;
+                }
+
+                SrcInfoText->setPlainText(
+                            tr("Source type: I/Q file\n") +
+                            tr("I/Q file version: ") + QString::number(lrpt_iq_file_version(f)).append('\n') +
+                            tr("Flags: ") + ((lrpt_iq_file_is_offsetted(f)) ? tr("offsetted") : "").append('\n') +
+                            tr("Sampling rate: ") + QString::number(lrpt_iq_file_samplerate(f)).append(" samples/s\n") +
+                            tr("Device name: ") + QString::fromUtf8(lrpt_iq_file_devicename(f)).append('\n') +
+                            tr("File size: ") + QString::number(lrpt_iq_file_length(f)).append(" samples")
+                            );
+
+                lrpt_iq_file_close(f);
+
+                break;
+            }
+
+            case QPSK_FILE: {
+                lrpt_qpsk_file_t *f = lrpt_qpsk_file_open_r(fileNameCString, err);
+
+                if (!f) {
+                    QMessageBox::critical(
+                                this,
+                                tr("glrpt error"),
+                                tr("Error while opening QPSK data file %1:\n").arg(fileName) +
+                                ((err) ? QString::fromUtf8(lrpt_error_message(err)) : ""),
+                                QMessageBox::Close);
+
+                    lrpt_error_deinit(err);
+
+                    return;
+                }
+
+                SrcInfoText->setPlainText(
+                            tr("Source type: QPSK file\n") +
+                            tr("QPSK file version: ") + QString::number(lrpt_qpsk_file_version(f)).append('\n') +
+                            tr("Flags: ") + ((lrpt_qpsk_file_is_diffcoded(f)) ? tr("diffcoded, ") : "") + ((lrpt_qpsk_file_is_interleaved(f)) ? tr("interleaved") : "") + '\n' +
+                            tr("Symbol type: ") + ((lrpt_qpsk_file_is_hardsymboled(f)) ? tr("hard") : tr("soft")).append('\n') +
+                            tr("Symbol rate: ") + QString::number(lrpt_qpsk_file_symrate(f)).append(" symbols/s\n") +
+                            tr("File size: ") + QString::number(lrpt_qpsk_file_length(f)).append(" symbols")
+                            );
+
+                lrpt_qpsk_file_close(f);
+
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        /* Free resources allocated by error object */
+        lrpt_error_deinit(err);
+
+        /* Store last directory */
+        lastSrcFileDir = QFileInfo(fileName).absolutePath();
+
+        QSettings s("desolve", "glrpt");
+
+        s.setValue("Paths/LastSrcDir", lastSrcFileDir);
+        s.sync();
+    }
 }
 
 /**************************************************************************************************/

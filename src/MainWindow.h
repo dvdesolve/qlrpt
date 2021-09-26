@@ -45,11 +45,14 @@ private:
         SDR_RECEIVER
     };
 
+    /* Common settings */
+    QString lastSrcFileDir;
+
     /* State flags */
     SrcType srcMode = NONE;
     bool processing = false;
 
-    /* Processing data */
+    /* Processing data values */
     bool pllStatus = false;
     double pllFreq = 0; /* In Hz */
     double pllPhaseErr = 0;
@@ -67,6 +70,7 @@ private:
     QLabel *FramingStatusLbl;
     QLabel *PacketsLbl;
 
+    void restoreSettings(void);
     void updateUIState(void);
 
 private slots:

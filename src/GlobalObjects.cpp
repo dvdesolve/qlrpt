@@ -25,16 +25,18 @@
 #include <QGuiApplication>
 #include <QMessageBox>
 #include <QScreen>
+#include <QSemaphore>
 
 #include <lrpt.h>
 
 /**************************************************************************************************/
 
-/* Main error object */
-lrpt_error_t *liblrptErr = NULL;
-
 /* I/Q data ring buffer */
 lrpt_iq_rb_t *iqRB = NULL;
+
+/* Guarding semaphores for I/Q ring buffer */
+QSemaphore *iqRBUsed = NULL;
+QSemaphore *iqRBFree = NULL;
 
 /* QPSK data ring buffer */
 lrpt_qpsk_rb_t *qpskRB = NULL;
@@ -44,26 +46,9 @@ lrpt_qpsk_rb_t *qpskRB = NULL;
 int initGlobalObjects(void) {
     QRect scrRect = QGuiApplication::screens().at(0)->virtualGeometry();
 
-    liblrptErr = lrpt_error_init();
+    int iqRBSize = 131072 * 10; /* TODO use stored settings instead */
 
-    if (!liblrptErr) {
-        QMessageBox mbox(
-                    QMessageBox::Critical,
-                    QCoreApplication::translate("Initialization Routine", "glrpt error"),
-                    QCoreApplication::translate("Initialization Routine", "Can't allocate LIBLRPT error object!"),
-                    QMessageBox::Close);
-
-        QSize mSize = mbox.sizeHint();
-
-        mbox.move(QPoint(
-                      scrRect.width() / 2 - mSize.width()/2,
-                      scrRect.height()/2 - mSize.height() / 2));
-        mbox.exec();
-
-        return 1;
-    }
-
-    iqRB = lrpt_iq_rb_alloc(131072 * 10, NULL); /* TODO use stored settings instead */
+    iqRB = lrpt_iq_rb_alloc(iqRBSize, NULL);
 
     if (!iqRB) {
         QMessageBox mbox(
@@ -81,6 +66,9 @@ int initGlobalObjects(void) {
 
         return 1;
     }
+
+    iqRBUsed = new QSemaphore(0);
+    iqRBFree = new QSemaphore(iqRBSize);
 
     qpskRB = lrpt_qpsk_rb_alloc(16384 * 10, NULL); /* TODO use SFL and stored settings instead */
 
@@ -107,7 +95,9 @@ int initGlobalObjects(void) {
 /**************************************************************************************************/
 
 void deinitGlobalObjects(void) {
-    lrpt_error_deinit(liblrptErr);
     lrpt_iq_rb_free(iqRB);
+    delete iqRBUsed;
+    delete iqRBFree;
+
     lrpt_qpsk_rb_free(qpskRB);
 }

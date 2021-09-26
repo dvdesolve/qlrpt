@@ -19,29 +19,28 @@
 
 /**************************************************************************************************/
 
-#ifndef GLOBALOBJECTS_H
-#define GLOBALOBJECTS_H
+#ifndef IQPRODUCERFILE_H
+#define IQPRODUCERFILE_H
 
 /**************************************************************************************************/
 
-#include <QSemaphore>
+#include <QThread>
 
 #include <lrpt.h>
 
 /**************************************************************************************************/
 
-extern lrpt_iq_rb_t *iqRB;
+class IQProducerFile : public QThread {
+    Q_OBJECT
 
-extern QSemaphore *iqRBUsed;
-extern QSemaphore *iqRBFree;
+public:
+    IQProducerFile(lrpt_iq_file_t *iqFile);
 
-extern lrpt_qpsk_rb_t *qpskRB;
+    void run(void) override;
 
-/**************************************************************************************************/
-
-int initGlobalObjects(void);
-
-void deinitGlobalObjects(void);
+private:
+    lrpt_iq_file_t *iqFile;
+};
 
 /**************************************************************************************************/
 
