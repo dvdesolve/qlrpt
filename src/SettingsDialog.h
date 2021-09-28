@@ -19,26 +19,22 @@
 
 /**************************************************************************************************/
 
-#include "GlobalObjects.h"
-#include "MainWindow.h"
-
-#include <QApplication>
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
 /**************************************************************************************************/
 
-int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
+#include "ui_SettingsDialog.h"
 
-    int initRes = initGlobalObjects();
+/**************************************************************************************************/
 
-    if (initRes != 0) {
-        deinitGlobalObjects();
+class SettingsDialog : public QDialog, private Ui::SettingsDialog {
+    Q_OBJECT
 
-        return initRes;
-    }
+public:
+    explicit SettingsDialog(QWidget *parent = nullptr);
+};
 
-    MainWindow w;
-    w.show();
+/**************************************************************************************************/
 
-    return a.exec();
-}
+#endif

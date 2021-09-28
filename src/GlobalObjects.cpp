@@ -46,7 +46,7 @@ lrpt_qpsk_rb_t *qpskRB = NULL;
 int initGlobalObjects(void) {
     QRect scrRect = QGuiApplication::screens().at(0)->virtualGeometry();
 
-    int iqRBSize = 131072 * 10; /* TODO use stored settings instead */
+    int iqRBSize = 131072; /* TODO use stored settings instead */
 
     iqRB = lrpt_iq_rb_alloc(iqRBSize, NULL);
 

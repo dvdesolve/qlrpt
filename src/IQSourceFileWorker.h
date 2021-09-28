@@ -19,27 +19,36 @@
 
 /**************************************************************************************************/
 
-#ifndef IQPRODUCERFILE_H
-#define IQPRODUCERFILE_H
+#ifndef IQSOURCEFILEWORKER_H
+#define IQSOURCEFILEWORKER_H
 
 /**************************************************************************************************/
 
-#include <QThread>
+#include <QObject>
 
 #include <lrpt.h>
 
 /**************************************************************************************************/
 
-class IQProducerFile : public QThread {
+class IQSourceFileWorker : public QObject {
     Q_OBJECT
 
 public:
-    IQProducerFile(lrpt_iq_file_t *iqFile);
+    explicit IQSourceFileWorker(size_t mtu, const QString &srcFile);
+    ~IQSourceFileWorker();
 
-    void run(void) override;
+public slots:
+    void process(void);
+
+signals:
+    void finished();
 
 private:
-    lrpt_iq_file_t *iqFile;
+    size_t mtu;
+    QString srcFile;
+
+    lrpt_iq_data_t *iqData = NULL;
+    lrpt_iq_file_t *iqFile = NULL;
 };
 
 /**************************************************************************************************/

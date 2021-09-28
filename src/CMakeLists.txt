@@ -26,18 +26,21 @@ pkg_check_modules(LIBLRPT REQUIRED liblrpt)
 set(glrpt_SOURCES
     main.cpp
     GlobalObjects.cpp
-    IQProducerFile.cpp
+    IQProcessorWorker.cpp
+    IQSourceFileWorker.cpp
     MainWindow.cpp
+    SettingsDialog.cpp
     FFTWidget.cpp
     LRPTChanWidget.cpp
     QPSKWidget.cpp
-
 )
 
 set(glrpt_HEADERS
     GlobalObjects.h
-    IQProducerFile.h
+    IQProcessorWorker.h
+    IQSourceFileWorker.h
     MainWindow.h
+    SettingsDialog.h
     FFTWidget.h
     LRPTChanWidget.h
     QPSKWidget.h
@@ -45,6 +48,7 @@ set(glrpt_HEADERS
 
 set(glrpt_FORMS
     MainWindow.ui
+    SettingsDialog.ui
 )
 
 

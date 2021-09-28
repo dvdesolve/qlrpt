@@ -24,7 +24,7 @@
 
 /**************************************************************************************************/
 
-#include "./ui_MainWindow.h"
+#include "ui_MainWindow.h"
 
 #include <QMainWindow>
 
@@ -44,6 +44,9 @@ private:
         QPSK_FILE,
         SDR_RECEIVER
     };
+
+    /* TODO debug */
+    uint64_t totLen;
 
     /* Common settings */
     QString lastSrcFileDir;
@@ -74,6 +77,15 @@ private:
     void updateUIState(void);
 
 private slots:
+    /* Open Settings dialog */
+    void openSettings(void);
+
+    /* Exit application */
+    void exitApp(void);
+
+    /* Show info about application */
+    void aboutApp(void);
+
     /* Handle source change */
     void setNewSource(int src);
 

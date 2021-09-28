@@ -943,6 +943,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="SettingsAct"/>
     <addaction name="ExitAct"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -963,6 +964,11 @@
   <action name="ExitAct">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="SettingsAct">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

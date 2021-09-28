@@ -19,26 +19,10 @@
 
 /**************************************************************************************************/
 
-#include "GlobalObjects.h"
-#include "MainWindow.h"
-
-#include <QApplication>
+#include "SettingsDialog.h"
 
 /**************************************************************************************************/
 
-int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-
-    int initRes = initGlobalObjects();
-
-    if (initRes != 0) {
-        deinitGlobalObjects();
-
-        return initRes;
-    }
-
-    MainWindow w;
-    w.show();
-
-    return a.exec();
+SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent) {
+    setupUi(this);
 }

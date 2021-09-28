@@ -22,12 +22,15 @@
 #include "MainWindow.h"
 
 #include "GlobalObjects.h"
+#include "IQProcessorWorker.h"
+#include "IQSourceFileWorker.h"
+#include "SettingsDialog.h"
 
-#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QThread>
 
 #include <lrpt.h>
 
@@ -46,8 +49,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     /* TODO just for debug, bogus SDR source */
     SrcCombB->addItem(tr("SDR receiver"));
 
-    /* Manage source selection properly */
+    /* TODO Manage source selection properly */
     connect(SrcCombB, SIGNAL(currentIndexChanged(int)), this, SLOT(setNewSource(int)));
+
+    /* Connections for menu entries */
+    connect(SettingsAct, SIGNAL(triggered()), this, SLOT(openSettings()));
+    connect(ExitAct, SIGNAL(triggered()), this, SLOT(exitApp()));
+    connect(AboutAct, SIGNAL(triggered()), this, SLOT(aboutApp()));
 
     /* Browse file button connection */
     connect(SrcFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseSrcFile()));
@@ -101,6 +109,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 /**************************************************************************************************/
 
 MainWindow::~MainWindow() {
+    deinitGlobalObjects();
 }
 
 /**************************************************************************************************/
@@ -283,6 +292,28 @@ void MainWindow::updateUIState(void) {
 
 /**************************************************************************************************/
 
+void MainWindow::openSettings(void) {
+    SettingsDialog d;
+
+    d.exec();
+    /* TODO re-read settings after exiting from dialog */
+}
+
+/**************************************************************************************************/
+
+void MainWindow::exitApp(void) {
+    /* TODO handle running processing, unsaved data etc */
+    QCoreApplication::quit();
+}
+
+/**************************************************************************************************/
+
+void MainWindow::aboutApp(void) {
+    QMessageBox::about(this, tr("About glrpt"), tr("Interactive GUI application for receiving, decoding and displaying LRPT images."));
+}
+
+/**************************************************************************************************/
+
 void MainWindow::setNewSource(int src) {
     /* TODO implement SDR source selection */
 
@@ -366,6 +397,9 @@ void MainWindow::browseSrcFile(void) {
                             tr("File size: ") + QString::number(lrpt_iq_file_length(f)).append(" samples")
                             );
 
+                /* TODO debug */
+                totLen = lrpt_iq_file_length(f);
+
                 lrpt_iq_file_close(f);
 
                 break;
@@ -446,6 +480,30 @@ void MainWindow::startStopProcessing(void) {
     /* TODO implement */
     processing = !processing;
     StartStopBtn->setText((processing) ? tr("Stop") : tr("Start"));
+
+    if ((srcMode == IQ_FILE) && processing) {
+        QThread *readerThread = new QThread();
+        QThread *writerThread = new QThread();
+
+        IQSourceFileWorker *readerWorker = new IQSourceFileWorker(131072, SrcFilepath->text());
+        IQProcessorWorker *writerWorker = new IQProcessorWorker(131072, totLen);
+
+        readerWorker->moveToThread(readerThread);
+        writerWorker->moveToThread(writerThread);
+
+        connect(readerThread, SIGNAL(started()), readerWorker, SLOT(process()));
+        connect(readerWorker, SIGNAL(finished()), readerThread, SLOT(quit()));
+        connect(readerWorker, SIGNAL(finished()), readerWorker, SLOT(deleteLater()));
+        connect(readerThread, SIGNAL(finished()), readerThread, SLOT(deleteLater()));
+
+        connect(writerThread, SIGNAL(started()), writerWorker, SLOT(process()));
+        connect(writerWorker, SIGNAL(finished()), writerThread, SLOT(quit()));
+        connect(writerWorker, SIGNAL(finished()), writerWorker, SLOT(deleteLater()));
+        connect(writerThread, SIGNAL(finished()), writerThread, SLOT(deleteLater()));
+
+        readerThread->start();
+        writerThread->start();
+    }
 
     /* Reflect changes in UI */
     updateUIState();

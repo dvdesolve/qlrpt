@@ -19,39 +19,38 @@
 
 /**************************************************************************************************/
 
-#include "IQProducerFile.h"
+#ifndef IQPROCESSORWORKER_H
+#define IQPROCESSORWORKER_H
 
-#include "GlobalObjects.h"
+/**************************************************************************************************/
+
+#include <QObject>
 
 #include <lrpt.h>
 
 /**************************************************************************************************/
 
-IQProducerFile::IQProducerFile(lrpt_iq_file_t *iqFile) {
-    this->iqFile = iqFile;
-}
+class IQProcessorWorker : public QObject {
+    Q_OBJECT
+
+public:
+    explicit IQProcessorWorker(size_t mtu, size_t total);
+    ~IQProcessorWorker();
+
+public slots:
+    void process(void);
+
+signals:
+    void finished();
+
+private:
+    size_t mtu;
+    size_t total;
+
+    lrpt_iq_data_t *iqData = NULL;
+    lrpt_iq_file_t *iqFile = NULL;
+};
 
 /**************************************************************************************************/
 
-void IQProducerFile::run() {
-    /* TODO use stored settings instead */
-    int mtu = 131072;
-
-    /* TODO error reporting */
-    /* TODO check for NULL iqData */
-    lrpt_iq_data_t *iqData = lrpt_iq_data_alloc(mtu, NULL);
-
-    const uint64_t dataLen = lrpt_iq_file_length(iqFile);
-    uint64_t totDataRead = 0;
-    size_t iqDataLen = 0;
-
-    while (totDataRead < dataLen) {
-        lrpt_iq_data_read_from_file(iqData, iqFile, mtu, false, NULL);
-        iqDataLen = lrpt_iq_data_length(iqData);
-        totDataRead += iqDataLen;
-
-        iqRBFree->acquire(iqDataLen);
-        lrpt_iq_rb_push(iqRB, iqData, iqDataLen, NULL);
-        iqRBUsed->release(iqDataLen);
-    }
-}
+#endif
