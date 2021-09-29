@@ -26,6 +26,7 @@
 #include "IQSourceFileWorker.h"
 #include "SettingsDialog.h"
 
+#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
@@ -53,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(SrcCombB, SIGNAL(currentIndexChanged(int)), this, SLOT(setNewSource(int)));
 
     /* Connections for menu entries */
-    connect(SettingsAct, SIGNAL(triggered()), this, SLOT(openSettings()));
+    connect(SettingsAct, SIGNAL(triggered()), this, SLOT(openSettingsDlg()));
     connect(ExitAct, SIGNAL(triggered()), this, SLOT(exitApp()));
     connect(AboutAct, SIGNAL(triggered()), this, SLOT(aboutApp()));
 
@@ -73,11 +74,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     PLLFreqLbl->setMidLineWidth(0);
     statusbar->addPermanentWidget(PLLFreqLbl);
 
+    PLLPhaseErrLbl = new QLabel(tr("PLL phase error: ---"), this);
+    PLLPhaseErrLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
+    PLLPhaseErrLbl->setLineWidth(1);
+    PLLPhaseErrLbl->setMidLineWidth(0);
+    statusbar->addPermanentWidget(PLLPhaseErrLbl);
+
     ALCGainLbl = new QLabel(tr("ALC gain: --- dB"), this);
     ALCGainLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
     ALCGainLbl->setLineWidth(1);
     ALCGainLbl->setMidLineWidth(0);
     statusbar->addPermanentWidget(ALCGainLbl);
+
+    SignalLevelLbl = new QLabel(tr("Signal level: ---"), this);
+    SignalLevelLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
+    SignalLevelLbl->setLineWidth(1);
+    SignalLevelLbl->setMidLineWidth(0);
+    statusbar->addPermanentWidget(SignalLevelLbl);
 
     FramingStatusLbl = new QLabel(tr("Framing: ---"), this);
     FramingStatusLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
@@ -114,12 +127,78 @@ MainWindow::~MainWindow() {
 
 /**************************************************************************************************/
 
-void MainWindow::restoreSettings() {
+void MainWindow::restoreSettings(void) {
     QSettings s("desolve", "glrpt");
 
     lastSrcFileDir = s.value(
                 "Paths/LastSrcDir",
                 QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
+
+    int x;
+
+    /* IQ source file MTU */
+    x = s.value("IO/IQSrcFileMTU", IQSrcFileMTU_DEF).toInt();
+
+    if ((x < 1) || (x > 1048576)) {
+        x = IQSrcFileMTU_DEF;
+        s.setValue("IO/IQSrcFileMTU", x);
+    }
+
+    IQSrcFileMTU = x;
+
+    /* QPSK source file MTU */
+    x = s.value("IO/QPSKSrcFileMTU", QPSKSrcFileMTU_DEF).toInt();
+
+    if ((x < 1) || (x > 1048576)) {
+        x = QPSKSrcFileMTU_DEF;
+        s.setValue("IO/QPSKSrcFileMTU", x);
+    }
+
+    QPSKSrcFileMTU = x;
+
+    /* IQ ring buffer size factor */
+    x = s.value("IO/IQRBFactor", IQRBFactor_DEF).toInt();
+
+    if ((x < 1) || (x > 100)) {
+        x = IQRBFactor_DEF;
+        s.setValue("IO/IQRBFactor", x);
+    }
+
+    IQRBFactor = x;
+
+    /* QPSK ring buffer size factor */
+    x = s.value("IO/QPSKRBFactor", QPSKRBFactor_DEF).toInt();
+
+    if ((x < 1) || (x > 100)) {
+        x = QPSKRBFactor_DEF;
+        s.setValue("IO/QPSKRBFactor", x);
+    }
+
+    QPSKRBFactor = x;
+
+    /* Demodulator MTU */
+    DemodMTUAsIQSrc = s.value("IO/DemodMTUAsIQSrc", true).toBool();
+
+    x = s.value("IO/DemodMTU", DemodMTU_DEF).toInt();
+
+    if ((x < 1) || (x > 1048576)) {
+        x = DemodMTU_DEF;
+        s.setValue("IO/DemodMTU", x);
+    }
+
+    DemodMTU = x;
+
+    /* Decoder SFL factor */
+    x = s.value("IO/DecoderSFLFactor", DecoderSFLFactor_DEF).toInt();
+
+    if ((x < 3) || (x > 100)) {
+        x = DecoderSFLFactor_DEF;
+        s.setValue("IO/DecoderSFLFactor", x);
+    }
+
+    DecoderSFLFactor = x;
+
+    s.sync();
 }
 
 /**************************************************************************************************/
@@ -147,17 +226,21 @@ void MainWindow::updateUIState(void) {
             StatusGB->setDisabled(true);
             FFTPlotGB->setDisabled(true);
             QPSKGB->setDisabled(true);
+            IQBufferUtilLbl->setDisabled(true);
+            IQBufferUtilBar->setDisabled(true);
+            QPSKBufferUtilLbl->setDisabled(true);
+            QPSKBufferUtilBar->setDisabled(true);
             PhaseErrorLbl->setDisabled(true);
             PhaseErrorBar->setDisabled(true);
-            PhaseErrorValLbl->setDisabled(true);
-            SignalQualityLevelLbl->setDisabled(true);
+            SignalQualityLbl->setDisabled(true);
             SignalQualityBar->setDisabled(true);
-            SignalLevelValLbl->setDisabled(true);
             LRPTGB->setDisabled(true);
 
             PLLStatusLbl->setDisabled(true);
             PLLFreqLbl->setDisabled(true);
+            PLLPhaseErrLbl->setDisabled(true);
             ALCGainLbl->setDisabled(true);
+            SignalLevelLbl->setDisabled(true);
             FramingStatusLbl->setDisabled(true);
             PacketsLbl->setDisabled(true);
 
@@ -184,17 +267,21 @@ void MainWindow::updateUIState(void) {
             StatusGB->setEnabled(processing);
             FFTPlotGB->setEnabled(true);
             QPSKGB->setEnabled(true);
+            IQBufferUtilLbl->setEnabled(true);
+            IQBufferUtilBar->setEnabled(true);
+            QPSKBufferUtilLbl->setEnabled(true);
+            QPSKBufferUtilBar->setEnabled(true);
             PhaseErrorLbl->setEnabled(true);
             PhaseErrorBar->setEnabled(true);
-            PhaseErrorValLbl->setEnabled(true);
-            SignalQualityLevelLbl->setEnabled(true);
+            SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
-            SignalLevelValLbl->setEnabled(true);
             LRPTGB->setEnabled(processing);
 
             PLLStatusLbl->setEnabled(processing);
             PLLFreqLbl->setEnabled(processing);
+            PLLPhaseErrLbl->setEnabled(processing);
             ALCGainLbl->setEnabled(processing);
+            SignalLevelLbl->setEnabled(processing);
             FramingStatusLbl->setEnabled(processing);
             PacketsLbl->setEnabled(processing);
 
@@ -221,17 +308,21 @@ void MainWindow::updateUIState(void) {
             StatusGB->setEnabled(processing);
             FFTPlotGB->setDisabled(true);
             QPSKGB->setEnabled(true);
+            IQBufferUtilLbl->setDisabled(true);
+            IQBufferUtilBar->setDisabled(true);
+            QPSKBufferUtilLbl->setEnabled(true);
+            QPSKBufferUtilBar->setEnabled(true);
             PhaseErrorLbl->setDisabled(true);
             PhaseErrorBar->setDisabled(true);
-            PhaseErrorValLbl->setDisabled(true);
-            SignalQualityLevelLbl->setEnabled(true);
+            SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
-            SignalLevelValLbl->setDisabled(true);
             LRPTGB->setEnabled(processing);
 
             PLLStatusLbl->setDisabled(true);
             PLLFreqLbl->setDisabled(true);
+            PLLPhaseErrLbl->setDisabled(true);
             ALCGainLbl->setDisabled(true);
+            SignalLevelLbl->setDisabled(true);
             FramingStatusLbl->setEnabled(processing);
             PacketsLbl->setEnabled(processing);
 
@@ -271,17 +362,21 @@ void MainWindow::updateUIState(void) {
             StatusGB->setEnabled(processing);
             FFTPlotGB->setEnabled(true);
             QPSKGB->setEnabled(true);
+            IQBufferUtilLbl->setEnabled(true);
+            IQBufferUtilBar->setEnabled(true);
+            QPSKBufferUtilLbl->setEnabled(true);
+            QPSKBufferUtilBar->setEnabled(true);
             PhaseErrorLbl->setEnabled(true);
             PhaseErrorBar->setEnabled(true);
-            PhaseErrorValLbl->setEnabled(true);
-            SignalQualityLevelLbl->setEnabled(true);
+            SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
-            SignalLevelValLbl->setEnabled(true);
             LRPTGB->setEnabled(processing);
 
             PLLStatusLbl->setEnabled(processing);
             PLLFreqLbl->setEnabled(processing);
+            PLLPhaseErrLbl->setEnabled(processing);
             ALCGainLbl->setEnabled(processing);
+            SignalLevelLbl->setEnabled(processing);
             FramingStatusLbl->setEnabled(processing);
             PacketsLbl->setEnabled(processing);
 
@@ -292,11 +387,11 @@ void MainWindow::updateUIState(void) {
 
 /**************************************************************************************************/
 
-void MainWindow::openSettings(void) {
+void MainWindow::openSettingsDlg(void) {
     SettingsDialog d;
 
-    d.exec();
-    /* TODO re-read settings after exiting from dialog */
+    if (d.exec() == QDialog::Accepted)
+        restoreSettings();
 }
 
 /**************************************************************************************************/

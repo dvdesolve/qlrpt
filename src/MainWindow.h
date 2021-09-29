@@ -51,6 +51,17 @@ private:
     /* Common settings */
     QString lastSrcFileDir;
 
+    int IQSrcFileMTU;
+    int QPSKSrcFileMTU;
+
+    int IQRBFactor;
+    int QPSKRBFactor;
+
+    bool DemodMTUAsIQSrc;
+    int DemodMTU;
+
+    int DecoderSFLFactor;
+
     /* State flags */
     SrcType srcMode = NONE;
     bool processing = false;
@@ -69,7 +80,9 @@ private:
     /* Status bar labels */
     QLabel *PLLStatusLbl;
     QLabel *PLLFreqLbl;
+    QLabel *PLLPhaseErrLbl;
     QLabel *ALCGainLbl;
+    QLabel *SignalLevelLbl;
     QLabel *FramingStatusLbl;
     QLabel *PacketsLbl;
 
@@ -78,7 +91,7 @@ private:
 
 private slots:
     /* Open Settings dialog */
-    void openSettings(void);
+    void openSettingsDlg(void);
 
     /* Exit application */
     void exitApp(void);

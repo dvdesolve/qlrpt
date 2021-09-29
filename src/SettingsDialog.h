@@ -28,11 +28,42 @@
 
 /**************************************************************************************************/
 
+#define IQSrcFileMTU_DEF        131072
+#define QPSKSrcFileMTU_DEF      131072
+
+#define IQRBFactor_DEF          10
+#define QPSKRBFactor_DEF        10
+
+#define DemodMTU_DEF            131072
+
+#define DecoderSFLFactor_DEF    3
+
+/**************************************************************************************************/
+
 class SettingsDialog : public QDialog, private Ui::SettingsDialog {
     Q_OBJECT
 
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
+
+private:
+    bool fixed = false;
+
+    /* Load settings from system storage */
+    void loadSettings(void);
+
+    /* Save settings to system storage */
+    void saveSettings(void);
+
+private slots:
+    /* Save settings upon exit */
+    void accept(void);
+
+    /* Exit and signal about changes if something was fixed */
+    void reject(void);
+
+    /* Reset settings to the compiled defaults */
+    void restoreDefaults(void);
 };
 
 /**************************************************************************************************/
