@@ -21,6 +21,7 @@
 
 #include "MainWindow.h"
 
+#include "GlobalDecls.h"
 #include "GlobalObjects.h"
 #include "IQProcessorWorker.h"
 #include "IQSourceFileWorker.h"
@@ -122,7 +123,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 /**************************************************************************************************/
 
 MainWindow::~MainWindow() {
-    deinitGlobalObjects();
+    /* Free allocated global resources */
+    lrpt_iq_rb_free(iqRB);
+    lrpt_qpsk_rb_free(qpskRB);
+    delete iqRBUsed;
+    delete iqRBFree;
+    delete qpskRBUsed;
+    delete qpskRBFree;
 }
 
 /**************************************************************************************************/
@@ -139,66 +146,123 @@ void MainWindow::restoreSettings(void) {
     /* IQ source file MTU */
     x = s.value("IO/IQSrcFileMTU", IQSrcFileMTU_DEF).toInt();
 
-    if ((x < 1) || (x > 1048576)) {
+    if ((x < IQSrcFileMTU_MIN) || (x > IQSrcFileMTU_MAX)) {
         x = IQSrcFileMTU_DEF;
         s.setValue("IO/IQSrcFileMTU", x);
     }
 
-    IQSrcFileMTU = x;
+    iqSrcFileMTU = x;
 
     /* QPSK source file MTU */
     x = s.value("IO/QPSKSrcFileMTU", QPSKSrcFileMTU_DEF).toInt();
 
-    if ((x < 1) || (x > 1048576)) {
+    if ((x < QPSKSrcFileMTU_MIN) || (x > QPSKSrcFileMTU_MAX)) {
         x = QPSKSrcFileMTU_DEF;
         s.setValue("IO/QPSKSrcFileMTU", x);
     }
 
-    QPSKSrcFileMTU = x;
+    qpskSrcFileMTU = x;
 
-    /* IQ ring buffer size factor */
-    x = s.value("IO/IQRBFactor", IQRBFactor_DEF).toInt();
+    /* IQ ring buffer size */
+    x = s.value("IO/IQRBSize", IQRBSize_DEF).toInt();
 
-    if ((x < 1) || (x > 100)) {
-        x = IQRBFactor_DEF;
-        s.setValue("IO/IQRBFactor", x);
+    if ((x < IQRBSize_MIN) || (x > IQRBSize_MAX)) {
+        x = IQRBSize_DEF;
+        s.setValue("IO/IQRBSize", x);
     }
 
-    IQRBFactor = x;
+    iqRBSize = x;
 
-    /* QPSK ring buffer size factor */
-    x = s.value("IO/QPSKRBFactor", QPSKRBFactor_DEF).toInt();
+    /* QPSK ring buffer size */
+    x = s.value("IO/QPSKRBSize", QPSKRBSize_DEF).toInt();
 
-    if ((x < 1) || (x > 100)) {
-        x = QPSKRBFactor_DEF;
-        s.setValue("IO/QPSKRBFactor", x);
+    if ((x < QPSKRBSize_MIN) || (x > QPSKRBSize_MAX)) {
+        x = QPSKRBSize_DEF;
+        s.setValue("IO/QPSKRBSize", x);
     }
 
-    QPSKRBFactor = x;
+    qpskRBSize = x;
 
-    /* Demodulator MTU */
-    DemodMTUAsIQSrc = s.value("IO/DemodMTUAsIQSrc", true).toBool();
+    /* Demodulator chunk size */
+    x = s.value("IO/DemodChunkSize", DemodChunkSize_DEF).toInt();
 
-    x = s.value("IO/DemodMTU", DemodMTU_DEF).toInt();
-
-    if ((x < 1) || (x > 1048576)) {
-        x = DemodMTU_DEF;
-        s.setValue("IO/DemodMTU", x);
+    if ((x != 0) && ((x < DemodChunkSize_MIN) || (x > DemodChunkSize_MAX))) {
+        x = DemodChunkSize_DEF;
+        s.setValue("IO/DemodChunkSize", x);
     }
 
-    DemodMTU = x;
+    demodChunkSize = x;
 
-    /* Decoder SFL factor */
-    x = s.value("IO/DecoderSFLFactor", DecoderSFLFactor_DEF).toInt();
+    /* Decoder chunk size */
+    x = s.value("IO/DecoderChunkSize", DecoderChunkSize_DEF).toInt();
 
-    if ((x < 3) || (x > 100)) {
-        x = DecoderSFLFactor_DEF;
-        s.setValue("IO/DecoderSFLFactor", x);
+    if ((x < DecoderChunkSize_MIN) || (x > DecoderChunkSize_MAX)) {
+        x = DecoderChunkSize_DEF;
+        s.setValue("IO/DecoderChunkSize", x);
     }
 
-    DecoderSFLFactor = x;
+    decoderChunkSize = x;
 
     s.sync();
+}
+
+/**************************************************************************************************/
+
+void MainWindow::setGlobalObjects(SrcType src) {
+    /* First we need to free previously allocated global resources */
+    lrpt_iq_rb_free(iqRB);
+    lrpt_qpsk_rb_free(qpskRB);
+    delete iqRBUsed;
+    delete iqRBFree;
+    delete qpskRBUsed;
+    delete qpskRBFree;
+
+    if (src == NO_SRC) { /* NULLify global resources */
+        iqRB = NULL;
+        qpskRB = NULL;
+        iqRBUsed = nullptr;
+        iqRBFree = nullptr;
+        qpskRBUsed = nullptr;
+        qpskRBFree = nullptr;
+    }
+    else { /* Re-allocate global resources */
+        /* I/Q data buffer for SDR and file sources */
+        if ((src == IQ_FILE) || (src == SDR_RECEIVER)) {
+            iqRB = lrpt_iq_rb_alloc(iqRBSize, NULL); /* TODO implement verbose error reporting */
+
+            if (!iqRB) {
+                QMessageBox::critical(this, tr("glrpt error"), tr("Can't allocate I/Q data ring buffer object!"), QMessageBox::Close);
+
+                /* Deinit all previously allocated objects */
+                setGlobalObjects(NO_SRC);
+
+                return;
+            }
+
+            iqRBUsed = new QSemaphore(0);
+            iqRBFree = new QSemaphore(iqRBSize);
+        }
+        else {
+            iqRB = NULL;
+            iqRBUsed = nullptr;
+            iqRBFree = nullptr;
+        }
+
+        /* QPSK data buffer for all sources */
+        qpskRB = lrpt_qpsk_rb_alloc(qpskRBSize, NULL); /* TODO implement verbose error reporting */
+
+        if (!qpskRB) {
+            QMessageBox::critical(this, tr("glrpt error"), tr("Can't allocate QPSK data ring buffer object!"), QMessageBox::Close);
+
+            /* Deinit all previously allocated objects */
+            setGlobalObjects(NO_SRC);
+
+            return;
+        }
+
+        qpskRBUsed = new QSemaphore(0);
+        qpskRBFree = new QSemaphore(qpskRBSize);
+    }
 }
 
 /**************************************************************************************************/
@@ -206,7 +270,7 @@ void MainWindow::restoreSettings(void) {
 void MainWindow::updateUIState(void) {
     switch (srcMode) {
         /* When no source is selected (e. g., at startup)*/
-        case SrcType::NONE: {
+        case NO_SRC: {
             StartStopBtn->setDisabled(true);
 
             SrcLbl->setEnabled(true);
@@ -247,7 +311,7 @@ void MainWindow::updateUIState(void) {
             break;
         }
 
-        case SrcType::IQ_FILE: {
+        case IQ_FILE: {
             StartStopBtn->setDisabled(SrcFilepath->text().isEmpty());
 
             SrcLbl->setDisabled(processing);
@@ -288,7 +352,7 @@ void MainWindow::updateUIState(void) {
             break;
         }
 
-        case SrcType::QPSK_FILE: {
+        case QPSK_FILE: {
             StartStopBtn->setDisabled(SrcFilepath->text().isEmpty());
 
             SrcLbl->setDisabled(processing);
@@ -329,7 +393,7 @@ void MainWindow::updateUIState(void) {
             break;
         }
 
-        case SrcType::SDR_RECEIVER: { /* TODO need to control specific GUI elements (such as bias tee) depending on receiver's capabilities */
+        case SDR_RECEIVER: { /* TODO need to control specific GUI elements (such as bias tee) depending on receiver's capabilities */
             StartStopBtn->setEnabled(true);
 
             SrcLbl->setDisabled(processing);
@@ -417,13 +481,17 @@ void MainWindow::setNewSource(int src) {
     SrcInfoText->clear();
 
     if (src == -1) /* No source (default) */
-        srcMode = SrcType::NONE;
-    if (src == 0) /* I/Q file */
-        srcMode = SrcType::IQ_FILE;
+        srcMode = NO_SRC;
+    else if (src == 0) /* I/Q file */
+        srcMode = IQ_FILE;
     else if (src == 1) /* QPSK file */
-        srcMode = SrcType::QPSK_FILE;
+        srcMode = QPSK_FILE;
     else /* Real SDR source */
-        srcMode = SrcType::SDR_RECEIVER;
+        srcMode = SDR_RECEIVER;
+    /* TODO other sources (such as TCP socket) can be added in the future */
+
+    /* Set global objects after source switching */
+    setGlobalObjects(srcMode);
 
     /* Reflect changes in UI */
     updateUIState();
@@ -491,9 +559,6 @@ void MainWindow::browseSrcFile(void) {
                             tr("Device name: ") + QString::fromUtf8(lrpt_iq_file_devicename(f)).append('\n') +
                             tr("File size: ") + QString::number(lrpt_iq_file_length(f)).append(" samples")
                             );
-
-                /* TODO debug */
-                totLen = lrpt_iq_file_length(f);
 
                 lrpt_iq_file_close(f);
 
@@ -572,32 +637,23 @@ void MainWindow::setLiveAPIDsImagery(void) {
 /**************************************************************************************************/
 
 void MainWindow::startStopProcessing(void) {
-    /* TODO implement */
     processing = !processing;
+
     StartStopBtn->setText((processing) ? tr("Stop") : tr("Start"));
+    SettingsAct->setDisabled(processing);
 
     if ((srcMode == IQ_FILE) && processing) {
-        QThread *readerThread = new QThread();
-        QThread *writerThread = new QThread();
+        iqSrcThread = new QThread();
+        iqSrcWorker = new IQSourceFileWorker(NULL, iqSrcFileMTU);
 
-        IQSourceFileWorker *readerWorker = new IQSourceFileWorker(131072, SrcFilepath->text());
-        IQProcessorWorker *writerWorker = new IQProcessorWorker(131072, totLen);
+        iqSrcWorker->moveToThread(iqSrcThread);
 
-        readerWorker->moveToThread(readerThread);
-        writerWorker->moveToThread(writerThread);
+//        connect(readerThread, SIGNAL(started()), readerWorker, SLOT(process()));
+//        connect(readerWorker, SIGNAL(finished()), readerThread, SLOT(quit()));
+//        connect(readerWorker, SIGNAL(finished()), readerWorker, SLOT(deleteLater()));
+//        connect(readerThread, SIGNAL(finished()), readerThread, SLOT(deleteLater()));
 
-        connect(readerThread, SIGNAL(started()), readerWorker, SLOT(process()));
-        connect(readerWorker, SIGNAL(finished()), readerThread, SLOT(quit()));
-        connect(readerWorker, SIGNAL(finished()), readerWorker, SLOT(deleteLater()));
-        connect(readerThread, SIGNAL(finished()), readerThread, SLOT(deleteLater()));
-
-        connect(writerThread, SIGNAL(started()), writerWorker, SLOT(process()));
-        connect(writerWorker, SIGNAL(finished()), writerThread, SLOT(quit()));
-        connect(writerWorker, SIGNAL(finished()), writerWorker, SLOT(deleteLater()));
-        connect(writerThread, SIGNAL(finished()), writerThread, SLOT(deleteLater()));
-
-        readerThread->start();
-        writerThread->start();
+        iqSrcThread->start();
     }
 
     /* Reflect changes in UI */

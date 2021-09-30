@@ -19,40 +19,34 @@
 
 /**************************************************************************************************/
 
-#ifndef SETTINGSDIALOG_H
-#define SETTINGSDIALOG_H
+#ifndef GLOBALDECLS_H
+#define GLOBALDECLS_H
 
 /**************************************************************************************************/
 
-#include "ui_SettingsDialog.h"
+#define IQSrcFileMTU_DEF        128
+#define IQSrcFileMTU_MIN        1
+#define IQSrcFileMTU_MAX        102400
 
-/**************************************************************************************************/
+#define QPSKSrcFileMTU_DEF      128
+#define QPSKSrcFileMTU_MIN      1
+#define QPSKSrcFileMTU_MAX      102400
 
-class SettingsDialog : public QDialog, private Ui::SettingsDialog {
-    Q_OBJECT
+#define IQRBSize_DEF            1024
+#define IQRBSize_MIN            1
+#define IQRBSize_MAX            102400
 
-public:
-    explicit SettingsDialog(QWidget *parent = nullptr);
+#define QPSKRBSize_DEF          1024
+#define QPSKRBSize_MIN          1
+#define QPSKRBSize_MAX          102400
 
-private:
-    bool fixed = false;
+#define DemodChunkSize_DEF      128
+#define DemodChunkSize_MIN      1
+#define DemodChunkSize_MAX      102400
 
-    /* Load settings from system storage */
-    void loadSettings(void);
-
-    /* Save settings to system storage */
-    void saveSettings(void);
-
-private slots:
-    /* Save settings upon exit */
-    void accept(void);
-
-    /* Exit and signal about changes if something was fixed */
-    void reject(void);
-
-    /* Reset settings to the compiled defaults */
-    void restoreDefaults(void);
-};
+#define DecoderChunkSize_DEF    3
+#define DecoderChunkSize_MIN    1
+#define DecoderChunkSize_MAX    100
 
 /**************************************************************************************************/
 

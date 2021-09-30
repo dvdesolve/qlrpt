@@ -21,11 +21,10 @@
 
 #include "GlobalObjects.h"
 
-#include <QCoreApplication>
-#include <QGuiApplication>
-#include <QMessageBox>
-#include <QScreen>
+#include "IQSourceAbstractWorker.h"
+
 #include <QSemaphore>
+#include <QThread>
 
 #include <lrpt.h>
 
@@ -38,66 +37,21 @@ lrpt_iq_rb_t *iqRB = NULL;
 QSemaphore *iqRBUsed = NULL;
 QSemaphore *iqRBFree = NULL;
 
+/* Thread for I/Q source (SDR or file) */
+QThread *iqSrcThread = NULL;
+
+/* Worker object for I/Q source */
+IQSourceAbstractWorker *iqSrcWorker = NULL;
+
 /* QPSK data ring buffer */
 lrpt_qpsk_rb_t *qpskRB = NULL;
 
-/**************************************************************************************************/
+/* Guarding semaphores for QPSK ring buffer */
+QSemaphore *qpskRBUsed = NULL;
+QSemaphore *qpskRBFree = NULL;
 
-int initGlobalObjects(void) {
-    QRect scrRect = QGuiApplication::screens().at(0)->virtualGeometry();
+/* Thread for QPSK source (demodulator or file) */
+QThread *qpskSrcThread = NULL;
 
-    int iqRBSize = 131072; /* TODO use stored settings instead */
-
-    iqRB = lrpt_iq_rb_alloc(iqRBSize, NULL);
-
-    if (!iqRB) {
-        QMessageBox mbox(
-                    QMessageBox::Critical,
-                    QCoreApplication::translate("Initialization Routine", "glrpt error"),
-                    QCoreApplication::translate("Initialization Routine", "Can't allocate I/Q data ring buffer object!"),
-                    QMessageBox::Close);
-
-        QSize mSize = mbox.sizeHint();
-
-        mbox.move(QPoint(
-                      scrRect.width() / 2 - mSize.width()/2,
-                      scrRect.height()/2 - mSize.height() / 2));
-        mbox.exec();
-
-        return 1;
-    }
-
-    iqRBUsed = new QSemaphore(0);
-    iqRBFree = new QSemaphore(iqRBSize);
-
-    qpskRB = lrpt_qpsk_rb_alloc(16384 * 10, NULL); /* TODO use SFL and stored settings instead */
-
-    if (!qpskRB) {
-        QMessageBox mbox(
-                    QMessageBox::Critical,
-                    QCoreApplication::translate("Initialization Routine", "glrpt error"),
-                    QCoreApplication::translate("Initialization Routine", "Can't allocate QPSK data ring buffer object!"),
-                    QMessageBox::Close);
-
-        QSize mSize = mbox.sizeHint();
-
-        mbox.move(QPoint(
-                      scrRect.width() / 2 - mSize.width()/2,
-                      scrRect.height()/2 - mSize.height() / 2));
-        mbox.exec();
-
-        return 1;
-    }
-
-    return 0;
-}
-
-/**************************************************************************************************/
-
-void deinitGlobalObjects(void) {
-    lrpt_iq_rb_free(iqRB);
-    delete iqRBUsed;
-    delete iqRBFree;
-
-    lrpt_qpsk_rb_free(qpskRB);
-}
+/* Thread for decoder */
+QThread *decoderThread = NULL;

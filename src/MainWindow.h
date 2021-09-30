@@ -39,31 +39,27 @@ public:
 
 private:
     enum SrcType {
-        NONE,
+        NO_SRC,
         IQ_FILE,
         QPSK_FILE,
         SDR_RECEIVER
     };
 
-    /* TODO debug */
-    uint64_t totLen;
-
     /* Common settings */
     QString lastSrcFileDir;
 
-    int IQSrcFileMTU;
-    int QPSKSrcFileMTU;
+    int iqSrcFileMTU;
+    int qpskSrcFileMTU;
 
-    int IQRBFactor;
-    int QPSKRBFactor;
+    int iqRBSize;
+    int qpskRBSize;
 
-    bool DemodMTUAsIQSrc;
-    int DemodMTU;
+    int demodChunkSize;
 
-    int DecoderSFLFactor;
+    int decoderChunkSize;
 
     /* State flags */
-    SrcType srcMode = NONE;
+    SrcType srcMode = NO_SRC;
     bool processing = false;
 
     /* Processing data values */
@@ -76,6 +72,8 @@ private:
     bool framingStatus = false;
     int nPacketsGood = 0;
     int nPacketsTotal = 0;
+    int iqBufferUtil = 0;
+    int qpskBufferUtil = 0;
 
     /* Status bar labels */
     QLabel *PLLStatusLbl;
@@ -86,7 +84,13 @@ private:
     QLabel *FramingStatusLbl;
     QLabel *PacketsLbl;
 
+    /* Read in settings from system storage */
     void restoreSettings(void);
+
+    /* (Re)allocate global objects */
+    void setGlobalObjects(SrcType src);
+
+    /* Manage GUI elements upon selecting source/processing */
     void updateUIState(void);
 
 private slots:

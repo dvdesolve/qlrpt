@@ -24,31 +24,30 @@
 
 /**************************************************************************************************/
 
-#include <QObject>
+#include "IQSourceAbstractWorker.h"
 
 #include <lrpt.h>
 
 /**************************************************************************************************/
 
-class IQSourceFileWorker : public QObject {
+class IQSourceFileWorker : public IQSourceAbstractWorker {
     Q_OBJECT
 
 public:
-    explicit IQSourceFileWorker(size_t mtu, const QString &srcFile);
+    explicit IQSourceFileWorker(lrpt_iq_file_t *iqFile, int MTU);
     ~IQSourceFileWorker();
 
 public slots:
-    void process(void);
+    void process(void) override;
 
 signals:
     void finished();
 
 private:
-    size_t mtu;
-    QString srcFile;
+    lrpt_iq_file_t *iqFile = NULL;
+    int MTU;
 
     lrpt_iq_data_t *iqData = NULL;
-    lrpt_iq_file_t *iqFile = NULL;
 };
 
 /**************************************************************************************************/

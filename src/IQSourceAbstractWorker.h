@@ -19,39 +19,23 @@
 
 /**************************************************************************************************/
 
-#ifndef SETTINGSDIALOG_H
-#define SETTINGSDIALOG_H
+#ifndef IQSOURCEABSTRACTWORKER_H
+#define IQSOURCEABSTRACTWORKER_H
 
 /**************************************************************************************************/
 
-#include "ui_SettingsDialog.h"
+#include <QObject>
 
 /**************************************************************************************************/
 
-class SettingsDialog : public QDialog, private Ui::SettingsDialog {
+class IQSourceAbstractWorker : public QObject {
     Q_OBJECT
 
 public:
-    explicit SettingsDialog(QWidget *parent = nullptr);
+    explicit IQSourceAbstractWorker();
 
-private:
-    bool fixed = false;
-
-    /* Load settings from system storage */
-    void loadSettings(void);
-
-    /* Save settings to system storage */
-    void saveSettings(void);
-
-private slots:
-    /* Save settings upon exit */
-    void accept(void);
-
-    /* Exit and signal about changes if something was fixed */
-    void reject(void);
-
-    /* Reset settings to the compiled defaults */
-    void restoreDefaults(void);
+public slots:
+    virtual void process(void) = 0;
 };
 
 /**************************************************************************************************/

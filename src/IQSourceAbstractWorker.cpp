@@ -19,41 +19,9 @@
 
 /**************************************************************************************************/
 
-#ifndef SETTINGSDIALOG_H
-#define SETTINGSDIALOG_H
+#include "IQSourceAbstractWorker.h"
 
 /**************************************************************************************************/
 
-#include "ui_SettingsDialog.h"
-
-/**************************************************************************************************/
-
-class SettingsDialog : public QDialog, private Ui::SettingsDialog {
-    Q_OBJECT
-
-public:
-    explicit SettingsDialog(QWidget *parent = nullptr);
-
-private:
-    bool fixed = false;
-
-    /* Load settings from system storage */
-    void loadSettings(void);
-
-    /* Save settings to system storage */
-    void saveSettings(void);
-
-private slots:
-    /* Save settings upon exit */
-    void accept(void);
-
-    /* Exit and signal about changes if something was fixed */
-    void reject(void);
-
-    /* Reset settings to the compiled defaults */
-    void restoreDefaults(void);
-};
-
-/**************************************************************************************************/
-
-#endif
+IQSourceAbstractWorker::IQSourceAbstractWorker() {
+}

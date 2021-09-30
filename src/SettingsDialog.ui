@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>475</width>
+    <width>454</width>
     <height>346</height>
    </rect>
   </property>
@@ -30,172 +30,10 @@
      </property>
      <widget class="QWidget" name="IOTab">
       <attribute name="title">
-       <string>I/O</string>
+       <string>Input/output</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,1">
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>I/Q ring buffer size factor:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QSpinBox" name="IQRBFactorSB">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="value">
-          <number>10</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QRadioButton" name="DemodMTUAsIQSrcRB">
-         <property name="text">
-          <string>as I/Q source</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Decoder SFL factor:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>I/Q file source MTU:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QSpinBox" name="IQSrcFileMTUSB">
-         <property name="suffix">
-          <string> sample(s)</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1048576</number>
-         </property>
-         <property name="singleStep">
-          <number>1024</number>
-         </property>
-         <property name="value">
-          <number>131072</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Demodulator MTU:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
-         <item>
-          <widget class="QRadioButton" name="DemodMTUCustomRB">
-           <property name="text">
-            <string>custom</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="DemodMTUSB">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="suffix">
-            <string> sample(s)</string>
-           </property>
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>1048576</number>
-           </property>
-           <property name="singleStep">
-            <number>1024</number>
-           </property>
-           <property name="value">
-            <number>131072</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="3" column="1">
-        <widget class="QSpinBox" name="QPSKRBFactorSB">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="value">
-          <number>10</number>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QSpinBox" name="DecoderSFLFactorSB">
-         <property name="minimum">
-          <number>3</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="value">
-          <number>3</number>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>QPSK ring buffer size factor:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QSpinBox" name="QPSKSrcFileMTUSB">
-         <property name="suffix">
-          <string> symbol(s)</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1048576</number>
-         </property>
-         <property name="singleStep">
-          <number>1024</number>
-         </property>
-         <property name="value">
-          <number>131072</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>QPSK file source MTU:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
+       <item row="2" column="2">
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -208,12 +46,202 @@
          </property>
         </spacer>
        </item>
+       <item row="4" column="1">
+        <widget class="QRadioButton" name="DemodChunkSizeDefaultRB">
+         <property name="text">
+          <string>as I/Q source</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>I/Q buffer size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Demodulator chunk size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Decoder chunk size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>I/Q source file MTU:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QSpinBox" name="IQRBSizeSB">
+         <property name="accelerated">
+          <bool>true</bool>
+         </property>
+         <property name="suffix">
+          <string> ksample(s)</string>
+         </property>
+         <property name="minimum">
+          <number>1024</number>
+         </property>
+         <property name="maximum">
+          <number>102400</number>
+         </property>
+         <property name="singleStep">
+          <number>1024</number>
+         </property>
+         <property name="value">
+          <number>1024</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>QPSK buffer size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="QPSKRBSizeSB">
+         <property name="accelerated">
+          <bool>true</bool>
+         </property>
+         <property name="suffix">
+          <string> ksymbol(s)</string>
+         </property>
+         <property name="minimum">
+          <number>1024</number>
+         </property>
+         <property name="maximum">
+          <number>102400</number>
+         </property>
+         <property name="singleStep">
+          <number>1024</number>
+         </property>
+         <property name="value">
+          <number>1024</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+         <item>
+          <widget class="QRadioButton" name="DemodChunkSizeCustomRB">
+           <property name="text">
+            <string>custom</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="DemodChunkSizeSB">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
+           <property name="suffix">
+            <string> ksample(s)</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>102400</number>
+           </property>
+           <property name="singleStep">
+            <number>128</number>
+           </property>
+           <property name="value">
+            <number>128</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="6" column="1">
+        <widget class="QSpinBox" name="DecoderChunkSizeSB">
+         <property name="accelerated">
+          <bool>true</bool>
+         </property>
+         <property name="suffix">
+          <string> SFL(s)</string>
+         </property>
+         <property name="minimum">
+          <number>3</number>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>3</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>QPSK source file MTU:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="IQSrcFileMTUSB">
+         <property name="accelerated">
+          <bool>true</bool>
+         </property>
+         <property name="suffix">
+          <string> ksample(s)</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>102400</number>
+         </property>
+         <property name="singleStep">
+          <number>128</number>
+         </property>
+         <property name="value">
+          <number>128</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="QPSKSrcFileMTUSB">
+         <property name="accelerated">
+          <bool>true</bool>
+         </property>
+         <property name="suffix">
+          <string> ksymbol(s)</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>102400</number>
+         </property>
+         <property name="singleStep">
+          <number>128</number>
+         </property>
+         <property name="value">
+          <number>128</number>
+         </property>
+        </widget>
+       </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="PostprocessingTab">
-      <attribute name="title">
-       <string>Postprocessing</string>
-      </attribute>
      </widget>
     </widget>
    </item>
@@ -233,12 +261,12 @@
   <tabstop>SettingsTabWidget</tabstop>
   <tabstop>IQSrcFileMTUSB</tabstop>
   <tabstop>QPSKSrcFileMTUSB</tabstop>
-  <tabstop>IQRBFactorSB</tabstop>
-  <tabstop>QPSKRBFactorSB</tabstop>
-  <tabstop>DemodMTUAsIQSrcRB</tabstop>
-  <tabstop>DemodMTUCustomRB</tabstop>
-  <tabstop>DemodMTUSB</tabstop>
-  <tabstop>DecoderSFLFactorSB</tabstop>
+  <tabstop>IQRBSizeSB</tabstop>
+  <tabstop>QPSKRBSizeSB</tabstop>
+  <tabstop>DemodChunkSizeDefaultRB</tabstop>
+  <tabstop>DemodChunkSizeCustomRB</tabstop>
+  <tabstop>DemodChunkSizeSB</tabstop>
+  <tabstop>DecoderChunkSizeSB</tabstop>
  </tabstops>
  <resources/>
  <connections/>

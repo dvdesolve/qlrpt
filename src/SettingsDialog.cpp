@@ -21,6 +21,8 @@
 
 #include "SettingsDialog.h"
 
+#include "GlobalDecls.h"
+
 #include <QPushButton>
 #include <QSettings>
 
@@ -46,7 +48,7 @@ void SettingsDialog::loadSettings(void) {
     /* IQ source file MTU */
     x = s.value("IO/IQSrcFileMTU", IQSrcFileMTU_DEF).toInt();
 
-    if ((x < 1) || (x > 1048576)) {
+    if ((x < IQSrcFileMTU_MIN) || (x > IQSrcFileMTU_MAX)) {
         x = IQSrcFileMTU_DEF;
         s.setValue("IO/IQSrcFileMTU", x);
         fixed = true;
@@ -57,7 +59,7 @@ void SettingsDialog::loadSettings(void) {
     /* QPSK source file MTU */
     x = s.value("IO/QPSKSrcFileMTU", QPSKSrcFileMTU_DEF).toInt();
 
-    if ((x < 1) || (x > 1048576)) {
+    if ((x < QPSKSrcFileMTU_MIN) || (x > QPSKSrcFileMTU_MAX)) {
         x = QPSKSrcFileMTU_DEF;
         s.setValue("IO/QPSKSrcFileMTU", x);
         fixed = true;
@@ -65,51 +67,56 @@ void SettingsDialog::loadSettings(void) {
 
     QPSKSrcFileMTUSB->setValue(x);
 
-    /* IQ ring buffer size factor */
-    x = s.value("IO/IQRBFactor", IQRBFactor_DEF).toInt();
+    /* IQ ring buffer size */
+    x = s.value("IO/IQRBSize", IQRBSize_DEF).toInt();
 
-    if ((x < 1) || (x > 100)) {
-        x = IQRBFactor_DEF;
-        s.setValue("IO/IQRBFactor", x);
+    if ((x < IQRBSize_MIN) || (x > IQRBSize_MAX)) {
+        x = IQRBSize_DEF;
+        s.setValue("IO/IQRBSize", x);
         fixed = true;
     }
 
-    IQRBFactorSB->setValue(x);
+    IQRBSizeSB->setValue(x);
 
-    /* QPSK ring buffer size factor */
-    x = s.value("IO/QPSKRBFactor", QPSKRBFactor_DEF).toInt();
+    /* QPSK ring buffer size */
+    x = s.value("IO/QPSKRBSize", QPSKRBSize_DEF).toInt();
 
-    if ((x < 1) || (x > 100)) {
-        x = QPSKRBFactor_DEF;
-        s.setValue("IO/QPSKRBFactor", x);
+    if ((x < QPSKRBSize_MIN) || (x > QPSKRBSize_MAX)) {
+        x = QPSKRBSize_DEF;
+        s.setValue("IO/QPSKRBSize", x);
         fixed = true;
     }
 
-    QPSKRBFactorSB->setValue(x);
+    QPSKRBSizeSB->setValue(x);
 
-    /* Demodulator MTU */
-    DemodMTUAsIQSrcRB->setChecked(s.value("IO/DemodMTUAsIQSrc", true).toBool());
+    /* Demodulator chunk size */
+    x = s.value("IO/DemodChunkSize", DemodChunkSize_DEF).toInt();
 
-    x = s.value("IO/DemodMTU", DemodMTU_DEF).toInt();
+    if (x == 0) {
+        DemodChunkSizeDefaultRB->setChecked(true);
+        DemodChunkSizeSB->setValue(DemodChunkSize_DEF);
+    }
+    else {
+        if ((x < DemodChunkSize_MIN) || (x > DemodChunkSize_MAX)) {
+            x = DemodChunkSize_DEF;
+            s.setValue("IO/DemodChunkSize", x);
+            fixed = true;
+        }
 
-    if ((x < 1) || (x > 1048576)) {
-        x = DemodMTU_DEF;
-        s.setValue("IO/DemodMTU", x);
+        DemodChunkSizeCustomRB->setChecked(true);
+        DemodChunkSizeSB->setValue(x);
+    }
+
+    /* Decoder chunk size */
+    x = s.value("IO/DecoderChunkSize", DecoderChunkSize_DEF).toInt();
+
+    if ((x < DecoderChunkSize_MIN) || (x > DecoderChunkSize_MAX)) {
+        x = DecoderChunkSize_DEF;
+        s.setValue("IO/DecoderChunkSize", x);
         fixed = true;
     }
 
-    DemodMTUSB->setValue(x);
-
-    /* Decoder SFL factor */
-    x = s.value("IO/DecoderSFLFactor", DecoderSFLFactor_DEF).toInt();
-
-    if ((x < 3) || (x > 100)) {
-        x = DecoderSFLFactor_DEF;
-        s.setValue("IO/DecoderSFLFactor", x);
-        fixed = true;
-    }
-
-    DecoderSFLFactorSB->setValue(x);
+    DecoderChunkSizeSB->setValue(x);
 
     s.sync();
 }
@@ -121,10 +128,14 @@ void SettingsDialog::saveSettings(void) {
 
     s.setValue("IO/IQSrcFileMTU", IQSrcFileMTUSB->value());
     s.setValue("IO/QPSKSrcFileMTU", QPSKSrcFileMTUSB->value());
-    s.setValue("IO/IQRBFactor", IQRBFactorSB->value());
-    s.setValue("IO/QPSKRBFactor", QPSKRBFactorSB->value());
-    s.setValue("IO/DemodMTUAsIQSrc", DemodMTUAsIQSrcRB->isChecked());
-    s.setValue("IO/DecoderSFLFactor", DecoderSFLFactorSB->value());
+
+    s.setValue("IO/IQRBSize", IQRBSizeSB->value());
+    s.setValue("IO/QPSKRBSize", QPSKRBSizeSB->value());
+
+    s.setValue("IO/DemodChunkSize",
+               (DemodChunkSizeDefaultRB->isChecked()) ? 0 : DemodChunkSizeSB->value());
+
+    s.setValue("IO/DecoderChunkSize", DecoderChunkSizeSB->value());
 
     s.sync();
 }
@@ -149,13 +160,13 @@ void SettingsDialog::reject() {
 
 void SettingsDialog::restoreDefaults(void) {
     IQSrcFileMTUSB->setValue(IQSrcFileMTU_DEF);
-    QPSKSrcFileMTUSB->setValue(IQSrcFileMTU_DEF);
+    QPSKSrcFileMTUSB->setValue(QPSKSrcFileMTU_DEF);
 
-    IQRBFactorSB->setValue(IQRBFactor_DEF);
-    QPSKRBFactorSB->setValue(QPSKRBFactor_DEF);
+    IQRBSizeSB->setValue(IQRBSize_DEF);
+    QPSKRBSizeSB->setValue(QPSKRBSize_DEF);
 
-    DemodMTUAsIQSrcRB->setChecked(true);
-    DemodMTUSB->setValue(DemodMTU_DEF);
+    DemodChunkSizeDefaultRB->setChecked(true);
+    DemodChunkSizeSB->setValue(DemodChunkSize_DEF);
 
-    DecoderSFLFactorSB->setValue(DecoderSFLFactor_DEF);
+    DecoderChunkSizeSB->setValue(DecoderChunkSize_DEF);
 }

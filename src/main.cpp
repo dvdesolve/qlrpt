@@ -19,7 +19,6 @@
 
 /**************************************************************************************************/
 
-#include "GlobalObjects.h"
 #include "MainWindow.h"
 
 #include <QApplication>
@@ -28,14 +27,6 @@
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-
-    int initRes = initGlobalObjects();
-
-    if (initRes != 0) {
-        deinitGlobalObjects();
-
-        return initRes;
-    }
 
     MainWindow w;
     w.show();

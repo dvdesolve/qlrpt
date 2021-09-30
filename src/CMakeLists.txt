@@ -27,6 +27,7 @@ set(glrpt_SOURCES
     main.cpp
     GlobalObjects.cpp
     IQProcessorWorker.cpp
+    IQSourceAbstractWorker.cpp
     IQSourceFileWorker.cpp
     MainWindow.cpp
     SettingsDialog.cpp
@@ -36,8 +37,10 @@ set(glrpt_SOURCES
 )
 
 set(glrpt_HEADERS
+    GlobalDecls.h
     GlobalObjects.h
     IQProcessorWorker.h
+    IQSourceAbstractWorker.h
     IQSourceFileWorker.h
     MainWindow.h
     SettingsDialog.h
