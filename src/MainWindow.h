@@ -26,7 +26,13 @@
 
 #include "ui_MainWindow.h"
 
+#include "IQSourceAbstractWorker.h"
+#include "QPSKSourceAbstractWorker.h"
+
 #include <QMainWindow>
+#include <QThread>
+
+#include <lrpt.h>
 
 /**************************************************************************************************/
 
@@ -58,7 +64,17 @@ private:
 
     int decoderChunkSize;
 
-    /* State flags */
+    /* State flags and variables */
+    IQSourceAbstractWorker *iqSrcWorker = nullptr;
+    QThread *iqSrcThread = nullptr;
+    lrpt_iq_file_t *iqSrcFile = NULL;
+
+    QPSKSourceAbstractWorker *qpskSrcWorker = nullptr;
+    QThread *qpskSrcThread = nullptr;
+    lrpt_qpsk_file_t *qpskSrcFile = NULL;
+
+    QThread *decoderThread = nullptr;
+
     SrcType srcMode = NO_SRC;
     bool processing = false;
 
@@ -85,35 +101,44 @@ private:
     QLabel *PacketsLbl;
 
     /* Read in settings from system storage */
-    void restoreSettings(void);
+    void restoreSettings();
 
     /* (Re)allocate global objects */
     void setGlobalObjects(SrcType src);
 
     /* Manage GUI elements upon selecting source/processing */
-    void updateUIState(void);
+    void updateUIState();
 
 private slots:
     /* Open Settings dialog */
-    void openSettingsDlg(void);
+    void openSettingsDlg();
 
     /* Exit application */
-    void exitApp(void);
+    void exitApp();
 
     /* Show info about application */
-    void aboutApp(void);
+    void aboutApp();
 
     /* Handle source change */
     void setNewSource(int src);
 
     /* Open source file */
-    void browseSrcFile(void);
+    void browseSrcFile();
+
+    /* Test selected file */
+    void testFile(const QString &fileName);
 
     /* Set live LRPT imagery area */
-    void setLiveAPIDsImagery(void);
+    void setLiveAPIDsImagery();
 
     /* Handle start/stop processing event */
-    void startStopProcessing(void);
+    void startStopProcessing();
+
+    /* Show buffer utilization status */
+    void updateBufferIndicators();
+
+    /* Finish file processing */
+    void finishSrcFileProcessing();
 };
 
 /**************************************************************************************************/

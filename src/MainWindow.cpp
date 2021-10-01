@@ -23,10 +23,11 @@
 
 #include "GlobalDecls.h"
 #include "GlobalObjects.h"
-#include "IQProcessorWorker.h"
 #include "IQSourceFileWorker.h"
+#include "QPSKSourceFileWorker.h"
 #include "SettingsDialog.h"
 
+#include <QDateTime>
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -59,8 +60,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ExitAct, SIGNAL(triggered()), this, SLOT(exitApp()));
     connect(AboutAct, SIGNAL(triggered()), this, SLOT(aboutApp()));
 
-    /* Browse file button connection */
+    /* Source file related connections */
     connect(SrcFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseSrcFile()));
+    connect(SrcFilepath, SIGNAL(textChanged(QString)), this, SLOT(testFile(QString)));
 
     /* Set up status bar labels */
     PLLStatusLbl = new QLabel(tr("PLL status: ---"), this);
@@ -134,7 +136,7 @@ MainWindow::~MainWindow() {
 
 /**************************************************************************************************/
 
-void MainWindow::restoreSettings(void) {
+void MainWindow::restoreSettings() {
     QSettings s("desolve", "glrpt");
 
     lastSrcFileDir = s.value(
@@ -151,7 +153,7 @@ void MainWindow::restoreSettings(void) {
         s.setValue("IO/IQSrcFileMTU", x);
     }
 
-    iqSrcFileMTU = x;
+    iqSrcFileMTU = x * 1024;
 
     /* QPSK source file MTU */
     x = s.value("IO/QPSKSrcFileMTU", QPSKSrcFileMTU_DEF).toInt();
@@ -161,7 +163,7 @@ void MainWindow::restoreSettings(void) {
         s.setValue("IO/QPSKSrcFileMTU", x);
     }
 
-    qpskSrcFileMTU = x;
+    qpskSrcFileMTU = x * 1024;
 
     /* IQ ring buffer size */
     x = s.value("IO/IQRBSize", IQRBSize_DEF).toInt();
@@ -171,7 +173,8 @@ void MainWindow::restoreSettings(void) {
         s.setValue("IO/IQRBSize", x);
     }
 
-    iqRBSize = x;
+    iqRBSize = x * 1024;
+    IQBufferUtilBar->setMaximum(iqRBSize); /* Update maximum of indicator buffer */
 
     /* QPSK ring buffer size */
     x = s.value("IO/QPSKRBSize", QPSKRBSize_DEF).toInt();
@@ -181,7 +184,8 @@ void MainWindow::restoreSettings(void) {
         s.setValue("IO/QPSKRBSize", x);
     }
 
-    qpskRBSize = x;
+    qpskRBSize = x * 1024;
+    QPSKBufferUtilBar->setMaximum(qpskRBSize); /* Update maximum of indicator buffer */
 
     /* Demodulator chunk size */
     x = s.value("IO/DemodChunkSize", DemodChunkSize_DEF).toInt();
@@ -267,7 +271,7 @@ void MainWindow::setGlobalObjects(SrcType src) {
 
 /**************************************************************************************************/
 
-void MainWindow::updateUIState(void) {
+void MainWindow::updateUIState() {
     switch (srcMode) {
         /* When no source is selected (e. g., at startup)*/
         case NO_SRC: {
@@ -451,30 +455,35 @@ void MainWindow::updateUIState(void) {
 
 /**************************************************************************************************/
 
-void MainWindow::openSettingsDlg(void) {
+void MainWindow::openSettingsDlg() {
     SettingsDialog d;
 
     if (d.exec() == QDialog::Accepted)
         restoreSettings();
+
+    /* Set global objects after settings change */
+    setGlobalObjects(srcMode);
 }
 
 /**************************************************************************************************/
 
-void MainWindow::exitApp(void) {
+void MainWindow::exitApp() {
     /* TODO handle running processing, unsaved data etc */
     QCoreApplication::quit();
 }
 
 /**************************************************************************************************/
 
-void MainWindow::aboutApp(void) {
-    QMessageBox::about(this, tr("About glrpt"), tr("Interactive GUI application for receiving, decoding and displaying LRPT images."));
+void MainWindow::aboutApp() {
+    QMessageBox::about(this,
+                       tr("About glrpt"),
+                       tr("<b>glrpt " GLRPT_VERSION_FULL "</b><br/>Interactive GUI application for receiving, decoding and displaying LRPT images."));
 }
 
 /**************************************************************************************************/
 
 void MainWindow::setNewSource(int src) {
-    /* TODO implement SDR source selection */
+    /* TODO implement real SDR source selection */
 
     /* Clear previously filled data in source fields */
     SrcFilepath->clear();
@@ -499,7 +508,7 @@ void MainWindow::setNewSource(int src) {
 
 /**************************************************************************************************/
 
-void MainWindow::browseSrcFile(void) {
+void MainWindow::browseSrcFile() {
     QString filter;
 
     switch (srcMode) {
@@ -523,84 +532,8 @@ void MainWindow::browseSrcFile(void) {
                 filter);
 
     if (!fileName.isEmpty()) {
-        /* Update UI elements */
-        SrcFilepath->setText(fileName);
-        StartStopBtn->setEnabled(true);
-
-        /* Error object for reporting */
-        lrpt_error_t *err = lrpt_error_init();
-
-        /* Convert QString to C string (with UTF-8 support) */
-        QByteArray fileNameUTF8 = fileName.toUtf8();
-        const char *fileNameCString = fileNameUTF8.data();
-
-        switch (srcMode) {
-            case IQ_FILE: {
-                lrpt_iq_file_t *f = lrpt_iq_file_open_r(fileNameCString, err);
-
-                if (!f) {
-                    QMessageBox::critical(
-                                this,
-                                tr("glrpt error"),
-                                tr("Error while opening I/Q data file %1:\n").arg(fileName) +
-                                ((err) ? QString::fromUtf8(lrpt_error_message(err)) : ""),
-                                QMessageBox::Close);
-
-                    lrpt_error_deinit(err);
-
-                    return;
-                }
-
-                SrcInfoText->setPlainText(
-                            tr("Source type: I/Q file\n") +
-                            tr("I/Q file version: ") + QString::number(lrpt_iq_file_version(f)).append('\n') +
-                            tr("Flags: ") + ((lrpt_iq_file_is_offsetted(f)) ? tr("offsetted") : "").append('\n') +
-                            tr("Sampling rate: ") + QString::number(lrpt_iq_file_samplerate(f)).append(" samples/s\n") +
-                            tr("Device name: ") + QString::fromUtf8(lrpt_iq_file_devicename(f)).append('\n') +
-                            tr("File size: ") + QString::number(lrpt_iq_file_length(f)).append(" samples")
-                            );
-
-                lrpt_iq_file_close(f);
-
-                break;
-            }
-
-            case QPSK_FILE: {
-                lrpt_qpsk_file_t *f = lrpt_qpsk_file_open_r(fileNameCString, err);
-
-                if (!f) {
-                    QMessageBox::critical(
-                                this,
-                                tr("glrpt error"),
-                                tr("Error while opening QPSK data file %1:\n").arg(fileName) +
-                                ((err) ? QString::fromUtf8(lrpt_error_message(err)) : ""),
-                                QMessageBox::Close);
-
-                    lrpt_error_deinit(err);
-
-                    return;
-                }
-
-                SrcInfoText->setPlainText(
-                            tr("Source type: QPSK file\n") +
-                            tr("QPSK file version: ") + QString::number(lrpt_qpsk_file_version(f)).append('\n') +
-                            tr("Flags: ") + ((lrpt_qpsk_file_is_diffcoded(f)) ? tr("diffcoded, ") : "") + ((lrpt_qpsk_file_is_interleaved(f)) ? tr("interleaved") : "") + '\n' +
-                            tr("Symbol type: ") + ((lrpt_qpsk_file_is_hardsymboled(f)) ? tr("hard") : tr("soft")).append('\n') +
-                            tr("Symbol rate: ") + QString::number(lrpt_qpsk_file_symrate(f)).append(" symbols/s\n") +
-                            tr("File size: ") + QString::number(lrpt_qpsk_file_length(f)).append(" symbols")
-                            );
-
-                lrpt_qpsk_file_close(f);
-
-                break;
-            }
-
-            default:
-                break;
-        }
-
-        /* Free resources allocated by error object */
-        lrpt_error_deinit(err);
+        /* Show some info about selected file */
+        testFile(fileName);
 
         /* Store last directory */
         lastSrcFileDir = QFileInfo(fileName).absolutePath();
@@ -614,7 +547,95 @@ void MainWindow::browseSrcFile(void) {
 
 /**************************************************************************************************/
 
-void MainWindow::setLiveAPIDsImagery(void) {
+void MainWindow::testFile(const QString &fileName) {
+    if (fileName.isEmpty()) {
+        StartStopBtn->setDisabled(true);
+
+        return;
+    }
+
+    SrcFilepath->setText(fileName);
+    StartStopBtn->setEnabled(true);
+
+    /* Error object for reporting */
+    lrpt_error_t *err = lrpt_error_init();
+
+    /* Convert QString to C string (with UTF-8 support) */
+    QByteArray fileNameUTF8 = fileName.toUtf8();
+    const char *fileNameCString = fileNameUTF8.data();
+
+    switch (srcMode) {
+        case IQ_FILE: {
+            lrpt_iq_file_t *f = lrpt_iq_file_open_r(fileNameCString, err);
+
+            if (!f) {
+                QMessageBox::critical(
+                            this,
+                            tr("glrpt error"),
+                            tr("Error while opening I/Q data file %1:\n").arg(fileName) +
+                            ((err) ? QString::fromUtf8(lrpt_error_message(err)) : ""),
+                            QMessageBox::Close);
+
+                lrpt_error_deinit(err);
+
+                return;
+            }
+
+            SrcInfoText->setPlainText(
+                        tr("Source type: I/Q file\n") +
+                        tr("I/Q file version: ") + QString::number(lrpt_iq_file_version(f)).append('\n') +
+                        tr("Flags: ") + ((lrpt_iq_file_is_offsetted(f)) ? tr("offsetted") : "").append('\n') +
+                        tr("Sampling rate: ") + QString::number(lrpt_iq_file_samplerate(f)).append(" samples/s\n") +
+                        tr("Device name: ") + QString::fromUtf8(lrpt_iq_file_devicename(f)).append('\n') +
+                        tr("File size: ") + QString::number(lrpt_iq_file_length(f)).append(" samples")
+                        );
+
+            lrpt_iq_file_close(f);
+
+            break;
+        }
+
+        case QPSK_FILE: {
+            lrpt_qpsk_file_t *f = lrpt_qpsk_file_open_r(fileNameCString, err);
+
+            if (!f) {
+                QMessageBox::critical(
+                            this,
+                            tr("glrpt error"),
+                            tr("Error while opening QPSK data file %1:\n").arg(fileName) +
+                            ((err) ? QString::fromUtf8(lrpt_error_message(err)) : ""),
+                            QMessageBox::Close);
+
+                lrpt_error_deinit(err);
+
+                return;
+            }
+
+            SrcInfoText->setPlainText(
+                        tr("Source type: QPSK file\n") +
+                        tr("QPSK file version: ") + QString::number(lrpt_qpsk_file_version(f)).append('\n') +
+                        tr("Flags: ") + ((lrpt_qpsk_file_is_diffcoded(f)) ? tr("diffcoded, ") : "") + ((lrpt_qpsk_file_is_interleaved(f)) ? tr("interleaved") : "") + '\n' +
+                        tr("Symbol type: ") + ((lrpt_qpsk_file_is_hardsymboled(f)) ? tr("hard") : tr("soft")).append('\n') +
+                        tr("Symbol rate: ") + QString::number(lrpt_qpsk_file_symrate(f)).append(" symbols/s\n") +
+                        tr("File size: ") + QString::number(lrpt_qpsk_file_length(f)).append(" symbols")
+                        );
+
+            lrpt_qpsk_file_close(f);
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    /* Free resources allocated by error object */
+    lrpt_error_deinit(err);
+}
+
+/**************************************************************************************************/
+
+void MainWindow::setLiveAPIDsImagery() {
     LRPTChan64Widget->setVisible(APID64ShowCB->isChecked());
     APID64Lbl->setVisible(APID64ShowCB->isChecked());
 
@@ -636,26 +657,124 @@ void MainWindow::setLiveAPIDsImagery(void) {
 
 /**************************************************************************************************/
 
-void MainWindow::startStopProcessing(void) {
-    processing = !processing;
+void MainWindow::startStopProcessing() {
+    processing = !processing; /* Switch mode */
 
     StartStopBtn->setText((processing) ? tr("Stop") : tr("Start"));
     SettingsAct->setDisabled(processing);
 
-    if ((srcMode == IQ_FILE) && processing) {
-        iqSrcThread = new QThread();
-        iqSrcWorker = new IQSourceFileWorker(NULL, iqSrcFileMTU);
+    if (processing)
+        LogText->insertPlainText(tr("Processing started at %1 UTC\n").
+                arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss")));
+    else
+        LogText->insertPlainText(tr("Processing finished at %1 UTC\n\n").
+                arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss")));
 
+    if ((srcMode == IQ_FILE) && processing) {
+        /* Convert QString to C string (with UTF-8 support) */
+        QByteArray fileNameUTF8 = SrcFilepath->text().toUtf8();
+        const char *fileNameCString = fileNameUTF8.data();
+
+        /* Open I/Q file for reading */
+        iqSrcFile = lrpt_iq_file_open_r(fileNameCString, NULL); /* TODO error reporting */
+
+        /* Allocate new thread and worker */
+        iqSrcThread = new QThread();
+        iqSrcWorker = new IQSourceFileWorker(iqSrcFile, iqSrcFileMTU);
+
+        /* Move worker into separate thread and set up connections */
         iqSrcWorker->moveToThread(iqSrcThread);
 
-//        connect(readerThread, SIGNAL(started()), readerWorker, SLOT(process()));
-//        connect(readerWorker, SIGNAL(finished()), readerThread, SLOT(quit()));
-//        connect(readerWorker, SIGNAL(finished()), readerWorker, SLOT(deleteLater()));
-//        connect(readerThread, SIGNAL(finished()), readerThread, SLOT(deleteLater()));
+        connect(iqSrcThread, SIGNAL(started()), iqSrcWorker, SLOT(process()));
+        connect(iqSrcWorker, SIGNAL(finished()), this, SLOT(finishSrcFileProcessing()));
+        connect(iqSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
 
+        /* Disable start/stop button before running worker thread */
+        StartStopBtn->setDisabled(true);
+
+        /* Start worker thread */
         iqSrcThread->start();
     }
 
+    if ((srcMode == QPSK_FILE) && processing) {
+        /* Convert QString to C string (with UTF-8 support) */
+        QByteArray fileNameUTF8 = SrcFilepath->text().toUtf8();
+        const char *fileNameCString = fileNameUTF8.data();
+
+        /* Open QPSK file for reading */
+        qpskSrcFile = lrpt_qpsk_file_open_r(fileNameCString, NULL); /* TODO error reporting */
+
+        /* Allocate new thread and worker */
+        qpskSrcThread = new QThread();
+        qpskSrcWorker = new QPSKSourceFileWorker(qpskSrcFile, qpskSrcFileMTU);
+
+        /* Move worker into separate thread and set up connections */
+        qpskSrcWorker->moveToThread(qpskSrcThread);
+
+        connect(qpskSrcThread, SIGNAL(started()), qpskSrcWorker, SLOT(process()));
+        connect(qpskSrcWorker, SIGNAL(finished()), this, SLOT(finishSrcFileProcessing()));
+        connect(qpskSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
+
+        /* Disable start/stop button before running worker thread */
+        StartStopBtn->setDisabled(true);
+
+        /* Start worker thread */
+        qpskSrcThread->start();
+    }
+
+    /* Reset all visible indicators */
+    /* TODO implement */
+
     /* Reflect changes in UI */
     updateUIState();
+}
+
+/**************************************************************************************************/
+
+void MainWindow::updateBufferIndicators() {
+    if ((srcMode == IQ_FILE) || (srcMode == SDR_RECEIVER))
+        IQBufferUtilBar->setValue(iqRBUsed->available());
+
+    QPSKBufferUtilBar->setValue(qpskRBUsed->available());
+}
+
+/**************************************************************************************************/
+
+void MainWindow::finishSrcFileProcessing() {
+    if (srcMode == IQ_FILE) {
+        /* Ask worker thread for stop and wait for it */
+        iqSrcThread->quit();
+        iqSrcThread->wait();
+
+        /* Delete both thread and worker and explicitly NULLify their pointers */
+        delete iqSrcThread;
+        delete iqSrcWorker;
+
+        iqSrcThread = nullptr;
+        iqSrcWorker = nullptr;
+
+        /* Close I/Q source file */
+        lrpt_iq_file_close(iqSrcFile);
+        iqSrcFile = NULL;
+    }
+    else if (srcMode == QPSK_FILE) {
+        /* Ask worker thread for stop and wait for it */
+        qpskSrcThread->quit();
+        qpskSrcThread->wait();
+
+        /* Delete both thread and worker and explicitly NULLify their pointers */
+        delete qpskSrcThread;
+        delete qpskSrcWorker;
+
+        qpskSrcThread = nullptr;
+        qpskSrcWorker = nullptr;
+
+        /* Close QPSK source file */
+        lrpt_qpsk_file_close(qpskSrcFile);
+        qpskSrcFile = NULL;
+    }
+
+    /* TODO free ring buffer resources, reset semaphores */
+
+    startStopProcessing();
 }

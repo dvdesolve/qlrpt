@@ -41,7 +41,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent) {
 
 /**************************************************************************************************/
 
-void SettingsDialog::loadSettings(void) {
+void SettingsDialog::loadSettings() {
     QSettings s("desolve", "glrpt");
     int x;
 
@@ -123,7 +123,7 @@ void SettingsDialog::loadSettings(void) {
 
 /**************************************************************************************************/
 
-void SettingsDialog::saveSettings(void) {
+void SettingsDialog::saveSettings() {
     QSettings s("desolve", "glrpt");
 
     s.setValue("IO/IQSrcFileMTU", IQSrcFileMTUSB->value());
@@ -158,7 +158,7 @@ void SettingsDialog::reject() {
 
 /**************************************************************************************************/
 
-void SettingsDialog::restoreDefaults(void) {
+void SettingsDialog::restoreDefaults() {
     IQSrcFileMTUSB->setValue(IQSrcFileMTU_DEF);
     QPSKSrcFileMTUSB->setValue(QPSKSrcFileMTU_DEF);
 

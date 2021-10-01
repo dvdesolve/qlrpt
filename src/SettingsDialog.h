@@ -38,20 +38,20 @@ private:
     bool fixed = false;
 
     /* Load settings from system storage */
-    void loadSettings(void);
+    void loadSettings();
 
     /* Save settings to system storage */
-    void saveSettings(void);
+    void saveSettings();
 
 private slots:
     /* Save settings upon exit */
-    void accept(void);
+    void accept();
 
     /* Exit and signal about changes if something was fixed */
-    void reject(void);
+    void reject();
 
     /* Reset settings to the compiled defaults */
-    void restoreDefaults(void);
+    void restoreDefaults();
 };
 
 /**************************************************************************************************/

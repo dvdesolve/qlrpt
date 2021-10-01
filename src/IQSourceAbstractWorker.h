@@ -35,7 +35,10 @@ public:
     explicit IQSourceAbstractWorker();
 
 public slots:
-    virtual void process(void) = 0;
+    virtual void process() = 0;
+
+signals:
+    void chunkProcessed();
 };
 
 /**************************************************************************************************/

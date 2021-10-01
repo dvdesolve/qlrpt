@@ -19,24 +19,28 @@
 
 /**************************************************************************************************/
 
-#include "GlobalObjects.h"
-
-#include <QSemaphore>
-
-#include <lrpt.h>
+#ifndef QPSKSOURCEABSTRACTWORKER_H
+#define QPSKSOURCEABSTRACTWORKER_H
 
 /**************************************************************************************************/
 
-/* I/Q data ring buffer */
-lrpt_iq_rb_t *iqRB = NULL;
+#include <QObject>
 
-/* Guarding semaphores for I/Q ring buffer */
-QSemaphore *iqRBUsed = NULL;
-QSemaphore *iqRBFree = NULL;
+/**************************************************************************************************/
 
-/* QPSK data ring buffer */
-lrpt_qpsk_rb_t *qpskRB = NULL;
+class QPSKSourceAbstractWorker : public QObject {
+    Q_OBJECT
 
-/* Guarding semaphores for QPSK ring buffer */
-QSemaphore *qpskRBUsed = NULL;
-QSemaphore *qpskRBFree = NULL;
+public:
+    explicit QPSKSourceAbstractWorker();
+
+public slots:
+    virtual void process() = 0;
+
+signals:
+    void chunkProcessed();
+};
+
+/**************************************************************************************************/
+
+#endif

@@ -38,7 +38,7 @@ public:
     ~IQProcessorWorker();
 
 public slots:
-    void process(void);
+    void process();
 
 signals:
     void finished();

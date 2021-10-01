@@ -38,7 +38,7 @@ public:
     ~IQSourceFileWorker();
 
 public slots:
-    void process(void) override;
+    void process() override;
 
 signals:
     void finished();

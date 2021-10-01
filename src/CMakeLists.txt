@@ -29,6 +29,8 @@ set(glrpt_SOURCES
     IQProcessorWorker.cpp
     IQSourceAbstractWorker.cpp
     IQSourceFileWorker.cpp
+    QPSKSourceAbstractWorker.cpp
+    QPSKSourceFileWorker.cpp
     MainWindow.cpp
     SettingsDialog.cpp
     FFTWidget.cpp
@@ -42,6 +44,8 @@ set(glrpt_HEADERS
     IQProcessorWorker.h
     IQSourceAbstractWorker.h
     IQSourceFileWorker.h
+    QPSKSourceAbstractWorker.h
+    QPSKSourceFileWorker.h
     MainWindow.h
     SettingsDialog.h
     FFTWidget.h
@@ -65,6 +69,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # primary and the only target
 add_executable(glrpt ${glrpt_SOURCES} ${glrpt_HEADERS} ${glrpt_FORMS})
 
+
+# compile-time definitions
+target_compile_definitions(glrpt PRIVATE GLRPT_VERSION_FULL="${PROJECT_VERSION}")
 
 # extra compiler options
 target_compile_options(glrpt PRIVATE -Wall -pedantic)

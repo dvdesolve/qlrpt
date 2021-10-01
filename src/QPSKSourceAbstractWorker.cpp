@@ -19,24 +19,9 @@
 
 /**************************************************************************************************/
 
-#include "GlobalObjects.h"
-
-#include <QSemaphore>
-
-#include <lrpt.h>
+#include "QPSKSourceAbstractWorker.h"
 
 /**************************************************************************************************/
 
-/* I/Q data ring buffer */
-lrpt_iq_rb_t *iqRB = NULL;
-
-/* Guarding semaphores for I/Q ring buffer */
-QSemaphore *iqRBUsed = NULL;
-QSemaphore *iqRBFree = NULL;
-
-/* QPSK data ring buffer */
-lrpt_qpsk_rb_t *qpskRB = NULL;
-
-/* Guarding semaphores for QPSK ring buffer */
-QSemaphore *qpskRBUsed = NULL;
-QSemaphore *qpskRBFree = NULL;
+QPSKSourceAbstractWorker::QPSKSourceAbstractWorker() {
+}

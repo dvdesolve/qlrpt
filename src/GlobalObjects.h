@@ -24,10 +24,7 @@
 
 /**************************************************************************************************/
 
-#include "IQSourceAbstractWorker.h"
-
 #include <QSemaphore>
-#include <QThread>
 
 #include <lrpt.h>
 
@@ -38,17 +35,10 @@ extern lrpt_iq_rb_t *iqRB;
 extern QSemaphore *iqRBUsed;
 extern QSemaphore *iqRBFree;
 
-extern QThread *iqSrcThread;
-extern IQSourceAbstractWorker *iqSrcWorker;
-
 extern lrpt_qpsk_rb_t *qpskRB;
 
 extern QSemaphore *qpskRBUsed;
 extern QSemaphore *qpskRBFree;
-
-extern QThread *qpskSrcThread;
-
-extern QThread *decoderThread;
 
 /**************************************************************************************************/
 

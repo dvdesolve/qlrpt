@@ -19,48 +19,48 @@
 
 /**************************************************************************************************/
 
-#include "IQProcessorWorker.h"
+#include "QPSKSourceFileWorker.h"
 
 #include "GlobalObjects.h"
 
+#include <lrpt.h>
+
 /**************************************************************************************************/
 
-IQProcessorWorker::IQProcessorWorker(size_t mtu, size_t total) {
-    this->mtu = mtu;
-    this->total = total;
+QPSKSourceFileWorker::QPSKSourceFileWorker(lrpt_qpsk_file_t *qpskFile, int MTU) {
+    this->qpskFile = qpskFile;
+    this->MTU = MTU;
 }
 
 /**************************************************************************************************/
 
-IQProcessorWorker::~IQProcessorWorker() {
-    lrpt_iq_data_free(iqData);
-    lrpt_iq_file_close(iqFile);
+QPSKSourceFileWorker::~QPSKSourceFileWorker() {
+    lrpt_qpsk_data_free(qpskData);
 }
 
 /**************************************************************************************************/
 
-void IQProcessorWorker::process() {
+void QPSKSourceFileWorker::process() {
     /* TODO check for errors in the whole function */
 
-    /* Allocate I/Q data object for buffered reading */
-    iqData = lrpt_iq_data_alloc(mtu, NULL);
+    /* Allocate QPSK data object for buffered reading */
+    qpskData = lrpt_qpsk_data_alloc(MTU, NULL);
 
-    /* Open destination file for writing */
-    iqFile = lrpt_iq_file_open_w_v1("/tmp/1.iq", false, 512000, "RTLSDR v3", NULL);
+    uint64_t dataLen = lrpt_qpsk_file_length(qpskFile);
+    uint64_t dataRead = 0;
 
-    uint64_t dataWritten = 0;
+    while (dataRead < dataLen) {
+        lrpt_qpsk_data_read_from_file(qpskData, qpskFile, MTU, false, NULL);
+        size_t n = lrpt_qpsk_data_length(qpskData);
 
-    while (dataWritten < total) {
-        const size_t n = ((total - dataWritten) < mtu) ? total - dataWritten : mtu;
+        qpskRBFree->acquire(n);
+        lrpt_qpsk_rb_push(qpskRB, qpskData, n, NULL);
+        qpskRBUsed->release(n);
 
-        iqRBUsed->acquire(n);
-        lrpt_iq_rb_pop(iqRB, iqData, n, NULL);
-        iqRBFree->release(n);
+        dataRead += n;
 
-        lrpt_iq_data_write_to_file(iqData, iqFile, false, NULL);
-
-        dataWritten += n;
+        emit chunkProcessed(); /* Tell caller about chunk being read */
     }
 
-    emit finished();
+    emit finished(); /* Tell caller about job end */
 }

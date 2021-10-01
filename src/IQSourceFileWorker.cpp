@@ -40,35 +40,27 @@ IQSourceFileWorker::~IQSourceFileWorker() {
 
 /**************************************************************************************************/
 
-void IQSourceFileWorker::process(void) {
+void IQSourceFileWorker::process() {
     /* TODO check for errors in the whole function */
 
     /* Allocate I/Q data object for buffered reading */
     iqData = lrpt_iq_data_alloc(MTU, NULL);
 
-//    /* Convert QString to C string (with UTF-8 support) */
-//    QByteArray fileNameUTF8 = srcFile.toUtf8();
-//    const char *fileNameCString = fileNameUTF8.data();
-//
+    uint64_t dataLen = lrpt_iq_file_length(iqFile);
+    uint64_t dataRead = 0;
 
-//
-//    /* Open source file for reading */
-//    iqFile = lrpt_iq_file_open_r(fileNameCString, NULL);
-//
-//    uint64_t tDataLen = lrpt_iq_file_length(iqFile);
-//    uint64_t dataRead = 0;
-//
-//    while (dataRead < tDataLen) {
-//        lrpt_iq_data_read_from_file(iqData, iqFile, mtu, false, NULL);
-//
-//        const size_t n = lrpt_iq_data_length(iqData);
-//
-//        iqRBFree->acquire(n);
-//        lrpt_iq_rb_push(iqRB, iqData, n, NULL);
-//        iqRBUsed->release(n);
-//
-//        dataRead += n;
-//    }
+    while (dataRead < dataLen) {
+        lrpt_iq_data_read_from_file(iqData, iqFile, MTU, false, NULL);
+        size_t n = lrpt_iq_data_length(iqData);
 
-    emit finished();
+        iqRBFree->acquire(n);
+        lrpt_iq_rb_push(iqRB, iqData, n, NULL);
+        iqRBUsed->release(n);
+
+        dataRead += n;
+
+        emit chunkProcessed(); /* Tell caller about chunk being read */
+    }
+
+    emit finished(); /* Tell caller about job end */
 }
