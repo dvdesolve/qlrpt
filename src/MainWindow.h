@@ -43,7 +43,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
+    /* Data source type */
     enum SrcType {
         NO_SRC,
         IQ_FILE,
@@ -52,17 +56,17 @@ private:
     };
 
     /* Common settings */
-    QString lastSrcFileDir;
+    QString lastSrcFileDir; /* Last directory of source file */
 
-    int iqSrcFileMTU;
-    int qpskSrcFileMTU;
+    int iqSrcFileMTU; /* MTU for reading I/Q file */
+    int qpskSrcFileMTU; /* MTU for reading QPSK file */
 
-    int iqRBSize;
-    int qpskRBSize;
+    int iqRBSize; /* Ring buffer size for I/Q data */
+    int qpskRBSize; /* Ring buffer size for QPSK data */
 
-    int demodChunkSize;
+    int demodChunkSize; /* MTU for demodulator */
 
-    int decoderChunkSize;
+    int decoderChunkSize; /* MTU for decoder */
 
     /* State flags and variables */
     IQSourceAbstractWorker *iqSrcWorker = nullptr;
@@ -88,8 +92,6 @@ private:
     bool framingStatus = false;
     int nPacketsGood = 0;
     int nPacketsTotal = 0;
-    int iqBufferUtil = 0;
-    int qpskBufferUtil = 0;
 
     /* Status bar labels */
     QLabel *PLLStatusLbl;
@@ -106,27 +108,27 @@ private:
     /* (Re)allocate global objects */
     void setGlobalObjects(SrcType src);
 
-    /* Manage GUI elements upon selecting source/processing */
-    void updateUIState();
+    /* Update GUI elements upon selecting source/processing */
+    void updateUI();
 
 private slots:
-    /* Open Settings dialog */
-    void openSettingsDlg();
-
     /* Exit application */
     void exitApp();
 
     /* Show info about application */
     void aboutApp();
 
+    /* Run "Settings" dialog */
+    void openSettingsDlg();
+
     /* Handle source change */
     void setNewSource(int src);
 
-    /* Open source file */
+    /* Select source file */
     void browseSrcFile();
 
-    /* Test selected file */
-    void testFile(const QString &fileName);
+    /* Show info about selected file */
+    void showFileInfo(const QString &fileName);
 
     /* Set live LRPT imagery area */
     void setLiveAPIDsImagery();
@@ -138,7 +140,10 @@ private slots:
     void updateBufferIndicators();
 
     /* Finish file processing */
-    void finishSrcFileProcessing();
+    void finishSrcFileWorker();
+
+    /* Finish demodulator */
+    void finishDemodulatorWorker();
 };
 
 /**************************************************************************************************/

@@ -26,7 +26,7 @@ pkg_check_modules(LIBLRPT REQUIRED liblrpt)
 set(glrpt_SOURCES
     main.cpp
     GlobalObjects.cpp
-    IQProcessorWorker.cpp
+    DemodulatorWorker.cpp
     IQSourceAbstractWorker.cpp
     IQSourceFileWorker.cpp
     QPSKSourceAbstractWorker.cpp
@@ -41,7 +41,7 @@ set(glrpt_SOURCES
 set(glrpt_HEADERS
     GlobalDecls.h
     GlobalObjects.h
-    IQProcessorWorker.h
+    DemodulatorWorker.h
     IQSourceAbstractWorker.h
     IQSourceFileWorker.h
     QPSKSourceAbstractWorker.h

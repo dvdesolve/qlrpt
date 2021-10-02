@@ -31,9 +31,15 @@
 SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent) {
     setupUi(this);
 
+    /* Dialog button box connections */
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), SIGNAL(clicked()), this, SLOT(restoreDefaults()));
+
+    /* Some UI interactions */
+    connect(DemodChunkSizeCustomRB, SIGNAL(toggled(bool)), DemodChunkSizeSB, SLOT(setEnabled(bool)));
+
+    /* TODO check if MTUs are lesser than ring buffers */
 
     /* Read settings from system storage */
     loadSettings();
@@ -94,7 +100,7 @@ void SettingsDialog::loadSettings() {
 
     if (x == 0) {
         DemodChunkSizeDefaultRB->setChecked(true);
-        DemodChunkSizeSB->setValue(DemodChunkSize_DEF);
+        DemodChunkSizeSB->setValue(DemodChunkSize_DEFINIT);
     }
     else {
         if ((x < DemodChunkSize_MIN) || (x > DemodChunkSize_MAX)) {
@@ -132,8 +138,9 @@ void SettingsDialog::saveSettings() {
     s.setValue("IO/IQRBSize", IQRBSizeSB->value());
     s.setValue("IO/QPSKRBSize", QPSKRBSizeSB->value());
 
-    s.setValue("IO/DemodChunkSize",
-               (DemodChunkSizeDefaultRB->isChecked()) ? 0 : DemodChunkSizeSB->value());
+    s.setValue("IO/DemodChunkSize", (DemodChunkSizeDefaultRB->isChecked()) ?
+                   0 :
+                   DemodChunkSizeSB->value());
 
     s.setValue("IO/DecoderChunkSize", DecoderChunkSizeSB->value());
 
@@ -166,7 +173,7 @@ void SettingsDialog::restoreDefaults() {
     QPSKRBSizeSB->setValue(QPSKRBSize_DEF);
 
     DemodChunkSizeDefaultRB->setChecked(true);
-    DemodChunkSizeSB->setValue(DemodChunkSize_DEF);
+    DemodChunkSizeSB->setValue(DemodChunkSize_DEFINIT);
 
     DecoderChunkSizeSB->setValue(DecoderChunkSize_DEF);
 }

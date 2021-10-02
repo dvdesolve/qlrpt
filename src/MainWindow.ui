@@ -66,7 +66,7 @@
            <item row="2" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <widget class="QLineEdit" name="SrcFilepath"/>
+              <widget class="QLineEdit" name="SrcFilePath"/>
              </item>
              <item>
               <widget class="QPushButton" name="SrcFileBrowseBtn">
@@ -119,7 +119,7 @@
             </layout>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="SrcFilepathLbl">
+            <widget class="QLabel" name="SrcFilePathLbl">
              <property name="text">
               <string>File path:</string>
              </property>
@@ -1038,7 +1038,7 @@
   <tabstop>StartStopBtn</tabstop>
   <tabstop>SrcCombB</tabstop>
   <tabstop>SrcRescanBtn</tabstop>
-  <tabstop>SrcFilepath</tabstop>
+  <tabstop>SrcFilePath</tabstop>
   <tabstop>SrcFileBrowseBtn</tabstop>
   <tabstop>SDRFrequencySB</tabstop>
   <tabstop>SDRInputRateCombB</tabstop>

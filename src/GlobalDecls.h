@@ -40,7 +40,8 @@
 #define QPSKRBSize_MIN          1
 #define QPSKRBSize_MAX          102400
 
-#define DemodChunkSize_DEF      128
+#define DemodChunkSize_DEF      0
+#define DemodChunkSize_DEFINIT  128
 #define DemodChunkSize_MIN      1
 #define DemodChunkSize_MAX      102400
 

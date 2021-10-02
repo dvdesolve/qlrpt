@@ -19,36 +19,36 @@
 
 /**************************************************************************************************/
 
-#ifndef IQPROCESSORWORKER_H
-#define IQPROCESSORWORKER_H
+#ifndef DEMODULATORWORKER_H
+#define DEMODULATORWORKER_H
 
 /**************************************************************************************************/
 
-#include <QObject>
+#include "QPSKSourceAbstractWorker.h"
 
 #include <lrpt.h>
 
 /**************************************************************************************************/
 
-class IQProcessorWorker : public QObject {
+class DemodulatorWorker : public QPSKSourceAbstractWorker {
     Q_OBJECT
 
 public:
-    explicit IQProcessorWorker(size_t mtu, size_t total);
-    ~IQProcessorWorker();
+    explicit DemodulatorWorker(lrpt_demodulator_t *demod, int MTU);
+    ~DemodulatorWorker();
 
 public slots:
-    void process();
+    void process() override;
 
 signals:
     void finished();
 
 private:
-    size_t mtu;
-    size_t total;
+    lrpt_demodulator_t *demod = NULL;
+    int MTU;
 
-    lrpt_iq_data_t *iqData = NULL;
-    lrpt_iq_file_t *iqFile = NULL;
+    lrpt_iq_data_t *iqInput = NULL;
+    lrpt_qpsk_data_t *qpskOutput = NULL;
 };
 
 /**************************************************************************************************/
