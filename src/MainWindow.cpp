@@ -21,6 +21,7 @@
 
 #include "MainWindow.h"
 
+#include "DecoderWorker.h"
 #include "DemodulatorWorker.h"
 #include "GlobalDecls.h"
 #include "GlobalObjects.h"
