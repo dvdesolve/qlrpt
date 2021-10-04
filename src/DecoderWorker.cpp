@@ -49,7 +49,7 @@ void DecoderWorker::process() {
     /* Allocate I/Q data object for buffered reading */
     qpskInput = lrpt_qpsk_data_alloc(MTU, NULL);
 
-    forever {
+    forever { /* TODO honor remaining number of QPSK symbols and pop no less than 3 * SFL */
         /* Check whether master has requested interruption */
         if (QThread::currentThread()->isInterruptionRequested()) {
             size_t dataLen = qpskRBUsed->available();
@@ -67,7 +67,7 @@ void DecoderWorker::process() {
 
                 /* TODO decode acquired data */
                 /* TODO dump data to be sure that all will be saved */
-                QThread::currentThread()->msleep(8); /* TODO debug */
+                QThread::currentThread()->msleep(20); /* TODO debug */
 
                 dataRead += n;
 
@@ -84,7 +84,7 @@ void DecoderWorker::process() {
 
             /* TODO decode acquired data */
             /* TODO dump data to be sure that all will be saved */
-            QThread::currentThread()->msleep(8); /* TODO debug */
+            QThread::currentThread()->msleep(20); /* TODO debug */
 
             emit chunkProcessed();
         }

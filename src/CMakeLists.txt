@@ -30,6 +30,7 @@ set(glrpt_SOURCES
     DemodulatorWorker.cpp
     IQSourceAbstractWorker.cpp
     IQSourceFileWorker.cpp
+    IQSourceSDRWorker.cpp
     QPSKSourceAbstractWorker.cpp
     QPSKSourceFileWorker.cpp
     MainWindow.cpp
@@ -46,6 +47,7 @@ set(glrpt_HEADERS
     DemodulatorWorker.h
     IQSourceAbstractWorker.h
     IQSourceFileWorker.h
+    IQSourceSDRWorker.h
     QPSKSourceAbstractWorker.h
     QPSKSourceFileWorker.h
     MainWindow.h

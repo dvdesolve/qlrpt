@@ -26,6 +26,7 @@
 
 #include "ui_MainWindow.h"
 
+#include "DecoderWorker.h"
 #include "IQSourceAbstractWorker.h"
 #include "QPSKSourceAbstractWorker.h"
 
@@ -68,7 +69,7 @@ private:
 
     int decoderChunkSize; /* MTU for decoder */
 
-    /* State flags and variables */
+    /* Workers */
     IQSourceAbstractWorker *iqSrcWorker = nullptr;
     QThread *iqSrcThread = nullptr;
     lrpt_iq_file_t *iqSrcFile = NULL;
@@ -77,12 +78,12 @@ private:
     QThread *qpskSrcThread = nullptr;
     lrpt_qpsk_file_t *qpskSrcFile = NULL;
 
+    DecoderWorker *decoderWorker = nullptr;
     QThread *decoderThread = nullptr;
 
+    /* State flags and variables */
     SrcType srcMode = NO_SRC;
     bool processing = false;
-
-    /* Processing data values */
     bool pllStatus = false;
     double pllFreq = 0; /* In Hz */
     double pllPhaseErr = 0;
@@ -130,6 +131,9 @@ private slots:
     /* Show info about selected file */
     void showFileInfo(const QString &fileName);
 
+    /* Handle enabled/disabled state for data dump items */
+    void setDDItems();
+
     /* Set live LRPT imagery area */
     void setLiveAPIDsImagery();
 
@@ -144,6 +148,9 @@ private slots:
 
     /* Finish demodulator */
     void finishDemodulatorWorker();
+
+    /* Finish decoder */
+    void finishDecoderWorker();
 };
 
 /**************************************************************************************************/

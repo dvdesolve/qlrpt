@@ -44,26 +44,6 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
-    /* Read stored settings */
-    restoreSettings();
-
-    SrcCombB->insertSeparator(SrcCombB->count());
-
-    /* TODO scan for SoapySDR sources and add them to the sources list */
-    SrcCombB->addItem(tr("SDR receiver")); /* TODO just for debug, bogus SDR source */
-
-    /* Handle source change */
-    connect(SrcCombB, SIGNAL(currentIndexChanged(int)), this, SLOT(setNewSource(int)));
-
-    /* Connections for menu entries */
-    connect(SettingsAct, SIGNAL(triggered()), this, SLOT(openSettingsDlg()));
-    connect(ExitAct, SIGNAL(triggered()), this, SLOT(exitApp()));
-    connect(AboutAct, SIGNAL(triggered()), this, SLOT(aboutApp()));
-
-    /* Source file related connections */
-    connect(SrcFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseSrcFile()));
-    connect(SrcFilePath, SIGNAL(textChanged(QString)), this, SLOT(showFileInfo(QString)));
-
     /* Set up status bar labels */
     PLLStatusLbl = new QLabel(tr("PLL status: ---"), this);
     PLLStatusLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
@@ -107,6 +87,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     PacketsLbl->setMidLineWidth(0);
     statusbar->addPermanentWidget(PacketsLbl);
 
+    /* Read stored settings */
+    restoreSettings();
+
+    SrcCombB->insertSeparator(SrcCombB->count());
+
+    /* TODO scan for SoapySDR sources and add them to the sources list */
+    SrcCombB->addItem(tr("SDR receiver")); /* TODO just for debug, bogus SDR source */
+
+    /* Handle source change */
+    connect(SrcCombB, SIGNAL(currentIndexChanged(int)), this, SLOT(setNewSource(int)));
+
+    /* Connections for menu entries */
+    connect(SettingsAct, SIGNAL(triggered()), this, SLOT(openSettingsDlg()));
+    connect(ExitAct, SIGNAL(triggered()), this, SLOT(exitApp()));
+    connect(AboutAct, SIGNAL(triggered()), this, SLOT(aboutApp()));
+
+    /* Source file related connections */
+    connect(SrcFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseSrcFile()));
+    connect(SrcFilePath, SIGNAL(textChanged(QString)), this, SLOT(showFileInfo(QString)));
+
+    /* Dump data related connections */
+    /* TODO implement */
+
+    /* Set up connections for data processing checkboxes */
+    connect(DemodFilterCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
+    connect(DecoderDiffcodedCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
+    connect(DecoderInterleavedCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
+    connect(DDRcvCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
+    connect(DDFiltCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
+    connect(DDDemodCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
+    connect(DDQPSKProcCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
+
     /* Set up connections for live APIDs checkboxes */
     connect(APID64ShowCB, SIGNAL(stateChanged(int)), this, SLOT(setLiveAPIDsImagery()));
     connect(APID65ShowCB, SIGNAL(stateChanged(int)), this, SLOT(setLiveAPIDsImagery()));
@@ -114,6 +126,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(APID67ShowCB, SIGNAL(stateChanged(int)), this, SLOT(setLiveAPIDsImagery()));
     connect(APID68ShowCB, SIGNAL(stateChanged(int)), this, SLOT(setLiveAPIDsImagery()));
     connect(APID69ShowCB, SIGNAL(stateChanged(int)), this, SLOT(setLiveAPIDsImagery()));
+
+    /* Additional UI interactions */
+    connect(SDRGainManualRB, SIGNAL(toggled(bool)), SDRGainSlider, SLOT(setEnabled(bool)));
 
     /* Connect start/stop button with corresponding slot */
     connect(StartStopBtn, SIGNAL(clicked()), this, SLOT(startStopProcessing()));
@@ -297,6 +312,7 @@ void MainWindow::updateUI() {
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(true);
             DecoderTab->setDisabled(true);
+            DDTab->setDisabled(true);
 
             StatusGB->setDisabled(true);
             FFTPlotGB->setDisabled(true);
@@ -338,6 +354,9 @@ void MainWindow::updateUI() {
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(processing);
             DecoderTab->setDisabled(processing);
+            DDTab->setDisabled(processing);
+
+            setDDItems();
 
             StatusGB->setEnabled(processing);
             FFTPlotGB->setEnabled(true);
@@ -379,6 +398,9 @@ void MainWindow::updateUI() {
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(true);
             DecoderTab->setDisabled(processing);
+            DDTab->setDisabled(processing);
+
+            setDDItems();
 
             StatusGB->setEnabled(processing);
             FFTPlotGB->setDisabled(true);
@@ -429,10 +451,13 @@ void MainWindow::updateUI() {
             /* ... except gain-related */
             SDRGainAutoRB->setEnabled(true);
             SDRGainManualRB->setEnabled(true);
-            SDRGainSlider->setEnabled(true);
+            SDRGainSlider->setEnabled(SDRGainManualRB->isChecked());
 
             DemodTab->setDisabled(processing);
             DecoderTab->setDisabled(processing);
+            DDTab->setDisabled(processing);
+
+            setDDItems();
 
             StatusGB->setEnabled(processing);
             FFTPlotGB->setEnabled(true);
@@ -654,6 +679,53 @@ void MainWindow::showFileInfo(const QString &fileName) {
 
 /**************************************************************************************************/
 
+void MainWindow::setDDItems() {
+    bool rcvEnabled = (srcMode == SDR_RECEIVER) ? true : false;
+
+    DDRcvCB->setEnabled(rcvEnabled);
+    DDRcvFilePath->setEnabled(rcvEnabled && DDRcvCB->isChecked());
+    DDRcvFileBrowseBtn->setEnabled(rcvEnabled && DDRcvCB->isChecked());
+
+    bool filtEnabled;
+
+    if (
+            ((srcMode == IQ_FILE) || (srcMode == SDR_RECEIVER)) &&
+            DemodFilterCB->isChecked())
+        filtEnabled = true;
+    else
+        filtEnabled = false;
+
+    DDFiltCB->setEnabled(filtEnabled);
+    DDFiltFilePath->setEnabled(filtEnabled && DDFiltCB->isChecked());
+    DDFiltFileBrowseBtn->setEnabled(filtEnabled && DDFiltCB->isChecked());
+
+    bool demodEnabled;
+
+    if ((srcMode == IQ_FILE) || (srcMode == SDR_RECEIVER))
+        demodEnabled = true;
+    else
+        demodEnabled = false;
+
+    DDDemodCB->setEnabled(demodEnabled);
+    DDDemodFilePath->setEnabled(demodEnabled && DDDemodCB->isChecked());
+    DDDemodFileBrowseBtn->setEnabled(demodEnabled && DDDemodCB->isChecked());
+
+    bool qpskprocEnabled;
+
+    if (
+            ((srcMode == IQ_FILE) || (srcMode == QPSK_FILE) || (srcMode == SDR_RECEIVER)) &&
+            (DecoderDiffcodedCB->isChecked() || DecoderInterleavedCB->isChecked()))
+        qpskprocEnabled = true;
+    else
+        qpskprocEnabled = false;
+
+    DDQPSKProcCB->setEnabled(qpskprocEnabled);
+    DDQPSKProcFilePath->setEnabled(qpskprocEnabled && DDQPSKProcCB->isChecked());
+    DDQPSKProcFileBrowseBtn->setEnabled(qpskprocEnabled && DDQPSKProcCB->isChecked());
+}
+
+/**************************************************************************************************/
+
 void MainWindow::setLiveAPIDsImagery() {
     LRPTChan64Widget->setVisible(APID64ShowCB->isChecked());
     APID64Lbl->setVisible(APID64ShowCB->isChecked());
@@ -708,9 +780,11 @@ void MainWindow::startStopProcessing() {
         connect(iqSrcWorker, SIGNAL(finished()), this, SLOT(finishSrcFileWorker()));
         connect(iqSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
 
-        /* Allocate new thread and worker for I/Q demodulator */
+        /* Allocate new thread and worker for demodulator */
         qpskSrcThread = new QThread();
-        qpskSrcWorker = new DemodulatorWorker(NULL, DemodChunkSize_DEFINIT * 1024); /* TODO pass actual demodulator object */
+        qpskSrcWorker = new DemodulatorWorker(NULL, (demodChunkSize == 0) ?
+                                                  (DemodChunkSize_DEFINIT * 1024) :
+                                                  demodChunkSize); /* TODO pass actual demodulator object */
 
         /* Move worker into separate thread and set up connections */
         qpskSrcWorker->moveToThread(qpskSrcThread);
@@ -719,9 +793,21 @@ void MainWindow::startStopProcessing() {
         connect(qpskSrcWorker, SIGNAL(finished()), this, SLOT(finishDemodulatorWorker()));
         connect(qpskSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
 
+        /* Allocate new thread and worker for decoder */
+        decoderThread = new QThread();
+        decoderWorker = new DecoderWorker(NULL, decoderChunkSize); /* TODO pass actual decoder object */
+
+        /* Move worker into separate thread and set up connections */
+        decoderWorker->moveToThread(decoderThread);
+
+        connect(decoderThread, SIGNAL(started()), decoderWorker, SLOT(process()));
+        connect(decoderWorker, SIGNAL(finished()), this, SLOT(finishDecoderWorker()));
+        connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
+
         /* Start worker threads */
         iqSrcThread->start();
         qpskSrcThread->start();
+        decoderThread->start();
     }
 
     if ((srcMode == QPSK_FILE) && processing) {
@@ -743,8 +829,20 @@ void MainWindow::startStopProcessing() {
         connect(qpskSrcWorker, SIGNAL(finished()), this, SLOT(finishSrcFileWorker()));
         connect(qpskSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
 
+        /* Allocate new thread and worker for decoder */
+        decoderThread = new QThread();
+        decoderWorker = new DecoderWorker(NULL, decoderChunkSize); /* TODO pass actual decoder object */
+
+        /* Move worker into separate thread and set up connections */
+        decoderWorker->moveToThread(decoderThread);
+
+        connect(decoderThread, SIGNAL(started()), decoderWorker, SLOT(process()));
+        connect(decoderWorker, SIGNAL(finished()), this, SLOT(finishDecoderWorker()));
+        connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
+
         /* Start worker thread */
         qpskSrcThread->start();
+        decoderThread->start();
     }
 
     /* Reflect changes in UI */
@@ -779,7 +877,7 @@ void MainWindow::finishSrcFileWorker() {
         lrpt_iq_file_close(iqSrcFile);
         iqSrcFile = NULL;
 
-        /* Request demodulator to stop */
+        /* Ask demodulator to stop */
         qpskSrcThread->requestInterruption();
     }
     else if (srcMode == QPSK_FILE) {
@@ -798,14 +896,8 @@ void MainWindow::finishSrcFileWorker() {
         lrpt_qpsk_file_close(qpskSrcFile);
         qpskSrcFile = NULL;
 
-        /* Request decoder to stop */
-        /* TODO implement */
-
-        /* TODO free ring buffer resources, reset semaphores - in separate helper function */
-        IQBufferUtilBar->setValue(0);
-        QPSKBufferUtilBar->setValue(0);
-
-        startStopProcessing();
+        /* Ask decoder to stop */
+        decoderThread->requestInterruption();
     }
 }
 
@@ -827,6 +919,24 @@ void MainWindow::finishDemodulatorWorker() {
     /* TODO implement */
 
     /* Request decoder to stop */
+    decoderThread->requestInterruption();
+}
+
+/**************************************************************************************************/
+
+void MainWindow::finishDecoderWorker() {
+    /* Ask worker thread for stop and wait for it */
+    decoderThread->quit();
+    decoderThread->wait();
+
+    /* Delete both thread and worker and explicitly NULLify their pointers */
+    delete decoderThread;
+    delete decoderWorker;
+
+    decoderThread = nullptr;
+    decoderWorker = nullptr;
+
+    /* Free decoder object */
     /* TODO implement */
 
     /* TODO free ring buffer resources, reset semaphores - in separate helper function */
