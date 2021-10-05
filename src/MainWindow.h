@@ -58,6 +58,10 @@ private:
 
     /* Common settings */
     QString lastSrcFileDir; /* Last directory of source file */
+    QString lastRcvDumpFileDir; /* Last directory of received dump */
+    QString lastFiltDumpFileDir; /* Last directory of filtered dump */
+    QString lastDemodDumpFileDir; /* Last directory of demodulated dump */
+    QString lastQPSKProcDumpFileDir; /* Last directory of processed dump */
 
     int iqSrcFileMTU; /* MTU for reading I/Q file */
     int qpskSrcFileMTU; /* MTU for reading QPSK file */
@@ -77,6 +81,7 @@ private:
     QPSKSourceAbstractWorker *qpskSrcWorker = nullptr;
     QThread *qpskSrcThread = nullptr;
     lrpt_qpsk_file_t *qpskSrcFile = NULL;
+    lrpt_demodulator_t *demodulator = NULL;
 
     DecoderWorker *decoderWorker = nullptr;
     QThread *decoderThread = nullptr;
@@ -84,13 +89,7 @@ private:
     /* State flags and variables */
     SrcType srcMode = NO_SRC;
     bool processing = false;
-    bool pllStatus = false;
-    double pllFreq = 0; /* In Hz */
-    double pllPhaseErr = 0;
-    double alcGain = 0; /* In dB */
     int sigQ = 0; /* In percents */
-    int sigLvl = 0; /* In units of samples amplitude */
-    bool framingStatus = false;
     int nPacketsGood = 0;
     int nPacketsTotal = 0;
 
@@ -134,14 +133,28 @@ private slots:
     /* Handle enabled/disabled state for data dump items */
     void setDDItems();
 
+    /* Select paths for dump files */
+    void browseRcvDumpFile();
+    void browseFiltDumpFile();
+    void browseDemodDumpFile();
+    void browseQPSKProcDumpFile();
+
     /* Set live LRPT imagery area */
     void setLiveAPIDsImagery();
 
     /* Handle start/stop processing event */
     void startStopProcessing();
 
-    /* Show buffer utilization status */
-    void updateBufferIndicators();
+    /* Show buffers utilization status */
+    void updateBuffersIndicators();
+
+    /* Show demodulation params during processing */
+    void updateDemodStatusValues(
+            bool pllState,
+            double pllFreq,
+            double pllPhaseErr,
+            double alcGain,
+            double sigLvl);
 
     /* Finish file processing */
     void finishSrcFileWorker();

@@ -40,9 +40,6 @@ public:
 public slots:
     void process() override;
 
-signals:
-    void finished();
-
 private:
     lrpt_iq_file_t *iqFile = NULL;
     int MTU;

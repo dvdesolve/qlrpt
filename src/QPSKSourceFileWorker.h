@@ -40,9 +40,6 @@ public:
 public slots:
     void process() override;
 
-signals:
-    void finished();
-
 private:
     lrpt_qpsk_file_t *qpskFile = NULL;
     int MTU;

@@ -29,9 +29,17 @@
 
 /**************************************************************************************************/
 
-DemodulatorWorker::DemodulatorWorker(lrpt_demodulator_t *demod, int MTU) {
+DemodulatorWorker::DemodulatorWorker(
+        lrpt_demodulator_t *demod,
+        int MTU,
+        lrpt_dsp_filter_t *filter,
+        lrpt_iq_file_t *filtDump,
+        lrpt_qpsk_file_t *demodDump) {
     this->demod = demod;
     this->MTU = MTU;
+    this->filter = filter;
+    this->filtDump = filtDump;
+    this->demodDump = demodDump;
 }
 
 /**************************************************************************************************/
@@ -49,6 +57,9 @@ void DemodulatorWorker::process() {
     /* Allocate I/Q data object for buffered reading */
     iqInput = lrpt_iq_data_alloc(MTU, NULL);
 
+    /* Allocate QPSK data object for temporary storage */
+    qpskOutput = lrpt_qpsk_data_alloc(0, NULL);
+
     forever {
         /* Check whether master has requested interruption */
         if (QThread::currentThread()->isInterruptionRequested()) {
@@ -65,9 +76,31 @@ void DemodulatorWorker::process() {
                 lrpt_iq_rb_pop(iqRB, iqInput, n, NULL);
                 iqRBFree->release(n);
 
-                /* TODO demod acquired data */
-                /* TODO dump data to be sure that all will be saved */
-                QThread::currentThread()->msleep(8); /* TODO debug */
+                /* TODO may be move into separate private function */
+                if (filter) {
+                    lrpt_dsp_filter_apply(filter, iqInput);
+
+                    if (filtDump)
+                        lrpt_iq_data_write_to_file(iqInput, filtDump, false, NULL);
+                }
+
+                lrpt_demodulator_exec(demod, iqInput, qpskOutput, NULL);
+
+                if (demodDump)
+                    lrpt_qpsk_data_write_to_file(qpskOutput, demodDump, false, NULL);
+
+                bool pllStatus = lrpt_demodulator_pllstate(demod);
+                double pllFreq = lrpt_demodulator_pllfreq(demod);
+                double pllPhaseErr = lrpt_demodulator_pllphaseerr(demod);
+                double alcGain = lrpt_demodulator_gain(demod);
+                double sigLvl = lrpt_demodulator_siglvl(demod);
+
+                emit demodInfo(pllStatus, pllFreq, pllPhaseErr, alcGain, sigLvl);
+
+                size_t m = lrpt_qpsk_data_length(qpskOutput);
+                qpskRBFree->acquire(m);
+                lrpt_qpsk_rb_push(qpskRB, qpskOutput, m, NULL);
+                qpskRBUsed->release(m);
 
                 dataRead += n;
 
@@ -82,9 +115,31 @@ void DemodulatorWorker::process() {
             lrpt_iq_rb_pop(iqRB, iqInput, MTU, NULL);
             iqRBFree->release(MTU);
 
-            /* TODO demod acquired data */
-            /* TODO dump data to be sure that all will be saved */
-            QThread::currentThread()->msleep(8); /* TODO debug */
+            /* TODO may be move into separate private function */
+            if (filter) {
+                lrpt_dsp_filter_apply(filter, iqInput);
+
+                if (filtDump)
+                    lrpt_iq_data_write_to_file(iqInput, filtDump, false, NULL);
+            }
+
+            lrpt_demodulator_exec(demod, iqInput, qpskOutput, NULL);
+
+            if (demodDump)
+                lrpt_qpsk_data_write_to_file(qpskOutput, demodDump, false, NULL);
+
+            bool pllStatus = lrpt_demodulator_pllstate(demod);
+            double pllFreq = lrpt_demodulator_pllfreq(demod);
+            double pllPhaseErr = lrpt_demodulator_pllphaseerr(demod);
+            double alcGain = lrpt_demodulator_gain(demod);
+            double sigLvl = lrpt_demodulator_siglvl(demod);
+
+            emit demodInfo(pllStatus, pllFreq, pllPhaseErr, alcGain, sigLvl);
+
+            size_t n = lrpt_qpsk_data_length(qpskOutput);
+            qpskRBFree->acquire(n);
+            lrpt_qpsk_rb_push(qpskRB, qpskOutput, n, NULL);
+            qpskRBUsed->release(n);
 
             emit chunkProcessed();
         }

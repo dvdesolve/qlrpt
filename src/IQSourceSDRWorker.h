@@ -40,9 +40,6 @@ public:
 public slots:
     void process() override;
 
-signals:
-    void finished();
-
 private:
     int MTU;
 

@@ -108,7 +108,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(SrcFilePath, SIGNAL(textChanged(QString)), this, SLOT(showFileInfo(QString)));
 
     /* Dump data related connections */
-    /* TODO implement */
+    connect(DDRcvFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseRcvDumpFile()));
+    connect(DDFiltFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseFiltDumpFile()));
+    connect(DDDemodFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseDemodDumpFile()));
+    connect(DDQPSKProcFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseQPSKProcDumpFile()));
 
     /* Set up connections for data processing checkboxes */
     connect(DemodFilterCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
@@ -557,7 +560,7 @@ void MainWindow::browseSrcFile() {
 
     QString fileName = QFileDialog::getOpenFileName(
                 this,
-                tr("Select source file"),
+                tr("Select source file to open"),
                 lastSrcFileDir,
                 filter);
 
@@ -726,6 +729,106 @@ void MainWindow::setDDItems() {
 
 /**************************************************************************************************/
 
+void MainWindow::browseRcvDumpFile() {
+    QString fileName = QFileDialog::getSaveFileName(
+                this,
+                tr("Specify dump file to save"),
+                lastRcvDumpFileDir,
+                tr("LRPT I/Q data files (*.iq)"));
+
+    if (!fileName.isEmpty()) {
+        if (QFileInfo(fileName).suffix() != "iq")
+            fileName += ".iq";
+
+        DDRcvFilePath->setText(fileName);
+
+        /* Store last directory */
+        lastRcvDumpFileDir = QFileInfo(fileName).absolutePath();
+
+        QSettings s("desolve", "glrpt");
+
+        s.setValue("Paths/LastRcvDumpDir", lastRcvDumpFileDir);
+        s.sync();
+    }
+}
+
+/**************************************************************************************************/
+
+void MainWindow::browseFiltDumpFile() {
+    QString fileName = QFileDialog::getSaveFileName(
+                this,
+                tr("Specify dump file to save"),
+                lastFiltDumpFileDir,
+                tr("LRPT I/Q data files (*.iq)"));
+
+    if (!fileName.isEmpty()) {
+        if (QFileInfo(fileName).suffix() != "iq")
+            fileName += ".iq";
+
+        DDFiltFilePath->setText(fileName);
+
+        /* Store last directory */
+        lastFiltDumpFileDir = QFileInfo(fileName).absolutePath();
+
+        QSettings s("desolve", "glrpt");
+
+        s.setValue("Paths/LastFiltDumpDir", lastFiltDumpFileDir);
+        s.sync();
+    }
+}
+
+/**************************************************************************************************/
+
+void MainWindow::browseDemodDumpFile() {
+    QString fileName = QFileDialog::getSaveFileName(
+                this,
+                tr("Specify dump file to save"),
+                lastDemodDumpFileDir,
+                tr("LRPT QPSK data files (*.qpsk)"));
+
+    if (!fileName.isEmpty()) {
+        if (QFileInfo(fileName).suffix() != "qpsk")
+            fileName += ".qpsk";
+
+        DDDemodFilePath->setText(fileName);
+
+        /* Store last directory */
+        lastDemodDumpFileDir = QFileInfo(fileName).absolutePath();
+
+        QSettings s("desolve", "glrpt");
+
+        s.setValue("Paths/LastDemodDumpDir", lastDemodDumpFileDir);
+        s.sync();
+    }
+}
+
+/**************************************************************************************************/
+
+void MainWindow::browseQPSKProcDumpFile() {
+    QString fileName = QFileDialog::getSaveFileName(
+                this,
+                tr("Specify dump file to save"),
+                lastQPSKProcDumpFileDir,
+                tr("LRPT QPSK data files (*.qpsk)"));
+
+    if (!fileName.isEmpty()) {
+        if (QFileInfo(fileName).suffix() != "qpsk")
+            fileName += ".qpsk";
+
+        DDQPSKProcFilePath->setText(fileName);
+
+        /* Store last directory */
+        lastQPSKProcDumpFileDir = QFileInfo(fileName).absolutePath();
+
+        QSettings s("desolve", "glrpt");
+
+        s.setValue("Paths/LastQPSKProcDumpDir", lastQPSKProcDumpFileDir);
+        s.sync();
+    }
+}
+
+/**************************************************************************************************/
+
 void MainWindow::setLiveAPIDsImagery() {
     LRPTChan64Widget->setVisible(APID64ShowCB->isChecked());
     APID64Lbl->setVisible(APID64ShowCB->isChecked());
@@ -769,6 +872,19 @@ void MainWindow::startStopProcessing() {
         /* Open I/Q file for reading */
         iqSrcFile = lrpt_iq_file_open_r(fileNameCString, NULL); /* TODO error reporting */
 
+        /* Initialize QPSK demodulator */
+        demodulator = lrpt_demodulator_init(
+                    DemodOffsetCB->isChecked(),
+                    DemodPLLBandwidthSB->value(),
+                    DemodInterpolationFactorSB->value(),
+                    lrpt_iq_file_samplerate(iqSrcFile),
+                    (DecoderInterleavedCB->isChecked()) ? 80000 : 72000,
+                    DemodRRCOrderSB->value(),
+                    DemodRRCAlphaSB->value(),
+                    DemodPLLLockedSB->value(),
+                    DemodPLLUnlockedSB->value(),
+                    NULL); /* TODO error reporting */
+
         /* Allocate new thread and worker for I/Q file reading */
         iqSrcThread = new QThread();
         iqSrcWorker = new IQSourceFileWorker(iqSrcFile, iqSrcFileMTU);
@@ -778,31 +894,38 @@ void MainWindow::startStopProcessing() {
 
         connect(iqSrcThread, SIGNAL(started()), iqSrcWorker, SLOT(process()));
         connect(iqSrcWorker, SIGNAL(finished()), this, SLOT(finishSrcFileWorker()));
-        connect(iqSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
+        connect(iqSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
 
         /* Allocate new thread and worker for demodulator */
         qpskSrcThread = new QThread();
-        qpskSrcWorker = new DemodulatorWorker(NULL, (demodChunkSize == 0) ?
-                                                  (DemodChunkSize_DEFINIT * 1024) :
-                                                  demodChunkSize); /* TODO pass actual demodulator object */
+        qpskSrcWorker = new DemodulatorWorker(demodulator,
+                    (demodChunkSize == 0) ? (DemodChunkSize_DEFINIT * 1024) : demodChunkSize,
+                    NULL,
+                    NULL,
+                    NULL); /* TODO pass actual filter object */ /* TODO pass file objects for filtered and demodulated dump */
 
         /* Move worker into separate thread and set up connections */
         qpskSrcWorker->moveToThread(qpskSrcThread);
 
         connect(qpskSrcThread, SIGNAL(started()), qpskSrcWorker, SLOT(process()));
         connect(qpskSrcWorker, SIGNAL(finished()), this, SLOT(finishDemodulatorWorker()));
-        connect(qpskSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
+        connect(qpskSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
+        connect(
+                    qpskSrcWorker,
+                    SIGNAL(demodInfo(bool,double,double,double,double)),
+                    this,
+                    SLOT(updateDemodStatusValues(bool,double,double,double,double)));
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(NULL, decoderChunkSize); /* TODO pass actual decoder object */
+        decoderWorker = new DecoderWorker(NULL, decoderChunkSize); /* TODO pass actual decoder object */ /* TODO pass file objects for processed dump */
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
 
         connect(decoderThread, SIGNAL(started()), decoderWorker, SLOT(process()));
         connect(decoderWorker, SIGNAL(finished()), this, SLOT(finishDecoderWorker()));
-        connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
+        connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
 
         /* Start worker threads */
         iqSrcThread->start();
@@ -827,18 +950,18 @@ void MainWindow::startStopProcessing() {
 
         connect(qpskSrcThread, SIGNAL(started()), qpskSrcWorker, SLOT(process()));
         connect(qpskSrcWorker, SIGNAL(finished()), this, SLOT(finishSrcFileWorker()));
-        connect(qpskSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
+        connect(qpskSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(NULL, decoderChunkSize); /* TODO pass actual decoder object */
+        decoderWorker = new DecoderWorker(NULL, decoderChunkSize); /* TODO pass actual decoder object */ /* TODO pass file objects for processed dump */
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
 
         connect(decoderThread, SIGNAL(started()), decoderWorker, SLOT(process()));
         connect(decoderWorker, SIGNAL(finished()), this, SLOT(finishDecoderWorker()));
-        connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBufferIndicators()));
+        connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
 
         /* Start worker thread */
         qpskSrcThread->start();
@@ -851,11 +974,29 @@ void MainWindow::startStopProcessing() {
 
 /**************************************************************************************************/
 
-void MainWindow::updateBufferIndicators() {
+void MainWindow::updateBuffersIndicators() {
     if ((srcMode == IQ_FILE) || (srcMode == SDR_RECEIVER))
         IQBufferUtilBar->setValue(iqRBUsed->available());
 
     QPSKBufferUtilBar->setValue(qpskRBUsed->available());
+}
+
+/**************************************************************************************************/
+
+void MainWindow::updateDemodStatusValues(
+        bool pllState,
+        double pllFreq,
+        double pllPhaseErr,
+        double alcGain,
+        double sigLvl) {
+    PLLStatusLbl->setText(tr("PLL status: <span style=\"font-weight: bold; color: %1\">%2</span>").
+                          arg(
+                              ((pllState) ? "green" : "red"),
+                              ((pllState) ? tr("locked") : tr("unlocked"))));
+    PLLFreqLbl->setText(tr("PLL frequency: %1 Hz").arg(pllFreq));
+    PLLPhaseErrLbl->setText(tr("PLL phase error: %1").arg(pllPhaseErr)); /* TODO update progress bar */
+    ALCGainLbl->setText(tr("ALC gain: %1 dB").arg(alcGain));
+    SignalLevelLbl->setText(tr("Signal level: %1").arg(sigLvl));
 }
 
 /**************************************************************************************************/
@@ -916,7 +1057,8 @@ void MainWindow::finishDemodulatorWorker() {
     qpskSrcWorker = nullptr;
 
     /* Free demodulator object */
-    /* TODO implement */
+    lrpt_demodulator_deinit(demodulator);
+    demodulator = NULL;
 
     /* Request decoder to stop */
     decoderThread->requestInterruption();
@@ -939,7 +1081,7 @@ void MainWindow::finishDecoderWorker() {
     /* Free decoder object */
     /* TODO implement */
 
-    /* TODO free ring buffer resources, reset semaphores - in separate helper function */
+    /* TODO free ring buffer resources, reset semaphores, status labels */
     IQBufferUtilBar->setValue(0);
     QPSKBufferUtilBar->setValue(0);
 
