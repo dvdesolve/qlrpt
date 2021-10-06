@@ -73,23 +73,29 @@ private:
 
     int decoderChunkSize; /* MTU for decoder */
 
-    /* Workers */
+    /* Workers and core objects */
     IQSourceAbstractWorker *iqSrcWorker = nullptr;
     QThread *iqSrcThread = nullptr;
     lrpt_iq_file_t *iqSrcFile = NULL;
+    lrpt_iq_file_t *ddRcvFile = NULL;
 
     QPSKSourceAbstractWorker *qpskSrcWorker = nullptr;
     QThread *qpskSrcThread = nullptr;
     lrpt_qpsk_file_t *qpskSrcFile = NULL;
     lrpt_demodulator_t *demodulator = NULL;
+    lrpt_dsp_filter_t *chebFilter = NULL;
+    lrpt_iq_file_t *ddFiltFile = NULL;
+    lrpt_qpsk_file_t *ddDemodFile = NULL;
 
     DecoderWorker *decoderWorker = nullptr;
     QThread *decoderThread = nullptr;
+    lrpt_decoder_t *decoder = NULL;
+    lrpt_image_t *lrptImage = NULL;
+    lrpt_qpsk_file_t *ddQPSKProcFile = NULL;
 
     /* State flags and variables */
     SrcType srcMode = NO_SRC;
     bool processing = false;
-    int sigQ = 0; /* In percents */
     int nPacketsGood = 0;
     int nPacketsTotal = 0;
 

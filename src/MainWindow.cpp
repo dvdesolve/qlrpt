@@ -324,8 +324,8 @@ void MainWindow::updateUI() {
             IQBufferUtilBar->setDisabled(true);
             QPSKBufferUtilLbl->setDisabled(true);
             QPSKBufferUtilBar->setDisabled(true);
-            PhaseErrorLbl->setDisabled(true);
-            PhaseErrorBar->setDisabled(true);
+            LockQualityLbl->setDisabled(true);
+            LockQualityBar->setDisabled(true);
             SignalQualityLbl->setDisabled(true);
             SignalQualityBar->setDisabled(true);
             LRPTGB->setDisabled(true);
@@ -368,8 +368,8 @@ void MainWindow::updateUI() {
             IQBufferUtilBar->setEnabled(true);
             QPSKBufferUtilLbl->setEnabled(true);
             QPSKBufferUtilBar->setEnabled(true);
-            PhaseErrorLbl->setEnabled(true);
-            PhaseErrorBar->setEnabled(true);
+            LockQualityLbl->setEnabled(true);
+            LockQualityBar->setEnabled(true);
             SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
             LRPTGB->setEnabled(processing);
@@ -412,8 +412,8 @@ void MainWindow::updateUI() {
             IQBufferUtilBar->setDisabled(true);
             QPSKBufferUtilLbl->setEnabled(true);
             QPSKBufferUtilBar->setEnabled(true);
-            PhaseErrorLbl->setDisabled(true);
-            PhaseErrorBar->setDisabled(true);
+            LockQualityLbl->setDisabled(true);
+            LockQualityBar->setDisabled(true);
             SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
             LRPTGB->setEnabled(processing);
@@ -469,8 +469,8 @@ void MainWindow::updateUI() {
             IQBufferUtilBar->setEnabled(true);
             QPSKBufferUtilLbl->setEnabled(true);
             QPSKBufferUtilBar->setEnabled(true);
-            PhaseErrorLbl->setEnabled(true);
-            PhaseErrorBar->setEnabled(true);
+            LockQualityLbl->setEnabled(true);
+            LockQualityBar->setEnabled(true);
             SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
             LRPTGB->setEnabled(processing);
@@ -623,6 +623,8 @@ void MainWindow::showFileInfo(const QString &fileName) {
                                                   ""));
             SrcInfoText->insertPlainText(tr("Sampling rate: %1 samples/s\n").
                                          arg(QString::number(lrpt_iq_file_samplerate(f))));
+            SrcInfoText->insertPlainText(tr("Bandwidth: %1 Hz\n").
+                                         arg(QString::number(lrpt_iq_file_bandwidth(f))));
             SrcInfoText->insertPlainText(tr("Device name: %1\n").
                                          arg(QString::fromUtf8(lrpt_iq_file_devicename(f))));
             SrcInfoText->insertPlainText(tr("File size: %1 samples\n").
@@ -885,6 +887,45 @@ void MainWindow::startStopProcessing() {
                     DemodPLLUnlockedSB->value(),
                     NULL); /* TODO error reporting */
 
+        /* Initialize Chebyshev filter (if requested) */
+        /* TODO may be store filter params in application settings */
+        if (DemodFilterCB->isChecked())
+            chebFilter = lrpt_dsp_filter_init(
+                        lrpt_iq_file_bandwidth(iqSrcFile),
+                        lrpt_iq_file_samplerate(iqSrcFile),
+                        5.0,
+                        6,
+                        LRPT_DSP_FILTER_TYPE_LOWPASS,
+                        NULL); /* TODO error reporting */
+
+        /* Open filtered I/Q file for writing (if requested) */
+        if (DDFiltCB->isChecked() && DDFiltFilePath->isEnabled() && !DDFiltFilePath->text().isEmpty()) {
+            fileNameUTF8 = DDFiltFilePath->text().toUtf8();
+            fileNameCString = fileNameUTF8.data();
+
+            ddFiltFile = lrpt_iq_file_open_w_v1(
+                        fileNameCString,
+                        lrpt_iq_file_is_offsetted(iqSrcFile),
+                        lrpt_iq_file_samplerate(iqSrcFile),
+                        lrpt_iq_file_bandwidth(iqSrcFile),
+                        lrpt_iq_file_devicename(iqSrcFile),
+                        NULL); /* TODO error reporting */
+        }
+
+        /* Open demodulated QPSK file for writing (if requested) */
+        if (DDDemodCB->isChecked() && DDDemodFilePath->isEnabled() && !DDDemodFilePath->text().isEmpty()) {
+            fileNameUTF8 = DDDemodFilePath->text().toUtf8();
+            fileNameCString = fileNameUTF8.data();
+
+            ddDemodFile = lrpt_qpsk_file_open_w_v1(
+                        fileNameCString,
+                        DecoderDiffcodedCB->isChecked(),
+                        DecoderInterleavedCB->isChecked(),
+                        false, /* TODO add GUI flag for soft/hard symbols */
+                        (DecoderInterleavedCB->isChecked()) ? 80000 : 72000,
+                        NULL); /* TODO error reporting */
+        }
+
         /* Allocate new thread and worker for I/Q file reading */
         iqSrcThread = new QThread();
         iqSrcWorker = new IQSourceFileWorker(iqSrcFile, iqSrcFileMTU);
@@ -900,9 +941,9 @@ void MainWindow::startStopProcessing() {
         qpskSrcThread = new QThread();
         qpskSrcWorker = new DemodulatorWorker(demodulator,
                     (demodChunkSize == 0) ? (DemodChunkSize_DEFINIT * 1024) : demodChunkSize,
-                    NULL,
-                    NULL,
-                    NULL); /* TODO pass actual filter object */ /* TODO pass file objects for filtered and demodulated dump */
+                    chebFilter,
+                    ddFiltFile,
+                    ddDemodFile);
 
         /* Move worker into separate thread and set up connections */
         qpskSrcWorker->moveToThread(qpskSrcThread);
@@ -928,6 +969,7 @@ void MainWindow::startStopProcessing() {
         connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
 
         /* Start worker threads */
+        /* TODO change cursor to busy */
         iqSrcThread->start();
         qpskSrcThread->start();
         decoderThread->start();
@@ -964,6 +1006,7 @@ void MainWindow::startStopProcessing() {
         connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
 
         /* Start worker thread */
+        /* TODO change cursor to busy */
         qpskSrcThread->start();
         decoderThread->start();
     }
@@ -993,10 +1036,23 @@ void MainWindow::updateDemodStatusValues(
                           arg(
                               ((pllState) ? "green" : "red"),
                               ((pllState) ? tr("locked") : tr("unlocked"))));
-    PLLFreqLbl->setText(tr("PLL frequency: %1 Hz").arg(pllFreq));
-    PLLPhaseErrLbl->setText(tr("PLL phase error: %1").arg(pllPhaseErr)); /* TODO update progress bar */
-    ALCGainLbl->setText(tr("ALC gain: %1 dB").arg(alcGain));
-    SignalLevelLbl->setText(tr("Signal level: %1").arg(sigLvl));
+    PLLFreqLbl->setText(tr("PLL frequency: %1 Hz").arg(QString::number(pllFreq, 'f', 1)));
+
+    PLLPhaseErrLbl->setText(tr("PLL phase error: %1").arg(QString::number(pllPhaseErr, 'f', 3)));
+
+    double x;
+
+    if (pllPhaseErr < 0.5)
+        x = 0.5;
+    else if (pllPhaseErr > 1.0)
+        x = 1.0;
+    else x = pllPhaseErr;
+
+    /* Display range is 0.5 (100%) -- 1.0 (0%) */
+    LockQualityBar->setValue(100 * (2.0 - x / 0.5));
+
+    ALCGainLbl->setText(tr("ALC gain: %1 dB").arg(QString::number(alcGain, 'f', 1)));
+    SignalLevelLbl->setText(tr("Signal level: %1").arg(QString::number(sigLvl, 'f', 0)));
 }
 
 /**************************************************************************************************/
@@ -1060,6 +1116,14 @@ void MainWindow::finishDemodulatorWorker() {
     lrpt_demodulator_deinit(demodulator);
     demodulator = NULL;
 
+    /* Free Chebyshev filter object */
+    lrpt_dsp_filter_deinit(chebFilter);
+    chebFilter = NULL;
+
+    /* Close intermediate dump files */
+    lrpt_iq_file_close(ddFiltFile);
+    lrpt_qpsk_file_close(ddDemodFile);
+
     /* Request decoder to stop */
     decoderThread->requestInterruption();
 }
@@ -1081,9 +1145,20 @@ void MainWindow::finishDecoderWorker() {
     /* Free decoder object */
     /* TODO implement */
 
-    /* TODO free ring buffer resources, reset semaphores, status labels */
+    /* TODO free ring buffer resources, reset semaphores */
+
     IQBufferUtilBar->setValue(0);
     QPSKBufferUtilBar->setValue(0);
+    LockQualityBar->setValue(0);
+    SignalQualityBar->setValue(0);
+
+    PLLStatusLbl->setText(tr("PLL status: ---"));
+    PLLFreqLbl->setText(tr("PLL frequency: --- Hz"));
+    PLLPhaseErrLbl->setText(tr("PLL phase error: ---"));
+    ALCGainLbl->setText(tr("ALC gain: --- dB"));
+    SignalLevelLbl->setText(tr("Signal level: ---"));
+    FramingStatusLbl->setText(tr("Framing: ---"));
+    PacketsLbl->setText(tr("Packets: ---/--- (---%)"));
 
     startStopProcessing();
 }
