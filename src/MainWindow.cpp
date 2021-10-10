@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
     /* Set up status bar labels */
-    PLLStatusLbl = new QLabel(tr("PLL status: ---"), this);
+    PLLStatusLbl = new QLabel(tr("PLL: ---"), this);
     PLLStatusLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
     PLLStatusLbl->setLineWidth(1);
     PLLStatusLbl->setMidLineWidth(0);
@@ -81,7 +81,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     FramingStatusLbl->setMidLineWidth(0);
     statusbar->addPermanentWidget(FramingStatusLbl);
 
-    PacketsLbl = new QLabel(tr("Packets: ---/--- (---%)"), this);
+    FramesLbl = new QLabel(tr("Frames: ---/--- (---%)"), this);
+    FramesLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
+    FramesLbl->setLineWidth(1);
+    FramesLbl->setMidLineWidth(0);
+    statusbar->addPermanentWidget(FramesLbl);
+
+    CVCDUsLbl = new QLabel(tr("CVCDUs: ---"), this);
+    CVCDUsLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
+    CVCDUsLbl->setLineWidth(1);
+    CVCDUsLbl->setMidLineWidth(0);
+    statusbar->addPermanentWidget(CVCDUsLbl);
+
+    PacketsLbl = new QLabel(tr("Packets: ---"), this);
     PacketsLbl->setFrameStyle(QFrame::Box | QFrame::Raised);
     PacketsLbl->setLineWidth(1);
     PacketsLbl->setMidLineWidth(0);
@@ -336,6 +348,8 @@ void MainWindow::updateUI() {
             ALCGainLbl->setDisabled(true);
             SignalLevelLbl->setDisabled(true);
             FramingStatusLbl->setDisabled(true);
+            FramesLbl->setDisabled(true);
+            CVCDUsLbl->setDisabled(true);
             PacketsLbl->setDisabled(true);
 
             break;
@@ -380,6 +394,8 @@ void MainWindow::updateUI() {
             ALCGainLbl->setEnabled(processing);
             SignalLevelLbl->setEnabled(processing);
             FramingStatusLbl->setEnabled(processing);
+            FramesLbl->setEnabled(processing);
+            CVCDUsLbl->setEnabled(processing);
             PacketsLbl->setEnabled(processing);
 
             break;
@@ -424,6 +440,8 @@ void MainWindow::updateUI() {
             ALCGainLbl->setDisabled(true);
             SignalLevelLbl->setDisabled(true);
             FramingStatusLbl->setEnabled(processing);
+            FramesLbl->setEnabled(processing);
+            CVCDUsLbl->setEnabled(processing);
             PacketsLbl->setEnabled(processing);
 
             break;
@@ -481,6 +499,8 @@ void MainWindow::updateUI() {
             ALCGainLbl->setEnabled(processing);
             SignalLevelLbl->setEnabled(processing);
             FramingStatusLbl->setEnabled(processing);
+            FramesLbl->setEnabled(processing);
+            CVCDUsLbl->setEnabled(processing);
             PacketsLbl->setEnabled(processing);
 
             break;
@@ -738,7 +758,7 @@ void MainWindow::browseRcvDumpFile() {
                 lastRcvDumpFileDir,
                 tr("LRPT I/Q data files (*.iq)"));
 
-    if (!fileName.isEmpty()) {
+    if (!fileName.isEmpty()) { /* TODO disable start-stop button in other case */
         if (QFileInfo(fileName).suffix() != "iq")
             fileName += ".iq";
 
@@ -763,7 +783,7 @@ void MainWindow::browseFiltDumpFile() {
                 lastFiltDumpFileDir,
                 tr("LRPT I/Q data files (*.iq)"));
 
-    if (!fileName.isEmpty()) {
+    if (!fileName.isEmpty()) { /* TODO disable start-stop button in other case */
         if (QFileInfo(fileName).suffix() != "iq")
             fileName += ".iq";
 
@@ -788,7 +808,7 @@ void MainWindow::browseDemodDumpFile() {
                 lastDemodDumpFileDir,
                 tr("LRPT QPSK data files (*.qpsk)"));
 
-    if (!fileName.isEmpty()) {
+    if (!fileName.isEmpty()) { /* TODO disable start-stop button in other case */
         if (QFileInfo(fileName).suffix() != "qpsk")
             fileName += ".qpsk";
 
@@ -806,7 +826,7 @@ void MainWindow::browseDemodDumpFile() {
 
 /**************************************************************************************************/
 
-void MainWindow::browseQPSKProcDumpFile() {
+void MainWindow::browseQPSKProcDumpFile() { /* TODO disable start-stop button in other case */
     QString fileName = QFileDialog::getSaveFileName(
                 this,
                 tr("Specify dump file to save"),
@@ -926,6 +946,14 @@ void MainWindow::startStopProcessing() {
                         NULL); /* TODO error reporting */
         }
 
+        /* Initialize LRPT decoder */
+        lrpt_decoder_spacecraft_t sc = LRPT_DECODER_SC_METEORM2;
+
+        if (DecoderSpacecraftCombB->currentIndex() == 0)
+            sc = LRPT_DECODER_SC_METEORM2;
+
+        decoder = lrpt_decoder_init(sc, NULL); /* TODO error reporting */
+
         /* Allocate new thread and worker for I/Q file reading */
         iqSrcThread = new QThread();
         iqSrcWorker = new IQSourceFileWorker(iqSrcFile, iqSrcFileMTU);
@@ -959,7 +987,7 @@ void MainWindow::startStopProcessing() {
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(NULL, decoderChunkSize); /* TODO pass actual decoder object */ /* TODO pass file objects for processed dump */
+        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, NULL); /* TODO pass file objects for processed dump */
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
@@ -967,6 +995,11 @@ void MainWindow::startStopProcessing() {
         connect(decoderThread, SIGNAL(started()), decoderWorker, SLOT(process()));
         connect(decoderWorker, SIGNAL(finished()), this, SLOT(finishDecoderWorker()));
         connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
+        connect(
+                    decoderWorker,
+                    SIGNAL(decoderInfo(bool,int,int,int,int)),
+                    this,
+                    SLOT(updateDecoderStatusValues(bool,int,int,int,int)));
 
         /* Start worker threads */
         /* TODO change cursor to busy */
@@ -1032,7 +1065,7 @@ void MainWindow::updateDemodStatusValues(
         double pllPhaseErr,
         double alcGain,
         double sigLvl) {
-    PLLStatusLbl->setText(tr("PLL status: <span style=\"font-weight: bold; color: %1\">%2</span>").
+    PLLStatusLbl->setText(tr("PLL: <span style=\"font-weight: bold; color: %1\">%2</span>").
                           arg(
                               ((pllState) ? "green" : "red"),
                               ((pllState) ? tr("locked") : tr("unlocked"))));
@@ -1053,6 +1086,25 @@ void MainWindow::updateDemodStatusValues(
 
     ALCGainLbl->setText(tr("ALC gain: %1 dB").arg(QString::number(alcGain, 'f', 1)));
     SignalLevelLbl->setText(tr("Signal level: %1").arg(QString::number(sigLvl, 'f', 0)));
+}
+
+/**************************************************************************************************/
+
+void MainWindow::updateDecoderStatusValues(bool frmState,
+        int frmTotCnt,
+        int frmOkCnt,
+        int cvcduCnt,
+        int pckCnt) {
+    FramingStatusLbl->setText(tr("Framing: <span style=\"font-weight: bold; color: %1\">%2</span>").
+                              arg(
+                                  ((frmState) ? "green" : "red"),
+                                  ((frmState) ? tr("ok") : tr("fail"))));
+    FramesLbl->setText(tr("Frames: %1/%2 (%3%)").
+                       arg(QString::number(frmOkCnt),
+                           QString::number(frmTotCnt),
+                           QString::number((frmTotCnt == 0) ? 0 : static_cast<int>(100.0 * frmOkCnt / frmTotCnt))));
+    CVCDUsLbl->setText(tr("CVCDUs: %1").arg(QString::number(cvcduCnt)));
+    PacketsLbl->setText(tr("Packets: %1").arg(QString::number(pckCnt)));
 }
 
 /**************************************************************************************************/
@@ -1122,7 +1174,9 @@ void MainWindow::finishDemodulatorWorker() {
 
     /* Close intermediate dump files */
     lrpt_iq_file_close(ddFiltFile);
+    ddFiltFile = NULL;
     lrpt_qpsk_file_close(ddDemodFile);
+    ddDemodFile = NULL;
 
     /* Request decoder to stop */
     decoderThread->requestInterruption();
@@ -1143,7 +1197,10 @@ void MainWindow::finishDecoderWorker() {
     decoderWorker = nullptr;
 
     /* Free decoder object */
-    /* TODO implement */
+    lrpt_decoder_deinit(decoder);
+    decoder = NULL;
+
+    /* TODO close intermediate dump files */
 
     /* TODO free ring buffer resources, reset semaphores */
 
@@ -1152,13 +1209,15 @@ void MainWindow::finishDecoderWorker() {
     LockQualityBar->setValue(0);
     SignalQualityBar->setValue(0);
 
-    PLLStatusLbl->setText(tr("PLL status: ---"));
+    PLLStatusLbl->setText(tr("PLL: ---"));
     PLLFreqLbl->setText(tr("PLL frequency: --- Hz"));
     PLLPhaseErrLbl->setText(tr("PLL phase error: ---"));
     ALCGainLbl->setText(tr("ALC gain: --- dB"));
     SignalLevelLbl->setText(tr("Signal level: ---"));
     FramingStatusLbl->setText(tr("Framing: ---"));
-    PacketsLbl->setText(tr("Packets: ---/--- (---%)"));
+    FramesLbl->setText(tr("Frames: ---/--- (---%)"));
+    CVCDUsLbl->setText(tr("CVCDUs: ---"));
+    PacketsLbl->setText(tr("Packets: ---"));
 
     startStopProcessing();
 }

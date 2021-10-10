@@ -52,7 +52,7 @@ DemodulatorWorker::~DemodulatorWorker() {
 /**************************************************************************************************/
 
 void DemodulatorWorker::process() {
-    /* TODO check for errors in the whole function */
+    /* TODO check for errors in the whole class */
 
     /* Allocate I/Q data object for buffered reading */
     iqInput = lrpt_iq_data_alloc(MTU, NULL);
@@ -76,35 +76,9 @@ void DemodulatorWorker::process() {
                 lrpt_iq_rb_pop(iqRB, iqInput, n, NULL);
                 iqRBFree->release(n);
 
-                /* TODO may be move into separate private function */
-                if (filter) {
-                    lrpt_dsp_filter_apply(filter, iqInput);
-
-                    if (filtDump)
-                        lrpt_iq_data_write_to_file(iqInput, filtDump, false, NULL);
-                }
-
-                lrpt_demodulator_exec(demod, iqInput, qpskOutput, NULL);
-
-                if (demodDump)
-                    lrpt_qpsk_data_write_to_file(qpskOutput, demodDump, false, NULL);
-
-                bool pllStatus = lrpt_demodulator_pllstate(demod);
-                double pllFreq = lrpt_demodulator_pllfreq(demod);
-                double pllPhaseErr = lrpt_demodulator_pllphaseerr(demod);
-                double alcGain = lrpt_demodulator_gain(demod);
-                double sigLvl = lrpt_demodulator_siglvl(demod);
-
-                emit demodInfo(pllStatus, pllFreq, pllPhaseErr, alcGain, sigLvl);
-
-                size_t m = lrpt_qpsk_data_length(qpskOutput);
-                qpskRBFree->acquire(m);
-                lrpt_qpsk_rb_push(qpskRB, qpskOutput, m, NULL);
-                qpskRBUsed->release(m);
+                processChunk();
 
                 dataRead += n;
-
-                emit chunkProcessed();
             }
 
             break;
@@ -115,35 +89,40 @@ void DemodulatorWorker::process() {
             lrpt_iq_rb_pop(iqRB, iqInput, MTU, NULL);
             iqRBFree->release(MTU);
 
-            /* TODO may be move into separate private function */
-            if (filter) {
-                lrpt_dsp_filter_apply(filter, iqInput);
-
-                if (filtDump)
-                    lrpt_iq_data_write_to_file(iqInput, filtDump, false, NULL);
-            }
-
-            lrpt_demodulator_exec(demod, iqInput, qpskOutput, NULL);
-
-            if (demodDump)
-                lrpt_qpsk_data_write_to_file(qpskOutput, demodDump, false, NULL);
-
-            bool pllStatus = lrpt_demodulator_pllstate(demod);
-            double pllFreq = lrpt_demodulator_pllfreq(demod);
-            double pllPhaseErr = lrpt_demodulator_pllphaseerr(demod);
-            double alcGain = lrpt_demodulator_gain(demod);
-            double sigLvl = lrpt_demodulator_siglvl(demod);
-
-            emit demodInfo(pllStatus, pllFreq, pllPhaseErr, alcGain, sigLvl);
-
-            size_t n = lrpt_qpsk_data_length(qpskOutput);
-            qpskRBFree->acquire(n);
-            lrpt_qpsk_rb_push(qpskRB, qpskOutput, n, NULL);
-            qpskRBUsed->release(n);
-
-            emit chunkProcessed();
+            processChunk();
         }
     }
 
     emit finished(); /* Tell caller about job end */
+}
+
+/**************************************************************************************************/
+
+void DemodulatorWorker::processChunk() {
+    if (filter) {
+        lrpt_dsp_filter_apply(filter, iqInput);
+
+        if (filtDump)
+            lrpt_iq_data_write_to_file(iqInput, filtDump, false, NULL);
+    }
+
+    lrpt_demodulator_exec(demod, iqInput, qpskOutput, NULL);
+
+    if (demodDump)
+        lrpt_qpsk_data_write_to_file(qpskOutput, demodDump, false, NULL);
+
+    bool pllStatus = lrpt_demodulator_pllstate(demod);
+    double pllFreq = lrpt_demodulator_pllfreq(demod);
+    double pllPhaseErr = lrpt_demodulator_pllphaseerr(demod);
+    double alcGain = lrpt_demodulator_gain(demod);
+    double sigLvl = lrpt_demodulator_siglvl(demod);
+
+    emit demodInfo(pllStatus, pllFreq, pllPhaseErr, alcGain, sigLvl);
+
+    size_t n = lrpt_qpsk_data_length(qpskOutput);
+    qpskRBFree->acquire(n);
+    lrpt_qpsk_rb_push(qpskRB, qpskOutput, n, NULL);
+    qpskRBUsed->release(n);
+
+    emit chunkProcessed();
 }

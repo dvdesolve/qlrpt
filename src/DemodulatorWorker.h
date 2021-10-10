@@ -57,6 +57,8 @@ private:
 
     lrpt_iq_data_t *iqInput = NULL;
     lrpt_qpsk_data_t *qpskOutput = NULL;
+
+    void processChunk();
 };
 
 /**************************************************************************************************/

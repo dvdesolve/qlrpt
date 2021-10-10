@@ -34,7 +34,7 @@ class DecoderWorker : public QObject {
     Q_OBJECT
 
 public:
-    explicit DecoderWorker(lrpt_decoder_t *decoder, int MTU);
+    explicit DecoderWorker(lrpt_decoder_t *decoder, int MTU, lrpt_qpsk_file_t *processedDump = NULL);
     ~DecoderWorker();
 
 public slots:
@@ -42,13 +42,22 @@ public slots:
 
 signals:
     void finished();
+    void decoderInfo(bool, int, int, int, int);
 
 private:
     lrpt_decoder_t *decoder = NULL;
     int MTU;
+    lrpt_qpsk_file_t *processedDump = NULL;
 
     lrpt_qpsk_data_t *qpskInput = NULL;
+    lrpt_qpsk_data_t *remnants = NULL;
+    lrpt_qpsk_data_t *oper = NULL;
     lrpt_image_t *img = NULL;
+
+    size_t n_rem = 0;
+    size_t n_proc = 0;
+
+    void processChunk();
 
 signals:
     void chunkProcessed();

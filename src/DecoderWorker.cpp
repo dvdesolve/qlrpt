@@ -29,33 +29,41 @@
 
 /**************************************************************************************************/
 
-DecoderWorker::DecoderWorker(lrpt_decoder_t *decoder, int MTU) {
+DecoderWorker::DecoderWorker(lrpt_decoder_t *decoder, int MTU, lrpt_qpsk_file_t *processedDump) {
     this->decoder = decoder;
     this->MTU = MTU;
+    this->processedDump = processedDump;
 }
 
 /**************************************************************************************************/
 
 DecoderWorker::~DecoderWorker() {
     lrpt_qpsk_data_free(qpskInput);
-    lrpt_decoder_deinit(decoder);
+    lrpt_qpsk_data_free(remnants);
 }
 
 /**************************************************************************************************/
 
 void DecoderWorker::process() {
-    /* TODO check for errors in the whole function */
+    /* TODO check for errors in the whole class */
 
-    /* Allocate I/Q data object for buffered reading */
+    /* Allocate QPSK data object for buffered reading */
     qpskInput = lrpt_qpsk_data_alloc(MTU, NULL);
 
-    forever { /* TODO honor remaining number of QPSK symbols and pop no less than 3 * SFL */
+    /* Allocate helper QPSK data object for storing remnants */
+    remnants = lrpt_qpsk_data_alloc(0, NULL);
+
+    forever {
         /* Check whether master has requested interruption */
         if (QThread::currentThread()->isInterruptionRequested()) {
             size_t dataLen = qpskRBUsed->available();
             size_t dataRead = 0;
 
-            /* Read till QPSK ring buffer become empty */
+            /* We should leave at least 3xSFL at the end of RB */
+            size_t extra = (dataLen % (3 * lrpt_decoder_sfl()));
+            dataLen -= extra;
+
+            /* Read till QPSK ring buffer become empty (with account to 3xSFL) */
             while (dataRead < dataLen) {
                 size_t n = ((dataLen - dataRead) < static_cast<size_t>(MTU)) ?
                             (dataLen - dataRead) :
@@ -65,13 +73,9 @@ void DecoderWorker::process() {
                 lrpt_qpsk_rb_pop(qpskRB, qpskInput, n, NULL);
                 qpskRBFree->release(n);
 
-                /* TODO decode acquired data */
-                /* TODO dump data to be sure that all will be saved */
-                QThread::currentThread()->msleep(20); /* TODO debug */
+                processChunk();
 
                 dataRead += n;
-
-                emit chunkProcessed();
             }
 
             break;
@@ -82,13 +86,52 @@ void DecoderWorker::process() {
             lrpt_qpsk_rb_pop(qpskRB, qpskInput, MTU, NULL);
             qpskRBFree->release(MTU);
 
-            /* TODO decode acquired data */
-            /* TODO dump data to be sure that all will be saved */
-            QThread::currentThread()->msleep(20); /* TODO debug */
-
-            emit chunkProcessed();
+            processChunk();
         }
     }
 
     emit finished(); /* Tell caller about job end */
+}
+
+/**************************************************************************************************/
+
+void DecoderWorker::processChunk() {
+    /* TODO should deinterleave and dediffcode here */
+    /* TODO dump processed QPSK data here */
+
+    /* Append data to remnants */
+    if (n_rem != 0) {
+        lrpt_qpsk_data_append(remnants, qpskInput, 0, lrpt_qpsk_data_length(qpskInput), NULL);
+        oper = remnants;
+    }
+    else
+        oper = qpskInput;
+
+    lrpt_decoder_exec(decoder, oper, &n_proc, NULL);
+
+    bool frmStatus = lrpt_decoder_framingstate(decoder);
+    int frmTotCnt = lrpt_decoder_framestot_cnt(decoder);
+    int frmOkCnt = lrpt_decoder_framesok_cnt(decoder);
+    int cvcduCnt = lrpt_decoder_cvcdu_cnt(decoder);
+    int pckCnt = lrpt_decoder_packets_cnt(decoder);
+
+    emit decoderInfo(frmStatus, frmTotCnt, frmOkCnt, cvcduCnt, pckCnt);
+
+    /* Recalculate how much data left unprocessed */
+    n_rem = lrpt_qpsk_data_length(oper) - n_proc;
+
+    /* Copy the remnants */
+    if (n_rem != 0) {
+        if (oper == qpskInput)
+            lrpt_qpsk_data_from_qpsk(remnants, qpskInput, n_proc, n_rem, NULL);
+        else {
+            lrpt_qpsk_data_t *tmp =
+                    lrpt_qpsk_data_create_from_qpsk(remnants, n_proc, n_rem, NULL);
+            lrpt_qpsk_data_from_qpsk(remnants, tmp, 0, n_rem, NULL);
+            lrpt_qpsk_data_free(tmp);
+        }
+    }
+
+    /* TODO we should emit not only this signal but a number of newly available pixels in each APID */
+    emit chunkProcessed();
 }

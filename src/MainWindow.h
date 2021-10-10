@@ -106,6 +106,8 @@ private:
     QLabel *ALCGainLbl;
     QLabel *SignalLevelLbl;
     QLabel *FramingStatusLbl;
+    QLabel *FramesLbl;
+    QLabel *CVCDUsLbl;
     QLabel *PacketsLbl;
 
     /* Read in settings from system storage */
@@ -161,6 +163,14 @@ private slots:
             double pllPhaseErr,
             double alcGain,
             double sigLvl);
+
+    /* Show decoder params during processing */
+    void updateDecoderStatusValues(
+            bool frmState,
+            int frmTotCnt,
+            int frmOkCnt,
+            int cvcduCnt,
+            int pckCnt);
 
     /* Finish file processing */
     void finishSrcFileWorker();
