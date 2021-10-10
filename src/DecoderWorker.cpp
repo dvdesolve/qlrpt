@@ -114,8 +114,9 @@ void DecoderWorker::processChunk() {
     int frmOkCnt = lrpt_decoder_framesok_cnt(decoder);
     int cvcduCnt = lrpt_decoder_cvcdu_cnt(decoder);
     int pckCnt = lrpt_decoder_packets_cnt(decoder);
+    int sigQ = lrpt_decoder_sigqual(decoder);
 
-    emit decoderInfo(frmStatus, frmTotCnt, frmOkCnt, cvcduCnt, pckCnt);
+    emit decoderInfo(frmStatus, frmTotCnt, frmOkCnt, cvcduCnt, pckCnt, sigQ);
 
     /* Recalculate how much data left unprocessed */
     n_rem = lrpt_qpsk_data_length(oper) - n_proc;

@@ -170,7 +170,8 @@ private slots:
             int frmTotCnt,
             int frmOkCnt,
             int cvcduCnt,
-            int pckCnt);
+            int pckCnt,
+            int sigQ);
 
     /* Finish file processing */
     void finishSrcFileWorker();

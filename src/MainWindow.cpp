@@ -997,9 +997,9 @@ void MainWindow::startStopProcessing() {
         connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
         connect(
                     decoderWorker,
-                    SIGNAL(decoderInfo(bool,int,int,int,int)),
+                    SIGNAL(decoderInfo(bool,int,int,int,int,int)),
                     this,
-                    SLOT(updateDecoderStatusValues(bool,int,int,int,int)));
+                    SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
 
         /* Start worker threads */
         /* TODO change cursor to busy */
@@ -1094,7 +1094,8 @@ void MainWindow::updateDecoderStatusValues(bool frmState,
         int frmTotCnt,
         int frmOkCnt,
         int cvcduCnt,
-        int pckCnt) {
+        int pckCnt,
+        int sigQ) {
     FramingStatusLbl->setText(tr("Framing: <span style=\"font-weight: bold; color: %1\">%2</span>").
                               arg(
                                   ((frmState) ? "green" : "red"),
@@ -1105,6 +1106,7 @@ void MainWindow::updateDecoderStatusValues(bool frmState,
                            QString::number((frmTotCnt == 0) ? 0 : static_cast<int>(100.0 * frmOkCnt / frmTotCnt))));
     CVCDUsLbl->setText(tr("CVCDUs: %1").arg(QString::number(cvcduCnt)));
     PacketsLbl->setText(tr("Packets: %1").arg(QString::number(pckCnt)));
+    SignalQualityBar->setValue(sigQ);
 }
 
 /**************************************************************************************************/

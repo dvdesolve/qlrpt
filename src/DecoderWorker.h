@@ -42,7 +42,7 @@ public slots:
 
 signals:
     void finished();
-    void decoderInfo(bool, int, int, int, int);
+    void decoderInfo(bool, int, int, int, int, int);
 
 private:
     lrpt_decoder_t *decoder = NULL;
