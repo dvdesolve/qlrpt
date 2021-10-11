@@ -34,8 +34,19 @@ class QPSKWidget : public QWidget {
 public:
     explicit QPSKWidget(QWidget *parent = nullptr);
 
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
+
+    void clearConst();
+
+public slots:
+    void drawConst(QVector<int> pts);
+
 protected:
-    void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
+
+private:
+    QVector<int> points;
 };
 
 /**************************************************************************************************/

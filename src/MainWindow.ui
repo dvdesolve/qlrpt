@@ -37,17 +37,24 @@
            <string>Main</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_4">
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QLineEdit" name="SrcFilePath"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="SrcFileBrowseBtn">
+               <property name="text">
+                <string>Select</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
            <item row="0" column="0" colspan="2">
             <widget class="QPushButton" name="StartStopBtn">
              <property name="text">
               <string>Start</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="SrcLbl">
-             <property name="text">
-              <string>Source:</string>
              </property>
             </widget>
            </item>
@@ -85,27 +92,6 @@
              </item>
             </layout>
            </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="SrcFilePathLbl">
-             <property name="text">
-              <string>File path:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QLineEdit" name="SrcFilePath"/>
-             </item>
-             <item>
-              <widget class="QPushButton" name="SrcFileBrowseBtn">
-               <property name="text">
-                <string>Select</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
            <item row="3" column="0" colspan="2">
             <widget class="QPlainTextEdit" name="SrcInfoText">
              <property name="sizePolicy">
@@ -125,18 +111,19 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
-            <spacer name="verticalSpacer_4">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
+           <item row="2" column="0">
+            <widget class="QLabel" name="SrcFilePathLbl">
+             <property name="text">
+              <string>File path:</string>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="SrcLbl">
+             <property name="text">
+              <string>Source:</string>
              </property>
-            </spacer>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -461,7 +448,7 @@
           <attribute name="title">
            <string>Decoder</string>
           </attribute>
-          <layout class="QGridLayout" name="gridLayout_6" columnstretch="0,0">
+          <layout class="QGridLayout" name="gridLayout_6" columnstretch="0,1">
            <item row="2" column="0">
             <widget class="QCheckBox" name="DecoderInterleavedCB">
              <property name="text">
@@ -512,53 +499,8 @@
            <string>Data dump</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_7">
-           <item row="7" column="1">
-            <widget class="QPushButton" name="DDQPSKProcFileBrowseBtn">
-             <property name="text">
-              <string>Select</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0">
-            <widget class="QLineEdit" name="DDQPSKProcFilePath"/>
-           </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="DDDemodCB">
-             <property name="text">
-              <string>Dump demodulated QPSK data</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QCheckBox" name="DDQPSKProcCB">
-             <property name="text">
-              <string>Dump processed QPSK data</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QPushButton" name="DDDemodFileBrowseBtn">
-             <property name="text">
-              <string>Select</string>
-             </property>
-            </widget>
-           </item>
            <item row="5" column="0">
             <widget class="QLineEdit" name="DDDemodFilePath"/>
-           </item>
-           <item row="0" column="0">
-            <widget class="QCheckBox" name="DDRcvCB">
-             <property name="text">
-              <string>Dump received I/Q data</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QPushButton" name="DDRcvFileBrowseBtn">
-             <property name="text">
-              <string>Select</string>
-             </property>
-            </widget>
            </item>
            <item row="3" column="0">
             <widget class="QLineEdit" name="DDFiltFilePath"/>
@@ -572,6 +514,51 @@
            </item>
            <item row="1" column="0">
             <widget class="QLineEdit" name="DDRcvFilePath"/>
+           </item>
+           <item row="5" column="1">
+            <widget class="QPushButton" name="DDDemodFileBrowseBtn">
+             <property name="text">
+              <string>Select</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="DDRcvCB">
+             <property name="text">
+              <string>Dump received I/Q data</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLineEdit" name="DDQPSKProcFilePath"/>
+           </item>
+           <item row="6" column="0">
+            <widget class="QCheckBox" name="DDQPSKProcCB">
+             <property name="text">
+              <string>Dump processed QPSK data</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QPushButton" name="DDQPSKProcFileBrowseBtn">
+             <property name="text">
+              <string>Select</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="DDRcvFileBrowseBtn">
+             <property name="text">
+              <string>Select</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QCheckBox" name="DDDemodCB">
+             <property name="text">
+              <string>Dump demodulated QPSK data</string>
+             </property>
+            </widget>
            </item>
            <item row="2" column="0">
             <widget class="QCheckBox" name="DDFiltCB">
@@ -958,14 +945,14 @@
               <widget class="FFTWidget" name="FFTPlot" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>200</width>
-                 <height>150</height>
+                 <width>255</width>
+                 <height>129</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>200</width>
-                 <height>150</height>
+                 <width>255</width>
+                 <height>129</height>
                 </size>
                </property>
               </widget>
@@ -1015,14 +1002,14 @@
               <widget class="QPSKWidget" name="QPSKPlot" native="true">
                <property name="minimumSize">
                 <size>
-                 <width>150</width>
-                 <height>150</height>
+                 <width>129</width>
+                 <height>129</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>150</width>
-                 <height>150</height>
+                 <width>129</width>
+                 <height>129</height>
                 </size>
                </property>
               </widget>

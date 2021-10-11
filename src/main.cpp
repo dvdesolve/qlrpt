@@ -28,6 +28,9 @@
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
+    /* Needed for passing QPSK points */
+    qRegisterMetaType<QVector<int> >("QVector<int>");
+
     MainWindow w;
     w.show();
 

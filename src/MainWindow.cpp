@@ -1000,6 +1000,7 @@ void MainWindow::startStopProcessing() {
                     SIGNAL(decoderInfo(bool,int,int,int,int,int)),
                     this,
                     SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
+        connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), QPSKPlot, SLOT(drawConst(QVector<int>)));
 
         /* Start worker threads */
         /* TODO change cursor to busy */
@@ -1029,7 +1030,7 @@ void MainWindow::startStopProcessing() {
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(NULL, decoderChunkSize); /* TODO pass actual decoder object */ /* TODO pass file objects for processed dump */
+        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, NULL); /* TODO pass file objects for processed dump */
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
@@ -1037,6 +1038,12 @@ void MainWindow::startStopProcessing() {
         connect(decoderThread, SIGNAL(started()), decoderWorker, SLOT(process()));
         connect(decoderWorker, SIGNAL(finished()), this, SLOT(finishDecoderWorker()));
         connect(decoderWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
+        connect(
+                    decoderWorker,
+                    SIGNAL(decoderInfo(bool,int,int,int,int,int)),
+                    this,
+                    SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
+        connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), QPSKPlot, SLOT(drawConst(QVector<int>)));
 
         /* Start worker thread */
         /* TODO change cursor to busy */
@@ -1204,12 +1211,14 @@ void MainWindow::finishDecoderWorker() {
 
     /* TODO close intermediate dump files */
 
-    /* TODO free ring buffer resources, reset semaphores */
+    /* TODO free ring buffer resources, reset semaphores, clear FFT widget */
 
     IQBufferUtilBar->setValue(0);
     QPSKBufferUtilBar->setValue(0);
     LockQualityBar->setValue(0);
     SignalQualityBar->setValue(0);
+
+    QPSKPlot->clearConst();
 
     PLLStatusLbl->setText(tr("PLL: ---"));
     PLLFreqLbl->setText(tr("PLL frequency: --- Hz"));

@@ -49,6 +49,9 @@
 #define DecoderChunkSize_MIN    1
 #define DecoderChunkSize_MAX    100
 
+/* TODO use custom settings */
+#define QPSKConstPoints         512
+
 /**************************************************************************************************/
 
 #endif

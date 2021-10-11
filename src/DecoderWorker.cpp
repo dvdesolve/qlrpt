@@ -99,6 +99,17 @@ void DecoderWorker::processChunk() {
     /* TODO should deinterleave and dediffcode here */
     /* TODO dump processed QPSK data here */
 
+    /* Prepare symbols for drawing on constellation */
+    int n = lrpt_qpsk_data_length(qpskInput);
+
+    if (n > QPSKConstPoints)
+        n = QPSKConstPoints;
+
+    lrpt_qpsk_data_to_soft(qpskInput, const_pts, n, NULL);
+
+    QVector<int> pts(const_pts, const_pts + n);
+    emit qpskConst(pts);
+
     /* Append data to remnants */
     if (n_rem != 0) {
         lrpt_qpsk_data_append(remnants, qpskInput, 0, lrpt_qpsk_data_length(qpskInput), NULL);

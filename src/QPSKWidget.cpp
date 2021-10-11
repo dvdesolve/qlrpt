@@ -26,22 +26,57 @@
 /**************************************************************************************************/
 
 QPSKWidget::QPSKWidget(QWidget *parent) : QWidget(parent) {
+    points.clear();
 }
 
 /**************************************************************************************************/
 
-void QPSKWidget::paintEvent(QPaintEvent */*event*/) {
-    QPainter painter(this);
-    QPen vPen(Qt::white, ((this->width() % 2) == 0) ? 2.0 : 1.0);
-    QPen hPen(Qt::white, ((this->height() % 2) == 0) ? 2.0 : 1.0);
+QSize QPSKWidget::minimumSizeHint() const {
+    return QSize(129, 129);
+}
 
-    QRect base(0, 0, this->width(), this->height());
+/**************************************************************************************************/
+
+QSize QPSKWidget::sizeHint() const {
+    return QSize(129, 129);
+}
+
+/**************************************************************************************************/
+
+void QPSKWidget::clearConst() {
+    points.clear();
+    update();
+}
+
+/**************************************************************************************************/
+
+void QPSKWidget::drawConst(QVector<int> pts) {
+    points = pts;
+    update();
+}
+
+/**************************************************************************************************/
+
+void QPSKWidget::paintEvent(QPaintEvent *) {
+    QPainter painter(this);
+
+    QRect base(0, 0, width(), height());
     painter.fillRect(base, QColor(Qt::black));
 
-    QLineF vLine((this->width() - 1) / 2.0, 0, (this->width() - 1) / 2.0, this->height());
-    QLineF hLine(0, (this->height() - 1) / 2.0, this->width(), (this->height() - 1) / 2.0);
-    painter.setPen(vPen);
+    QPen pen(Qt::white, 1.0);
+    QLineF vLine(width() / 2, 0, width() / 2, height());
+    QLineF hLine(0, height() / 2, width(), height() / 2);
+
+    painter.setPen(pen);
     painter.drawLine(vLine);
-    painter.setPen(hPen);
     painter.drawLine(hLine);
+
+    for (int i = 0; i < points.size() / 2; i++) {
+        int x = points.at(2 * i) / 2;
+        int y = points.at(2 * i + 1) / 2;
+
+        /* Usual QPSK coding */
+
+        painter.drawPoint(width() / 2 + x, height() / 2 - y);
+    }
 }
