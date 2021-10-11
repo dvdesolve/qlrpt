@@ -1017,6 +1017,14 @@ void MainWindow::startStopProcessing() {
         /* Open QPSK file for reading */
         qpskSrcFile = lrpt_qpsk_file_open_r(fileNameCString, NULL); /* TODO error reporting */
 
+        /* Initialize LRPT decoder */
+        lrpt_decoder_spacecraft_t sc = LRPT_DECODER_SC_METEORM2;
+
+        if (DecoderSpacecraftCombB->currentIndex() == 0)
+            sc = LRPT_DECODER_SC_METEORM2;
+
+        decoder = lrpt_decoder_init(sc, NULL); /* TODO error reporting */
+
         /* Allocate new thread and worker for QPSK file reading */
         qpskSrcThread = new QThread();
         qpskSrcWorker = new QPSKSourceFileWorker(qpskSrcFile, qpskSrcFileMTU);
