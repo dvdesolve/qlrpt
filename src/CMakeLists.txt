@@ -1,17 +1,17 @@
-# This file is part of glrpt.
+# This file is part of qlrpt.
 #
-# glrpt is free software: you can redistribute it and/or modify
+# qlrpt is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# glrpt is distributed in the hope that it will be useful,
+# qlrpt is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with glrpt. If not, see https://www.gnu.org/licenses/
+# along with qlrpt. If not, see https://www.gnu.org/licenses/
 #
 # Author: Viktor Drobot
 
@@ -23,7 +23,7 @@ pkg_check_modules(LIBLRPT REQUIRED liblrpt)
 
 
 # sources
-set(glrpt_SOURCES
+set(qlrpt_SOURCES
     main.cpp
     GlobalObjects.cpp
     DecoderWorker.cpp
@@ -40,7 +40,7 @@ set(glrpt_SOURCES
     QPSKWidget.cpp
 )
 
-set(glrpt_HEADERS
+set(qlrpt_HEADERS
     GlobalDecls.h
     GlobalObjects.h
     DecoderWorker.h
@@ -57,7 +57,7 @@ set(glrpt_HEADERS
     QPSKWidget.h
 )
 
-set(glrpt_FORMS
+set(qlrpt_FORMS
     MainWindow.ui
     SettingsDialog.ui
 )
@@ -71,28 +71,28 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
 # primary and the only target
-add_executable(glrpt ${glrpt_SOURCES} ${glrpt_HEADERS} ${glrpt_FORMS})
+add_executable(qlrpt ${qlrpt_SOURCES} ${qlrpt_HEADERS} ${qlrpt_FORMS})
 
 
 # compile-time definitions
-target_compile_definitions(glrpt PRIVATE GLRPT_VERSION_FULL="${PROJECT_VERSION}")
+target_compile_definitions(qlrpt PRIVATE qlrpt_VERSION_FULL="${PROJECT_VERSION}")
 
 # extra compiler options
-target_compile_options(glrpt PRIVATE -Wall -pedantic)
+target_compile_options(qlrpt PRIVATE -Wall -pedantic)
 
 
 # where to find external includes
-target_include_directories(glrpt SYSTEM PRIVATE ${LIBLRPT_INCLUDE_DIRS})
+target_include_directories(qlrpt SYSTEM PRIVATE ${LIBLRPT_INCLUDE_DIRS})
 
 
 # where to find external libraries
-target_link_directories(glrpt PRIVATE ${LIBLRPT_LIBRARY_DIRS})
+target_link_directories(qlrpt PRIVATE ${LIBLRPT_LIBRARY_DIRS})
 
 
 # link libraries
-target_link_libraries(glrpt PRIVATE Qt5::Widgets)
-target_link_libraries(glrpt PRIVATE ${LIBLRPT_LIBRARIES})
+target_link_libraries(qlrpt PRIVATE Qt5::Widgets)
+target_link_libraries(qlrpt PRIVATE ${LIBLRPT_LIBRARIES})
 
 
 # install executable
-install(TARGETS glrpt RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS qlrpt RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

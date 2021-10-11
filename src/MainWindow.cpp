@@ -1,18 +1,18 @@
 /*
- * This file is part of glrpt.
+ * This file is part of qlrpt.
  *
- * glrpt is free software: you can redistribute it and/or modify
+ * qlrpt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * glrpt is distributed in the hope that it will be useful,
+ * qlrpt is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with glrpt. If not, see https://www.gnu.org/licenses/
+ * along with qlrpt. If not, see https://www.gnu.org/licenses/
  *
  * Author: Viktor Drobot
  */
@@ -174,7 +174,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 /**************************************************************************************************/
 
 void MainWindow::restoreSettings() {
-    QSettings s("desolve", "glrpt");
+    QSettings s("desolve", "qlrpt");
 
     lastSrcFileDir = s.value(
                 "Paths/LastSrcDir",
@@ -272,7 +272,7 @@ void MainWindow::setGlobalObjects(SrcType src) {
             iqRB = lrpt_iq_rb_alloc(iqRBSize, NULL); /* TODO implement verbose error reporting */
 
             if (!iqRB) {
-                QMessageBox::critical(this, tr("glrpt error"), tr("Can't allocate I/Q data ring buffer object!"), QMessageBox::Close);
+                QMessageBox::critical(this, tr("qlrpt error"), tr("Can't allocate I/Q data ring buffer object!"), QMessageBox::Close);
 
                 /* Deinit all previously allocated objects */
                 setGlobalObjects(NO_SRC);
@@ -293,7 +293,7 @@ void MainWindow::setGlobalObjects(SrcType src) {
         qpskRB = lrpt_qpsk_rb_alloc(qpskRBSize, NULL); /* TODO implement verbose error reporting */
 
         if (!qpskRB) {
-            QMessageBox::critical(this, tr("glrpt error"), tr("Can't allocate QPSK data ring buffer object!"), QMessageBox::Close);
+            QMessageBox::critical(this, tr("qlrpt error"), tr("Can't allocate QPSK data ring buffer object!"), QMessageBox::Close);
 
             /* Deinit all previously allocated objects */
             setGlobalObjects(NO_SRC);
@@ -519,8 +519,8 @@ void MainWindow::exitApp() {
 
 void MainWindow::aboutApp() {
     QMessageBox::about(this,
-                       tr("About glrpt"),
-                       tr("<b>glrpt " GLRPT_VERSION_FULL "</b><br/>Interactive GUI application for receiving, decoding and displaying LRPT images."));
+                       tr("About qlrpt"),
+                       tr("<b>qlrpt " qlrpt_VERSION_FULL "</b><br/>Interactive GUI application for receiving, decoding and displaying LRPT images."));
 }
 
 /**************************************************************************************************/
@@ -591,7 +591,7 @@ void MainWindow::browseSrcFile() {
         /* Store last directory */
         lastSrcFileDir = QFileInfo(fileName).absolutePath();
 
-        QSettings s("desolve", "glrpt");
+        QSettings s("desolve", "qlrpt");
 
         s.setValue("Paths/LastSrcDir", lastSrcFileDir);
         s.sync();
@@ -767,7 +767,7 @@ void MainWindow::browseRcvDumpFile() {
         /* Store last directory */
         lastRcvDumpFileDir = QFileInfo(fileName).absolutePath();
 
-        QSettings s("desolve", "glrpt");
+        QSettings s("desolve", "qlrpt");
 
         s.setValue("Paths/LastRcvDumpDir", lastRcvDumpFileDir);
         s.sync();
@@ -792,7 +792,7 @@ void MainWindow::browseFiltDumpFile() {
         /* Store last directory */
         lastFiltDumpFileDir = QFileInfo(fileName).absolutePath();
 
-        QSettings s("desolve", "glrpt");
+        QSettings s("desolve", "qlrpt");
 
         s.setValue("Paths/LastFiltDumpDir", lastFiltDumpFileDir);
         s.sync();
@@ -817,7 +817,7 @@ void MainWindow::browseDemodDumpFile() {
         /* Store last directory */
         lastDemodDumpFileDir = QFileInfo(fileName).absolutePath();
 
-        QSettings s("desolve", "glrpt");
+        QSettings s("desolve", "qlrpt");
 
         s.setValue("Paths/LastDemodDumpDir", lastDemodDumpFileDir);
         s.sync();
@@ -842,7 +842,7 @@ void MainWindow::browseQPSKProcDumpFile() { /* TODO disable start-stop button in
         /* Store last directory */
         lastQPSKProcDumpFileDir = QFileInfo(fileName).absolutePath();
 
-        QSettings s("desolve", "glrpt");
+        QSettings s("desolve", "qlrpt");
 
         s.setValue("Paths/LastQPSKProcDumpDir", lastQPSKProcDumpFileDir);
         s.sync();

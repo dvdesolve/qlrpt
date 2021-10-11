@@ -1,23 +1,23 @@
-# This file is part of glrpt.
+# This file is part of qlrpt.
 #
-# glrpt is free software: you can redistribute it and/or modify
+# qlrpt is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# glrpt is distributed in the hope that it will be useful,
+# qlrpt is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with glrpt. If not, see https://www.gnu.org/licenses/
+# along with qlrpt. If not, see https://www.gnu.org/licenses/
 #
 # Author: Viktor Drobot
 
 # global settings
 cmake_minimum_required(VERSION 3.12)
-project(glrpt VERSION 2.99.0 LANGUAGES CXX DESCRIPTION "Interactive GUI application for receiving, decoding and displaying LRPT images")
+project(qlrpt VERSION 0.1.0 LANGUAGES CXX DESCRIPTION "Interactive GUI application for receiving, decoding and displaying LRPT images written in C++/Qt")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,3 +41,4 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # build project
 add_subdirectory(src)
+add_subdirectory(share)

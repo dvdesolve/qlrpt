@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=qlrpt
+Comment=LRPT image decoder
+Exec=qlrpt
+Icon=qlrpt
+Terminal=false
+Type=Application
+Categories=HamRadio;Utility;Network;Other
