@@ -19,8 +19,8 @@
 
 /**************************************************************************************************/
 
-#ifndef QPSKWIDGET_H
-#define QPSKWIDGET_H
+#ifndef WATERFALLWIDGET_H
+#define WATERFALLWIDGET_H
 
 /**************************************************************************************************/
 
@@ -28,25 +28,14 @@
 
 /**************************************************************************************************/
 
-class QPSKWidget : public QWidget {
+class WaterfallWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit QPSKWidget(QWidget *parent = nullptr);
-
-    QSize minimumSizeHint() const override;
-    QSize sizeHint() const override;
-
-    void clearConst();
-
-public slots:
-    void drawConst(QVector<int> pts);
+    explicit WaterfallWidget(QWidget *parent = nullptr);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-
-private:
-    QVector<int> points;
+    void paintEvent(QPaintEvent *event) override;
 };
 
 /**************************************************************************************************/

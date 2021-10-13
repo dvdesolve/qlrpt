@@ -19,25 +19,20 @@
 
 /**************************************************************************************************/
 
-#ifndef FFTWIDGET_H
-#define FFTWIDGET_H
+#include "WaterfallWidget.h"
+
+#include <QPainter>
 
 /**************************************************************************************************/
 
-#include <QWidget>
+WaterfallWidget::WaterfallWidget(QWidget *parent) : QWidget(parent) {
+}
 
 /**************************************************************************************************/
 
-class FFTWidget : public QWidget {
-    Q_OBJECT
+void WaterfallWidget::paintEvent(QPaintEvent */*event*/) {
+    QPainter painter(this);
 
-public:
-    explicit FFTWidget(QWidget *parent = nullptr);
-
-protected:
-    void paintEvent(QPaintEvent *event) override;
-};
-
-/**************************************************************************************************/
-
-#endif
+    QRect base(0, 0, this->width(), this->height());
+    painter.fillRect(base, QColor(Qt::black));
+}

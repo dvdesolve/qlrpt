@@ -26,9 +26,9 @@
 
 #include "ui_MainWindow.h"
 
-#include "DecoderWorker.h"
-#include "IQSourceAbstractWorker.h"
-#include "QPSKSourceAbstractWorker.h"
+#include "../workers/DecoderWorker.h"
+#include "../workers/IQSourceAbstractWorker.h"
+#include "../workers/QPSKSourceAbstractWorker.h"
 
 #include <QMainWindow>
 #include <QThread>

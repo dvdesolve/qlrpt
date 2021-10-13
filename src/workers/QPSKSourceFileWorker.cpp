@@ -21,7 +21,7 @@
 
 #include "QPSKSourceFileWorker.h"
 
-#include "GlobalObjects.h"
+#include "../qlrpt/GlobalObjects.h"
 
 #include <lrpt.h>
 

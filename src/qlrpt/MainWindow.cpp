@@ -21,13 +21,13 @@
 
 #include "MainWindow.h"
 
-#include "DecoderWorker.h"
-#include "DemodulatorWorker.h"
+#include "../workers/DecoderWorker.h"
+#include "../workers/DemodulatorWorker.h"
 #include "GlobalDecls.h"
 #include "GlobalObjects.h"
-#include "IQSourceFileWorker.h"
-#include "QPSKSourceFileWorker.h"
-#include "SettingsDialog.h"
+#include "../workers/IQSourceFileWorker.h"
+#include "../workers/QPSKSourceFileWorker.h"
+#include "../dialogs/SettingsDialog.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -330,8 +330,8 @@ void MainWindow::updateUI() {
             DDTab->setDisabled(true);
 
             StatusGB->setDisabled(true);
-            FFTPlotGB->setDisabled(true);
-            QPSKGB->setDisabled(true);
+            WaterfallGB->setDisabled(true);
+            ConstellationGB->setDisabled(true);
             IQBufferUtilLbl->setDisabled(true);
             IQBufferUtilBar->setDisabled(true);
             QPSKBufferUtilLbl->setDisabled(true);
@@ -376,8 +376,8 @@ void MainWindow::updateUI() {
             setDDItems();
 
             StatusGB->setEnabled(processing);
-            FFTPlotGB->setEnabled(true);
-            QPSKGB->setEnabled(true);
+            WaterfallGB->setEnabled(true);
+            ConstellationGB->setEnabled(true);
             IQBufferUtilLbl->setEnabled(true);
             IQBufferUtilBar->setEnabled(true);
             QPSKBufferUtilLbl->setEnabled(true);
@@ -422,8 +422,8 @@ void MainWindow::updateUI() {
             setDDItems();
 
             StatusGB->setEnabled(processing);
-            FFTPlotGB->setDisabled(true);
-            QPSKGB->setEnabled(true);
+            WaterfallGB->setDisabled(true);
+            ConstellationGB->setEnabled(true);
             IQBufferUtilLbl->setDisabled(true);
             IQBufferUtilBar->setDisabled(true);
             QPSKBufferUtilLbl->setEnabled(true);
@@ -481,8 +481,8 @@ void MainWindow::updateUI() {
             setDDItems();
 
             StatusGB->setEnabled(processing);
-            FFTPlotGB->setEnabled(true);
-            QPSKGB->setEnabled(true);
+            WaterfallGB->setEnabled(true);
+            ConstellationGB->setEnabled(true);
             IQBufferUtilLbl->setEnabled(true);
             IQBufferUtilBar->setEnabled(true);
             QPSKBufferUtilLbl->setEnabled(true);
@@ -1000,7 +1000,7 @@ void MainWindow::startStopProcessing() {
                     SIGNAL(decoderInfo(bool,int,int,int,int,int)),
                     this,
                     SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
-        connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), QPSKPlot, SLOT(drawConst(QVector<int>)));
+        connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), ConstellationPlot, SLOT(drawConst(QVector<int>)));
 
         /* Start worker threads */
         /* TODO change cursor to busy */
@@ -1051,7 +1051,7 @@ void MainWindow::startStopProcessing() {
                     SIGNAL(decoderInfo(bool,int,int,int,int,int)),
                     this,
                     SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
-        connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), QPSKPlot, SLOT(drawConst(QVector<int>)));
+        connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), ConstellationPlot, SLOT(drawConst(QVector<int>)));
 
         /* Start worker thread */
         /* TODO change cursor to busy */
@@ -1226,7 +1226,7 @@ void MainWindow::finishDecoderWorker() {
     LockQualityBar->setValue(0);
     SignalQualityBar->setValue(0);
 
-    QPSKPlot->clearConst();
+    ConstellationPlot->clearConst();
 
     PLLStatusLbl->setText(tr("PLL: ---"));
     PLLFreqLbl->setText(tr("PLL frequency: --- Hz"));

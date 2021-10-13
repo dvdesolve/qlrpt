@@ -19,47 +19,45 @@
 
 /**************************************************************************************************/
 
-#include "IQSourceSDRWorker.h"
+#include "IQSourceFileWorker.h"
 
-#include "GlobalObjects.h"
-
-#include <QThread>
+#include "../qlrpt/GlobalObjects.h"
 
 #include <lrpt.h>
 
 /**************************************************************************************************/
 
-IQSourceSDRWorker::IQSourceSDRWorker(/* TODO implement */int MTU) {
+IQSourceFileWorker::IQSourceFileWorker(lrpt_iq_file_t *iqFile, int MTU) {
+    this->iqFile = iqFile;
     this->MTU = MTU;
 }
 
 /**************************************************************************************************/
 
-IQSourceSDRWorker::~IQSourceSDRWorker() {
+IQSourceFileWorker::~IQSourceFileWorker() {
     lrpt_iq_data_free(iqData);
 }
 
 /**************************************************************************************************/
 
-void IQSourceSDRWorker::process() {
+void IQSourceFileWorker::process() {
     /* TODO check for errors in the whole function */
 
     /* Allocate I/Q data object for buffered reading */
     iqData = lrpt_iq_data_alloc(MTU, NULL);
 
-    forever {
-        /* Check whether master has requested interruption */
-        if (QThread::currentThread()->isInterruptionRequested()) {
-            /* TODO implement immediate exiting */
-        }
+    uint64_t dataLen = lrpt_iq_file_length(iqFile);
+    uint64_t dataRead = 0;
 
-        /* TODO implement reading from SDR source */
-
+    while (dataRead < dataLen) {
+        lrpt_iq_data_read_from_file(iqData, iqFile, MTU, false, NULL);
         size_t n = lrpt_iq_data_length(iqData);
 
-        iqRBFree->tryAcquire(n);
+        iqRBFree->acquire(n);
         lrpt_iq_rb_push(iqRB, iqData, n, NULL);
         iqRBUsed->release(n);
+
+        dataRead += n;
 
         emit chunkProcessed(); /* Tell caller about chunk being read */
     }

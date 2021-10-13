@@ -24,7 +24,7 @@
 
 /**************************************************************************************************/
 
-#include "GlobalDecls.h"
+#include "../qlrpt/GlobalDecls.h"
 
 #include <QObject>
 

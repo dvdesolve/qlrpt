@@ -927,13 +927,13 @@
         </widget>
        </item>
        <item row="4" column="0" colspan="2">
-        <widget class="QGroupBox" name="FFTPlotGB">
+        <widget class="QGroupBox" name="WaterfallGB">
          <property name="title">
           <string>FFT</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
-           <widget class="QFrame" name="FFTPlotFrame">
+           <widget class="QFrame" name="WaterfallFrame">
             <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
@@ -942,7 +942,7 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="FFTWidget" name="FFTPlot" native="true">
+              <widget class="WaterfallWidget" name="WaterfallPlot" native="true">
                <property name="minimumSize">
                 <size>
                  <width>255</width>
@@ -984,13 +984,13 @@
         </widget>
        </item>
        <item row="4" column="2">
-        <widget class="QGroupBox" name="QPSKGB">
+        <widget class="QGroupBox" name="ConstellationGB">
          <property name="title">
           <string>QPSK</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_13">
           <item>
-           <widget class="QFrame" name="QPSKFrame">
+           <widget class="QFrame" name="ConstellationFrame">
             <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
@@ -999,7 +999,7 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
-              <widget class="QPSKWidget" name="QPSKPlot" native="true">
+              <widget class="ConstellationWidget" name="ConstellationPlot" native="true">
                <property name="minimumSize">
                 <size>
                  <width>129</width>
@@ -1103,21 +1103,21 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>FFTWidget</class>
+   <class>WaterfallWidget</class>
    <extends>QWidget</extends>
-   <header>FFTWidget.h</header>
+   <header>widgets/WaterfallWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QPSKWidget</class>
+   <class>ConstellationWidget</class>
    <extends>QWidget</extends>
-   <header>QPSKWidget.h</header>
+   <header>widgets/ConstellationWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>LRPTChanWidget</class>
    <extends>QWidget</extends>
-   <header>LRPTChanWidget.h</header>
+   <header>widgets/LRPTChanWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

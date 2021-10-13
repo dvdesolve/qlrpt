@@ -21,7 +21,7 @@
 
 #include "SettingsDialog.h"
 
-#include "GlobalDecls.h"
+#include "../qlrpt/GlobalDecls.h"
 
 #include <QPushButton>
 #include <QSettings>

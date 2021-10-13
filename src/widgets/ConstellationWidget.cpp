@@ -19,45 +19,45 @@
 
 /**************************************************************************************************/
 
-#include "QPSKWidget.h"
+#include "ConstellationWidget.h"
 
 #include <QPainter>
 
 /**************************************************************************************************/
 
-QPSKWidget::QPSKWidget(QWidget *parent) : QWidget(parent) {
+ConstellationWidget::ConstellationWidget(QWidget *parent) : QWidget(parent) {
     points.clear();
 }
 
 /**************************************************************************************************/
 
-QSize QPSKWidget::minimumSizeHint() const {
+QSize ConstellationWidget::minimumSizeHint() const {
     return QSize(129, 129);
 }
 
 /**************************************************************************************************/
 
-QSize QPSKWidget::sizeHint() const {
+QSize ConstellationWidget::sizeHint() const {
     return QSize(129, 129);
 }
 
 /**************************************************************************************************/
 
-void QPSKWidget::clearConst() {
+void ConstellationWidget::clearConst() {
     points.clear();
     update();
 }
 
 /**************************************************************************************************/
 
-void QPSKWidget::drawConst(QVector<int> pts) {
+void ConstellationWidget::drawConst(QVector<int> pts) {
     points = pts;
     update();
 }
 
 /**************************************************************************************************/
 
-void QPSKWidget::paintEvent(QPaintEvent *) {
+void ConstellationWidget::paintEvent(QPaintEvent *) {
     QPainter painter(this);
 
     QRect base(0, 0, width(), height());
@@ -71,6 +71,7 @@ void QPSKWidget::paintEvent(QPaintEvent *) {
     painter.drawLine(vLine);
     painter.drawLine(hLine);
 
+    /* TODO may be use QPixmap? */
     for (int i = 0; i < points.size() / 2; i++) {
         int x = points.at(2 * i) / 2;
         int y = points.at(2 * i + 1) / 2;

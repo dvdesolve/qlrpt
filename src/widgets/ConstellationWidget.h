@@ -19,20 +19,36 @@
 
 /**************************************************************************************************/
 
-#include "FFTWidget.h"
-
-#include <QPainter>
-
-/**************************************************************************************************/
-
-FFTWidget::FFTWidget(QWidget *parent) : QWidget(parent) {
-}
+#ifndef CONSTELLATIONWIDGET_H
+#define CONSTELLATIONWIDGET_H
 
 /**************************************************************************************************/
 
-void FFTWidget::paintEvent(QPaintEvent */*event*/) {
-    QPainter painter(this);
+#include <QWidget>
 
-    QRect base(0, 0, this->width(), this->height());
-    painter.fillRect(base, QColor(Qt::black));
-}
+/**************************************************************************************************/
+
+class ConstellationWidget : public QWidget {
+    Q_OBJECT
+
+public:
+    explicit ConstellationWidget(QWidget *parent = nullptr);
+
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
+
+    void clearConst();
+
+public slots:
+    void drawConst(QVector<int> pts);
+
+protected:
+    void paintEvent(QPaintEvent *) override;
+
+private:
+    QVector<int> points;
+};
+
+/**************************************************************************************************/
+
+#endif

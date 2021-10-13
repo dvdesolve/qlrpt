@@ -24,42 +24,42 @@ pkg_check_modules(LIBLRPT REQUIRED liblrpt)
 
 # sources
 set(qlrpt_SOURCES
-    main.cpp
-    GlobalObjects.cpp
-    DecoderWorker.cpp
-    DemodulatorWorker.cpp
-    IQSourceAbstractWorker.cpp
-    IQSourceFileWorker.cpp
-    IQSourceSDRWorker.cpp
-    QPSKSourceAbstractWorker.cpp
-    QPSKSourceFileWorker.cpp
-    MainWindow.cpp
-    SettingsDialog.cpp
-    FFTWidget.cpp
-    LRPTChanWidget.cpp
-    QPSKWidget.cpp
+    dialogs/SettingsDialog.cpp
+    qlrpt/main.cpp
+    qlrpt/GlobalObjects.cpp
+    qlrpt/MainWindow.cpp
+    widgets/ConstellationWidget.cpp
+    widgets/LRPTChanWidget.cpp
+    widgets/WaterfallWidget.cpp
+    workers/DecoderWorker.cpp
+    workers/DemodulatorWorker.cpp
+    workers/IQSourceAbstractWorker.cpp
+    workers/IQSourceFileWorker.cpp
+    workers/IQSourceSDRWorker.cpp
+    workers/QPSKSourceAbstractWorker.cpp
+    workers/QPSKSourceFileWorker.cpp
 )
 
 set(qlrpt_HEADERS
-    GlobalDecls.h
-    GlobalObjects.h
-    DecoderWorker.h
-    DemodulatorWorker.h
-    IQSourceAbstractWorker.h
-    IQSourceFileWorker.h
-    IQSourceSDRWorker.h
-    QPSKSourceAbstractWorker.h
-    QPSKSourceFileWorker.h
-    MainWindow.h
-    SettingsDialog.h
-    FFTWidget.h
-    LRPTChanWidget.h
-    QPSKWidget.h
+    dialogs/SettingsDialog.h
+    qlrpt/GlobalDecls.h
+    qlrpt/GlobalObjects.h
+    qlrpt/MainWindow.h
+    widgets/ConstellationWidget.h
+    widgets/LRPTChanWidget.h
+    widgets/WaterfallWidget.h
+    workers/DecoderWorker.h
+    workers/DemodulatorWorker.h
+    workers/IQSourceAbstractWorker.h
+    workers/IQSourceFileWorker.h
+    workers/IQSourceSDRWorker.h
+    workers/QPSKSourceAbstractWorker.h
+    workers/QPSKSourceFileWorker.h
 )
 
 set(qlrpt_FORMS
-    MainWindow.ui
-    SettingsDialog.ui
+    dialogs/SettingsDialog.ui
+    qlrpt/MainWindow.ui
 )
 
 

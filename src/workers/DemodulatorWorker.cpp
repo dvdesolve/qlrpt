@@ -21,7 +21,7 @@
 
 #include "DemodulatorWorker.h"
 
-#include "GlobalObjects.h"
+#include "../qlrpt/GlobalObjects.h"
 
 #include <QThread>
 
