@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with qlrpt. If not, see https://www.gnu.org/licenses/
  *
+ * Author: Neoklis Kyriazis
  * Author: Viktor Drobot
  */
 
@@ -32,13 +33,13 @@ ConstellationWidget::ConstellationWidget(QWidget *parent) : QWidget(parent) {
 /**************************************************************************************************/
 
 QSize ConstellationWidget::minimumSizeHint() const {
-    return QSize(129, 129);
+    return QSize(W, H);
 }
 
 /**************************************************************************************************/
 
 QSize ConstellationWidget::sizeHint() const {
-    return QSize(129, 129);
+    return QSize(W, H);
 }
 
 /**************************************************************************************************/
@@ -60,24 +61,25 @@ void ConstellationWidget::drawConst(QVector<int> pts) {
 void ConstellationWidget::paintEvent(QPaintEvent *) {
     QPainter painter(this);
 
-    QRect base(0, 0, width(), height());
-    painter.fillRect(base, QColor(Qt::black));
+    QImage constellation = QImage(W, H, QImage::Format_RGB32);
+    constellation.fill(QColor(Qt::black));
+
+    for (int i = 0; i < points.size() / 2; i++) {
+        /* Usual QPSK coding */
+        int x = (W2 + points.at(2 * i) / 2);
+        int y = (H2 - points.at(2 * i + 1) / 2);
+
+        QRgb *line = reinterpret_cast<QRgb *>(constellation.scanLine(y));
+        line[x] = QColor(Qt::white).rgb();
+    }
+
+    painter.drawImage(0, 0, constellation);
 
     QPen pen(Qt::white, 1.0);
-    QLineF vLine(width() / 2, 0, width() / 2, height());
-    QLineF hLine(0, height() / 2, width(), height() / 2);
+    QLineF vLine(W2, 0, W2, H_1);
+    QLineF hLine(0, H2, W_1, H2);
 
     painter.setPen(pen);
     painter.drawLine(vLine);
     painter.drawLine(hLine);
-
-    /* TODO may be use QPixmap? */
-    for (int i = 0; i < points.size() / 2; i++) {
-        int x = points.at(2 * i) / 2;
-        int y = points.at(2 * i + 1) / 2;
-
-        /* Usual QPSK coding */
-
-        painter.drawPoint(width() / 2 + x, height() / 2 - y);
-    }
 }

@@ -100,7 +100,7 @@ void DecoderWorker::processChunk() {
     /* TODO dump processed QPSK data here */
 
     /* Prepare symbols for drawing on constellation */
-    int n = lrpt_qpsk_data_length(qpskInput);
+    size_t n = lrpt_qpsk_data_length(qpskInput);
 
     if (n > QPSKConstPoints)
         n = QPSKConstPoints;

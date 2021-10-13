@@ -47,6 +47,8 @@ DemodulatorWorker::DemodulatorWorker(
 DemodulatorWorker::~DemodulatorWorker() {
     lrpt_iq_data_free(iqInput);
     lrpt_qpsk_data_free(qpskOutput);
+
+    lrpt_dsp_ifft_deinit(ifft);
 }
 
 /**************************************************************************************************/
@@ -59,6 +61,9 @@ void DemodulatorWorker::process() {
 
     /* Allocate QPSK data object for temporary storage */
     qpskOutput = lrpt_qpsk_data_alloc(0, NULL);
+
+    /* Initialize IFFT object */
+    ifft = lrpt_dsp_ifft_init(256, NULL);
 
     forever {
         /* Check whether master has requested interruption */
@@ -105,6 +110,37 @@ void DemodulatorWorker::processChunk() {
         if (filtDump)
             lrpt_iq_data_write_to_file(iqInput, filtDump, false, NULL);
     }
+
+    size_t iqN = lrpt_iq_data_length(iqInput);
+    lrpt_iq_data_to_doubles(iqInput, fftI, fftQ, 512, NULL);
+
+    int dec = 0;
+    double si = 0.0, sq = 0.0;
+
+    for (int i = 0; i < 512; i++) {
+        /* If we still have I/Q data in fftI and fftQ arrays */
+        if (i < static_cast<int>(iqN)) {
+            si += fftI[i];
+            sq += fftQ[i];
+        }
+
+        /* Promote decimation (up to the factor of 2) */
+        dec++;
+
+        if (dec == 2) {
+            /* TODO should we divide here? */
+            ifftData[i - 1] = static_cast<int16_t>(si);
+            ifftData[i] = static_cast<int16_t>(sq);
+
+            si = sq = 0.0;
+            dec = 0;
+        }
+    }
+
+    lrpt_dsp_ifft_exec(ifft, ifftData);
+
+    QVector<int> coeffs(ifftData, ifftData + 512);
+    emit iqWaterfall(coeffs);
 
     lrpt_demodulator_exec(demod, iqInput, qpskOutput, NULL);
 

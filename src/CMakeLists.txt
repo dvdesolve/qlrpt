@@ -18,7 +18,7 @@
 # check for packages
 find_package(PkgConfig REQUIRED)
 
-find_package(Qt5 5.2 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 5.14 COMPONENTS Widgets REQUIRED)
 pkg_check_modules(LIBLRPT REQUIRED liblrpt)
 
 

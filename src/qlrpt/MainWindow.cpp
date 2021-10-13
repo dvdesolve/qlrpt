@@ -984,6 +984,7 @@ void MainWindow::startStopProcessing() {
                     SIGNAL(demodInfo(bool,double,double,double,double)),
                     this,
                     SLOT(updateDemodStatusValues(bool,double,double,double,double)));
+        connect(qpskSrcWorker, SIGNAL(iqWaterfall(QVector<int>)), WaterfallPlot, SLOT(drawWaterfall(QVector<int>)));
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
@@ -1226,6 +1227,7 @@ void MainWindow::finishDecoderWorker() {
     LockQualityBar->setValue(0);
     SignalQualityBar->setValue(0);
 
+    WaterfallPlot->clearWaterfall();
     ConstellationPlot->clearConst();
 
     PLLStatusLbl->setText(tr("PLL: ---"));

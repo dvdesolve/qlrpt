@@ -47,6 +47,7 @@ public slots:
 
 signals:
     void demodInfo(bool, double, double, double, double);
+    void iqWaterfall(QVector<int>);
 
 private:
     lrpt_demodulator_t *demod = NULL;
@@ -57,6 +58,11 @@ private:
 
     lrpt_iq_data_t *iqInput = NULL;
     lrpt_qpsk_data_t *qpskOutput = NULL;
+
+    lrpt_dsp_ifft_t *ifft = NULL;
+    int16_t ifftData[512];
+    double fftI[512];
+    double fftQ[512];
 
     void processChunk();
 };

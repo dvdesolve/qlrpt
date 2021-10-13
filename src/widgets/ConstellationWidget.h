@@ -46,6 +46,14 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
+    /* Constellation widget will be always 129x129 pixels */
+    const int W = 129;
+    const int W2 = W / 2;
+    const int W_1 = W - 1;
+    const int H = 129;
+    const int H2 = H / 2;
+    const int H_1 = H - 1;
+
     QVector<int> points;
 };
 
