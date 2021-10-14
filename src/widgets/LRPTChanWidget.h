@@ -34,8 +34,19 @@ class LRPTChanWidget : public QWidget {
 public:
     explicit LRPTChanWidget(QWidget *parent = nullptr);
 
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
+
+    void stub();
+
 protected:
     void paintEvent(QPaintEvent *event) override;
+
+private:
+    /* Image widget will always be 300 pixels wide */
+    const int W = 300;
+
+    int curHeight = 0;
 };
 
 /**************************************************************************************************/

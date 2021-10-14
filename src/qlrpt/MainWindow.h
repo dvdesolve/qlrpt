@@ -181,6 +181,8 @@ private slots:
 
     /* Finish decoder */
     void finishDecoderWorker();
+
+    void stub(int apid, QVector<int> pxls);
 };
 
 /**************************************************************************************************/

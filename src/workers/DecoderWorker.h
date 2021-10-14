@@ -46,6 +46,7 @@ signals:
     void finished();
     void decoderInfo(bool, int, int, int, int, int);
     void qpskConst(QVector<int>);
+    void pxlsAvail(int, QVector<int>);
 
 private:
     lrpt_decoder_t *decoder = NULL;
@@ -61,6 +62,8 @@ private:
     size_t n_proc = 0;
 
     int8_t const_pts[2 * QPSKConstPoints]; /* One QPSK symbols equals to 2 int8_t bytes */
+
+    int pxCnt[6] = { 0, 0, 0, 0, 0, 0 };
 
     void processChunk();
 

@@ -1002,6 +1002,7 @@ void MainWindow::startStopProcessing() {
                     this,
                     SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
         connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), ConstellationPlot, SLOT(drawConst(QVector<int>)));
+        connect(decoderWorker, SIGNAL(pxlsAvail(int,QVector<int>)), this, SLOT(stub(int,QVector<int>)));
 
         /* Start worker threads */
         /* TODO change cursor to busy */
@@ -1053,6 +1054,7 @@ void MainWindow::startStopProcessing() {
                     this,
                     SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
         connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), ConstellationPlot, SLOT(drawConst(QVector<int>)));
+        connect(decoderWorker, SIGNAL(pxlsAvail(int,QVector<int>)), this, SLOT(stub(int,QVector<int>)));
 
         /* Start worker thread */
         /* TODO change cursor to busy */
@@ -1123,6 +1125,8 @@ void MainWindow::updateDecoderStatusValues(bool frmState,
     CVCDUsLbl->setText(tr("CVCDUs: %1").arg(QString::number(cvcduCnt)));
     PacketsLbl->setText(tr("Packets: %1").arg(QString::number(pckCnt)));
     SignalQualityBar->setValue(sigQ);
+
+    LRPTChan64Widget->stub();
 }
 
 /**************************************************************************************************/
@@ -1241,4 +1245,9 @@ void MainWindow::finishDecoderWorker() {
     PacketsLbl->setText(tr("Packets: ---"));
 
     startStopProcessing();
+}
+
+void MainWindow::stub(int apid, QVector<int> pxls)
+{
+    qDebug() << apid << pxls.size();
 }

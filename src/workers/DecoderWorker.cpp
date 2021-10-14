@@ -129,6 +129,26 @@ void DecoderWorker::processChunk() {
 
     emit decoderInfo(frmStatus, frmTotCnt, frmOkCnt, cvcduCnt, pckCnt, sigQ);
 
+    /* Get new pixels */
+    size_t cnt[6];
+    lrpt_decoder_pxls_avail(decoder, cnt);
+
+    for (int i = 0; i < 6; i++) {
+        size_t diff = (cnt[i] - pxCnt[i]);
+
+        if (diff > 0) {
+            uint8_t *apid_pxls = new uint8_t[diff];
+            lrpt_decoder_pxls_get(decoder, apid_pxls, 64 + i, pxCnt[i], diff, NULL);
+
+            pxCnt[i] = cnt[i];
+
+            QVector<int> pxls(apid_pxls, apid_pxls + diff);
+            emit pxlsAvail(64 + i, pxls);
+
+            delete [] apid_pxls;
+        }
+    }
+
     /* Recalculate how much data left unprocessed */
     n_rem = lrpt_qpsk_data_length(oper) - n_proc;
 

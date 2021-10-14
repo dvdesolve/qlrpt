@@ -30,6 +30,24 @@ LRPTChanWidget::LRPTChanWidget(QWidget *parent) : QWidget(parent) {
 
 /**************************************************************************************************/
 
+QSize LRPTChanWidget::minimumSizeHint() const {
+    return QSize(W, curHeight);
+}
+
+/**************************************************************************************************/
+
+QSize LRPTChanWidget::sizeHint() const {
+    return QSize(W, curHeight);
+}
+
+void LRPTChanWidget::stub() {
+    curHeight += 100;
+    setMinimumHeight(curHeight);
+    resize(W, curHeight);
+}
+
+/**************************************************************************************************/
+
 void LRPTChanWidget::paintEvent(QPaintEvent */*event*/) {
     QPainter painter(this);
 
