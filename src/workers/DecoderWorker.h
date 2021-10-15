@@ -63,7 +63,8 @@ private:
 
     int8_t const_pts[2 * QPSKConstPoints]; /* One QPSK symbols equals to 2 int8_t bytes */
 
-    int pxCnt[6] = { 0, 0, 0, 0, 0, 0 };
+    int imgStdWidth;
+    int linesCnt[6] = { 0, 0, 0, 0, 0, 0 };
 
     void processChunk();
 

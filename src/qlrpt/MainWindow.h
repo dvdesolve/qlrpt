@@ -96,8 +96,6 @@ private:
     /* State flags and variables */
     SrcType srcMode = NO_SRC;
     bool processing = false;
-    int nPacketsGood = 0;
-    int nPacketsTotal = 0;
 
     /* Status bar labels */
     QLabel *PLLStatusLbl;
@@ -173,6 +171,9 @@ private slots:
             int pckCnt,
             int sigQ);
 
+    /* Render new pixel data */
+    void renderImage(int apid, QVector<int> pxls);
+
     /* Finish file processing */
     void finishSrcFileWorker();
 
@@ -181,8 +182,6 @@ private slots:
 
     /* Finish decoder */
     void finishDecoderWorker();
-
-    void stub(int apid, QVector<int> pxls);
 };
 
 /**************************************************************************************************/

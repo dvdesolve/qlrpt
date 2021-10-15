@@ -37,7 +37,10 @@ public:
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
-    void stub();
+    void renderPixels(QVector<int> pxls);
+    void setStdWidth(int width);
+
+    void clearImage();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -47,6 +50,9 @@ private:
     const int W = 300;
 
     int curHeight = 0;
+    int stdWidth = 0;
+
+    QVector<int> image;
 };
 
 /**************************************************************************************************/

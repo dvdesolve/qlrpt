@@ -26,6 +26,7 @@
 /**************************************************************************************************/
 
 LRPTChanWidget::LRPTChanWidget(QWidget *parent) : QWidget(parent) {
+    image.clear();
 }
 
 /**************************************************************************************************/
@@ -40,10 +41,29 @@ QSize LRPTChanWidget::sizeHint() const {
     return QSize(W, curHeight);
 }
 
-void LRPTChanWidget::stub() {
-    curHeight += 100;
+/**************************************************************************************************/
+
+void LRPTChanWidget::renderPixels(QVector<int> pxls) {
+    image.append(pxls);
+
+    curHeight = image.size() / stdWidth; /* Number of full lines to be rendered */
     setMinimumHeight(curHeight);
     resize(W, curHeight);
+
+    update();
+}
+
+/**************************************************************************************************/
+
+void LRPTChanWidget::setStdWidth(int width) {
+    stdWidth = width;
+}
+
+/**************************************************************************************************/
+
+void LRPTChanWidget::clearImage() {
+    image.clear();
+    update();
 }
 
 /**************************************************************************************************/
@@ -51,6 +71,19 @@ void LRPTChanWidget::stub() {
 void LRPTChanWidget::paintEvent(QPaintEvent */*event*/) {
     QPainter painter(this);
 
-    QRect base(0, 0, this->width(), this->height());
-    painter.fillRect(base, QColor(Qt::darkGray));
+    /* If there is something to be rendered */
+    if (curHeight > 0) {
+        QImage img = QImage(stdWidth, curHeight, QImage::Format_Grayscale8);
+
+        for (int y = 0; y < curHeight; y++) {
+            uchar *line = img.scanLine(y);
+
+            for (int x = 0; x < stdWidth; x++)
+                *line++ = image.at(y * stdWidth + x);
+        }
+
+        /* TODO support smoothing */
+        QImage scaled = img.scaledToWidth(W);
+        painter.drawImage(0, 0, scaled);
+    }
 }

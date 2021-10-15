@@ -33,6 +33,7 @@ DecoderWorker::DecoderWorker(lrpt_decoder_t *decoder, int MTU, lrpt_qpsk_file_t 
     this->decoder = decoder;
     this->MTU = MTU;
     this->processedDump = processedDump;
+    imgStdWidth = lrpt_decoder_imgwidth(decoder);
 }
 
 /**************************************************************************************************/
@@ -134,15 +135,17 @@ void DecoderWorker::processChunk() {
     lrpt_decoder_pxls_avail(decoder, cnt);
 
     for (int i = 0; i < 6; i++) {
-        size_t diff = (cnt[i] - pxCnt[i]);
+        size_t linesAvail = (cnt[i] / (8 * imgStdWidth));
+        size_t diff = (linesAvail - linesCnt[i]);
+        size_t pxlsRequired = (diff * 8 * imgStdWidth);
 
-        if (diff > 0) {
-            uint8_t *apid_pxls = new uint8_t[diff];
-            lrpt_decoder_pxls_get(decoder, apid_pxls, 64 + i, pxCnt[i], diff, NULL);
+        if (pxlsRequired > 0) {
+            uint8_t *apid_pxls = new uint8_t[pxlsRequired];
+            lrpt_decoder_pxls_get(decoder, apid_pxls, 64 + i, linesCnt[i] * 8 * imgStdWidth, pxlsRequired, NULL);
 
-            pxCnt[i] = cnt[i];
+            linesCnt[i] = linesAvail;
 
-            QVector<int> pxls(apid_pxls, apid_pxls + diff);
+            QVector<int> pxls(apid_pxls, apid_pxls + pxlsRequired);
             emit pxlsAvail(64 + i, pxls);
 
             delete [] apid_pxls;

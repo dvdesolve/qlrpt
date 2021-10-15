@@ -99,6 +99,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     PacketsLbl->setMidLineWidth(0);
     statusbar->addPermanentWidget(PacketsLbl);
 
+    /* TODO populate spacecraft combobox directly and store corresponding data as UserRole */
+
     /* Read stored settings */
     restoreSettings();
 
@@ -879,9 +881,17 @@ void MainWindow::startStopProcessing() {
     StartStopBtn->setText((processing) ? tr("Stop") : tr("Start"));
     SettingsAct->setDisabled(processing);
 
-    if (processing)
+    if (processing) {
+        LRPTChan64Widget->clearImage();
+        LRPTChan65Widget->clearImage();
+        LRPTChan66Widget->clearImage();
+        LRPTChan67Widget->clearImage();
+        LRPTChan68Widget->clearImage();
+        LRPTChan69Widget->clearImage();
+
         LogText->insertPlainText(tr("Processing started at %1 UTC\n").
                 arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss")));
+    }
     else
         LogText->insertPlainText(tr("Processing finished at %1 UTC\n\n").
                 arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss")));
@@ -952,6 +962,13 @@ void MainWindow::startStopProcessing() {
         if (DecoderSpacecraftCombB->currentIndex() == 0)
             sc = LRPT_DECODER_SC_METEORM2;
 
+        LRPTChan64Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan65Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan66Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan67Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan68Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan69Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+
         decoder = lrpt_decoder_init(sc, NULL); /* TODO error reporting */
 
         /* Allocate new thread and worker for I/Q file reading */
@@ -1002,7 +1019,7 @@ void MainWindow::startStopProcessing() {
                     this,
                     SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
         connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), ConstellationPlot, SLOT(drawConst(QVector<int>)));
-        connect(decoderWorker, SIGNAL(pxlsAvail(int,QVector<int>)), this, SLOT(stub(int,QVector<int>)));
+        connect(decoderWorker, SIGNAL(pxlsAvail(int,QVector<int>)), this, SLOT(renderImage(int,QVector<int>)));
 
         /* Start worker threads */
         /* TODO change cursor to busy */
@@ -1024,6 +1041,13 @@ void MainWindow::startStopProcessing() {
 
         if (DecoderSpacecraftCombB->currentIndex() == 0)
             sc = LRPT_DECODER_SC_METEORM2;
+
+        LRPTChan64Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan65Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan66Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan67Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan68Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
+        LRPTChan69Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
 
         decoder = lrpt_decoder_init(sc, NULL); /* TODO error reporting */
 
@@ -1054,7 +1078,7 @@ void MainWindow::startStopProcessing() {
                     this,
                     SLOT(updateDecoderStatusValues(bool,int,int,int,int,int)));
         connect(decoderWorker, SIGNAL(qpskConst(QVector<int>)), ConstellationPlot, SLOT(drawConst(QVector<int>)));
-        connect(decoderWorker, SIGNAL(pxlsAvail(int,QVector<int>)), this, SLOT(stub(int,QVector<int>)));
+        connect(decoderWorker, SIGNAL(pxlsAvail(int,QVector<int>)), this, SLOT(renderImage(int,QVector<int>)));
 
         /* Start worker thread */
         /* TODO change cursor to busy */
@@ -1125,8 +1149,45 @@ void MainWindow::updateDecoderStatusValues(bool frmState,
     CVCDUsLbl->setText(tr("CVCDUs: %1").arg(QString::number(cvcduCnt)));
     PacketsLbl->setText(tr("Packets: %1").arg(QString::number(pckCnt)));
     SignalQualityBar->setValue(sigQ);
+}
 
-    LRPTChan64Widget->stub();
+/**************************************************************************************************/
+
+void MainWindow::renderImage(int apid, QVector<int> pxls) {
+    switch (apid) {
+        case 64: {
+            LRPTChan64Widget->renderPixels(pxls);
+            break;
+        }
+
+        case 65: {
+            LRPTChan65Widget->renderPixels(pxls);
+            break;
+        }
+
+        case 66: {
+            LRPTChan66Widget->renderPixels(pxls);
+            break;
+        }
+
+        case 67: {
+            LRPTChan67Widget->renderPixels(pxls);
+            break;
+        }
+
+        case 68: {
+            LRPTChan68Widget->renderPixels(pxls);
+            break;
+        }
+
+        case 69: {
+            LRPTChan69Widget->renderPixels(pxls);
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 /**************************************************************************************************/
@@ -1245,9 +1306,4 @@ void MainWindow::finishDecoderWorker() {
     PacketsLbl->setText(tr("Packets: ---"));
 
     startStopProcessing();
-}
-
-void MainWindow::stub(int apid, QVector<int> pxls)
-{
-    qDebug() << apid << pxls.size();
 }
