@@ -32,13 +32,13 @@ LRPTChanWidget::LRPTChanWidget(QWidget *parent) : QWidget(parent) {
 /**************************************************************************************************/
 
 QSize LRPTChanWidget::minimumSizeHint() const {
-    return QSize(W, curHeight);
+    return QSize(W, curHeightScaled);
 }
 
 /**************************************************************************************************/
 
 QSize LRPTChanWidget::sizeHint() const {
-    return QSize(W, curHeight);
+    return QSize(W, curHeightScaled);
 }
 
 /**************************************************************************************************/
@@ -46,9 +46,10 @@ QSize LRPTChanWidget::sizeHint() const {
 void LRPTChanWidget::renderPixels(QVector<int> pxls) {
     image.append(pxls);
 
-    curHeight = image.size() / stdWidth; /* Number of full lines to be rendered */
-    setMinimumHeight(curHeight);
-    resize(W, curHeight);
+    curHeight = (image.size() / stdWidth); /* Number of full lines to be rendered */
+    curHeightScaled = (curHeight * W / stdWidth + 1); /* Add extra line */
+    setMinimumHeight(curHeightScaled);
+    resize(W, curHeightScaled);
 
     update();
 }
@@ -63,6 +64,12 @@ void LRPTChanWidget::setStdWidth(int width) {
 
 void LRPTChanWidget::clearImage() {
     image.clear();
+
+    curHeight = 0;
+    curHeightScaled = 0;
+    setMinimumHeight(0);
+    resize(W, 0);
+
     update();
 }
 
