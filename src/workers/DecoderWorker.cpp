@@ -29,9 +29,14 @@
 
 /**************************************************************************************************/
 
-DecoderWorker::DecoderWorker(lrpt_decoder_t *decoder, int MTU, lrpt_qpsk_file_t *processedDump) {
+DecoderWorker::DecoderWorker(
+        lrpt_decoder_t *decoder,
+        int MTU,
+        lrpt_dsp_dediffcoder_t *dediffcoder,
+        lrpt_qpsk_file_t *processedDump) {
     this->decoder = decoder;
     this->MTU = MTU;
+    this->dediffcoder = dediffcoder;
     this->processedDump = processedDump;
     imgStdWidth = lrpt_decoder_imgwidth(decoder);
 }
@@ -97,7 +102,11 @@ void DecoderWorker::process() {
 /**************************************************************************************************/
 
 void DecoderWorker::processChunk() {
-    /* TODO should deinterleave and dediffcode here */
+    /* TODO should deinterleave here */
+
+    if (dediffcoder)
+        lrpt_dsp_dediffcoder_exec(dediffcoder, qpskInput);
+
     /* TODO dump processed QPSK data here */
 
     /* Prepare symbols for drawing on constellation */

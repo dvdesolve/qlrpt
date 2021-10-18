@@ -61,8 +61,7 @@ private:
 
     lrpt_dsp_ifft_t *ifft = NULL;
     int16_t ifftData[512];
-    double fftI[512];
-    double fftQ[512];
+    double fftIQ[1024];
 
     void processChunk();
 };

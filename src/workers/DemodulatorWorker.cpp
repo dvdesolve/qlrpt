@@ -112,7 +112,7 @@ void DemodulatorWorker::processChunk() {
     }
 
     size_t iqN = lrpt_iq_data_length(iqInput);
-    lrpt_iq_data_to_doubles(iqInput, fftI, fftQ, 512, NULL);
+    lrpt_iq_data_to_doubles(iqInput, fftIQ, 512, NULL);
 
     int dec = 0;
     double si = 0.0, sq = 0.0;
@@ -120,8 +120,8 @@ void DemodulatorWorker::processChunk() {
     for (int i = 0; i < 512; i++) {
         /* If we still have I/Q data in fftI and fftQ arrays */
         if (i < static_cast<int>(iqN)) {
-            si += fftI[i];
-            sq += fftQ[i];
+            si += fftIQ[2 * i];
+            sq += fftIQ[2 * i + 1];
         }
 
         /* Promote decimation (up to the factor of 2) */

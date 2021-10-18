@@ -43,7 +43,7 @@ public:
     void clearImage();
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
 
 private:
     /* Image widget will always be 300 pixels wide */

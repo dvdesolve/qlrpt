@@ -90,6 +90,7 @@ private:
     DecoderWorker *decoderWorker = nullptr;
     QThread *decoderThread = nullptr;
     lrpt_decoder_t *decoder = NULL;
+    lrpt_dsp_dediffcoder_t *dediffcoder = NULL;
     lrpt_image_t *lrptImage = NULL;
     lrpt_qpsk_file_t *ddQPSKProcFile = NULL;
 

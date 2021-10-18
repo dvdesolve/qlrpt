@@ -971,6 +971,10 @@ void MainWindow::startStopProcessing() {
 
         decoder = lrpt_decoder_init(sc, NULL); /* TODO error reporting */
 
+        /* Initialize dediffcoder (if requested) */
+        if (DecoderDiffcodedCB->isChecked())
+            dediffcoder = lrpt_dsp_dediffcoder_init(NULL); /* TODO error reporting */
+
         /* Allocate new thread and worker for I/Q file reading */
         iqSrcThread = new QThread();
         iqSrcWorker = new IQSourceFileWorker(iqSrcFile, iqSrcFileMTU);
@@ -1005,7 +1009,7 @@ void MainWindow::startStopProcessing() {
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, NULL); /* TODO pass file objects for processed dump */
+        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, NULL); /* TODO pass deinterleaver and file objects for processed dump */
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
@@ -1051,6 +1055,10 @@ void MainWindow::startStopProcessing() {
 
         decoder = lrpt_decoder_init(sc, NULL); /* TODO error reporting */
 
+        /* Initialize dediffcoder (if requested) */
+        if (DecoderDiffcodedCB->isChecked())
+            dediffcoder = lrpt_dsp_dediffcoder_init(NULL); /* TODO error reporting */
+
         /* Allocate new thread and worker for QPSK file reading */
         qpskSrcThread = new QThread();
         qpskSrcWorker = new QPSKSourceFileWorker(qpskSrcFile, qpskSrcFileMTU);
@@ -1064,7 +1072,7 @@ void MainWindow::startStopProcessing() {
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, NULL); /* TODO pass file objects for processed dump */
+        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, NULL); /* TODO pass deinterleaver and file objects for processed dump */
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
@@ -1282,6 +1290,10 @@ void MainWindow::finishDecoderWorker() {
     /* Free decoder object */
     lrpt_decoder_deinit(decoder);
     decoder = NULL;
+
+    /* Free dediffcoder object */
+    lrpt_dsp_dediffcoder_deinit(dediffcoder);
+    dediffcoder = NULL;
 
     /* TODO close intermediate dump files */
 

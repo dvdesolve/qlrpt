@@ -36,7 +36,11 @@ class DecoderWorker : public QObject {
     Q_OBJECT
 
 public:
-    explicit DecoderWorker(lrpt_decoder_t *decoder, int MTU, lrpt_qpsk_file_t *processedDump = NULL); /* TODO add deinterleaver and dediffcoder */
+    explicit DecoderWorker(
+            lrpt_decoder_t *decoder,
+            int MTU,
+            lrpt_dsp_dediffcoder_t *dediffcoder = NULL,
+            lrpt_qpsk_file_t *processedDump = NULL); /* TODO add deinterleaver */
     ~DecoderWorker();
 
 public slots:
@@ -51,6 +55,7 @@ signals:
 private:
     lrpt_decoder_t *decoder = NULL;
     int MTU;
+    lrpt_dsp_dediffcoder_t *dediffcoder = NULL;
     lrpt_qpsk_file_t *processedDump = NULL;
 
     lrpt_qpsk_data_t *qpskInput = NULL;

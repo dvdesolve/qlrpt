@@ -27,6 +27,7 @@
 /**************************************************************************************************/
 
 WaterfallWidget::WaterfallWidget(QWidget *parent) : QWidget(parent) {
+    /* TODO try to avoid pointer-based access to waterfall QImage */
     waterfall = new QImage(W, H, QImage::Format_RGB32);
     waterfall->fill(QColor(Qt::black));
 }

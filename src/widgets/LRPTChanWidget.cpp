@@ -75,9 +75,10 @@ void LRPTChanWidget::clearImage() {
 
 /**************************************************************************************************/
 
-void LRPTChanWidget::paintEvent(QPaintEvent */*event*/) {
+void LRPTChanWidget::paintEvent(QPaintEvent *) {
     QPainter painter(this);
 
+    /* TODO use more optimal approach - for example, copy old image buffer to new one as with FFT waterfall */
     /* If there is something to be rendered */
     if (curHeight > 0) {
         QImage img = QImage(stdWidth, curHeight, QImage::Format_Grayscale8);
