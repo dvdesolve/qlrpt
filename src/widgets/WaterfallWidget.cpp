@@ -27,15 +27,8 @@
 /**************************************************************************************************/
 
 WaterfallWidget::WaterfallWidget(QWidget *parent) : QWidget(parent) {
-    /* TODO try to avoid pointer-based access to waterfall QImage */
-    waterfall = new QImage(W, H, QImage::Format_RGB32);
-    waterfall->fill(QColor(Qt::black));
-}
-
-/**************************************************************************************************/
-
-WaterfallWidget::~WaterfallWidget() {
-    delete waterfall;
+    waterfall =  QImage(W, H, QImage::Format_RGB32);
+    waterfall.fill(QColor(Qt::black));
 }
 
 /**************************************************************************************************/
@@ -57,7 +50,7 @@ void WaterfallWidget::clearWaterfall() {
     bin_max = 1000;
     curr_bin_max = 0;
 
-    waterfall->fill(QColor(Qt::black));
+    waterfall.fill(QColor(Qt::black));
 
     update();
 }
@@ -65,11 +58,11 @@ void WaterfallWidget::clearWaterfall() {
 /**************************************************************************************************/
 
 void WaterfallWidget::drawWaterfall(QVector<int> freqs) {
-    memmove(waterfall->bits() + waterfall->bytesPerLine(),
-            waterfall->bits(),
-            waterfall->sizeInBytes() - waterfall->bytesPerLine());
+    memmove(waterfall.bits() + waterfall.bytesPerLine(),
+            waterfall.bits(),
+            waterfall.sizeInBytes() - waterfall.bytesPerLine());
 
-    QRgb *topline = reinterpret_cast<QRgb *>(waterfall->scanLine(0));
+    QRgb *topline = reinterpret_cast<QRgb *>(waterfall.scanLine(0));
 
     int idx = 256;
 
@@ -106,7 +99,7 @@ void WaterfallWidget::drawWaterfall(QVector<int> freqs) {
 void WaterfallWidget::paintEvent(QPaintEvent *) {
     QPainter painter(this);
 
-    painter.drawImage(0, 0, *waterfall);
+    painter.drawImage(0, 0, waterfall);
 }
 
 /**************************************************************************************************/

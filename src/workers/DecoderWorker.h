@@ -60,6 +60,7 @@ private:
 
     lrpt_qpsk_data_t *qpskInput = NULL;
     lrpt_qpsk_data_t *remnants = NULL;
+    lrpt_qpsk_data_t *temp = NULL;
     lrpt_qpsk_data_t *oper = NULL;
     lrpt_image_t *img = NULL;
 

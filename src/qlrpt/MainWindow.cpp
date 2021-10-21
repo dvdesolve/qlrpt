@@ -677,7 +677,7 @@ void MainWindow::showFileInfo(const QString &fileName) {
                                          arg(QString::number(lrpt_qpsk_file_version(f))));
             SrcInfoText->insertPlainText(tr("Flags: %1%2\n").
                                          arg((lrpt_qpsk_file_is_diffcoded(f)) ?
-                                                 tr("diffcoded, ") :
+                                                 tr("diffcoded ") :
                                                  "",
                                              (lrpt_qpsk_file_is_interleaved(f)) ?
                                                  tr("interleaved") :

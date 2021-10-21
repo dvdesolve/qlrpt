@@ -46,6 +46,7 @@ DecoderWorker::DecoderWorker(
 DecoderWorker::~DecoderWorker() {
     lrpt_qpsk_data_free(qpskInput);
     lrpt_qpsk_data_free(remnants);
+    lrpt_qpsk_data_free(temp);
 }
 
 /**************************************************************************************************/
@@ -58,6 +59,9 @@ void DecoderWorker::process() {
 
     /* Allocate helper QPSK data object for storing remnants */
     remnants = lrpt_qpsk_data_alloc(0, NULL);
+
+    /* Allocate temporary QPSK storage for handling extra data */
+    temp = lrpt_qpsk_data_alloc(MTU, NULL);
 
     forever {
         /* Check whether master has requested interruption */
@@ -130,6 +134,19 @@ void DecoderWorker::processChunk() {
 
     lrpt_decoder_exec(decoder, oper, &n_proc, NULL);
 
+    /* Recalculate how much data left unprocessed */
+    n_rem = lrpt_qpsk_data_length(oper) - n_proc;
+
+    /* Copy the remnants */
+    if (n_rem != 0) {
+        if (oper == qpskInput)
+            lrpt_qpsk_data_from_qpsk(remnants, qpskInput, n_proc, n_rem, NULL);
+        else {
+            lrpt_qpsk_data_from_qpsk(temp, remnants, n_proc, n_rem, NULL);
+            lrpt_qpsk_data_from_qpsk(remnants, temp, 0, n_rem, NULL);
+        }
+    }
+
     bool frmStatus = lrpt_decoder_framingstate(decoder);
     int frmTotCnt = lrpt_decoder_framestot_cnt(decoder);
     int frmOkCnt = lrpt_decoder_framesok_cnt(decoder);
@@ -158,21 +175,6 @@ void DecoderWorker::processChunk() {
             emit pxlsAvail(64 + i, pxls);
 
             delete [] apid_pxls;
-        }
-    }
-
-    /* Recalculate how much data left unprocessed */
-    n_rem = lrpt_qpsk_data_length(oper) - n_proc;
-
-    /* Copy the remnants */
-    if (n_rem != 0) {
-        if (oper == qpskInput)
-            lrpt_qpsk_data_from_qpsk(remnants, qpskInput, n_proc, n_rem, NULL);
-        else {
-            lrpt_qpsk_data_t *tmp =
-                    lrpt_qpsk_data_create_from_qpsk(remnants, n_proc, n_rem, NULL);
-            lrpt_qpsk_data_from_qpsk(remnants, tmp, 0, n_rem, NULL);
-            lrpt_qpsk_data_free(tmp);
         }
     }
 

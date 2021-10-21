@@ -49,11 +49,11 @@ private:
     /* Image widget will always be 300 pixels wide */
     const int W = 300;
 
+    QImage preview;
+
     int curHeight = 0;
     int curHeightScaled = 0;
     int stdWidth = 0;
-
-    QVector<int> image;
 };
 
 /**************************************************************************************************/

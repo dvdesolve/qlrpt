@@ -33,7 +33,6 @@ class WaterfallWidget : public QWidget {
 
 public:
     explicit WaterfallWidget(QWidget *parent = nullptr);
-    ~WaterfallWidget();
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
@@ -55,7 +54,7 @@ private:
     const int H2 = H / 2;
     const int H_1 = H - 1;
 
-    QImage *waterfall;
+    QImage waterfall;
 
     const int amp_avg_win = 4;
     const int amp_avg_mult = amp_avg_win - 1;

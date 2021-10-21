@@ -26,7 +26,7 @@
 /**************************************************************************************************/
 
 LRPTChanWidget::LRPTChanWidget(QWidget *parent) : QWidget(parent) {
-    image.clear();
+    preview = QImage(0, 0, QImage::Format_Grayscale8);
 }
 
 /**************************************************************************************************/
@@ -44,9 +44,23 @@ QSize LRPTChanWidget::sizeHint() const {
 /**************************************************************************************************/
 
 void LRPTChanWidget::renderPixels(QVector<int> pxls) {
-    image.append(pxls);
+    int addHeight = pxls.size() / stdWidth;
+    QImage new_preview(stdWidth, curHeight + addHeight, QImage::Format_Grayscale8);
 
-    curHeight = (image.size() / stdWidth); /* Number of full lines to be rendered */
+    /* If old image contains some data - copy it to the top of new one */
+    if (curHeight > 0)
+        memcpy(new_preview.bits(), preview.bits(), preview.sizeInBytes());
+
+    for (int y = 0; y < addHeight; y++) {
+        uchar *line = new_preview.scanLine(curHeight + y);
+
+        for (int x = 0; x < stdWidth; x++)
+            *line++ = pxls.at(x);
+    }
+
+    preview = new_preview;
+
+    curHeight += addHeight; /* Number of full lines to be rendered */
     curHeightScaled = (curHeight * W / stdWidth + 1); /* Add extra line */
     setMinimumHeight(curHeightScaled);
     resize(W, curHeightScaled);
@@ -63,7 +77,7 @@ void LRPTChanWidget::setStdWidth(int width) {
 /**************************************************************************************************/
 
 void LRPTChanWidget::clearImage() {
-    image.clear();
+    preview = QImage(0, 0, QImage::Format_Grayscale8);
 
     curHeight = 0;
     curHeightScaled = 0;
@@ -78,20 +92,10 @@ void LRPTChanWidget::clearImage() {
 void LRPTChanWidget::paintEvent(QPaintEvent *) {
     QPainter painter(this);
 
-    /* TODO use more optimal approach - for example, copy old image buffer to new one as with FFT waterfall */
     /* If there is something to be rendered */
     if (curHeight > 0) {
-        QImage img = QImage(stdWidth, curHeight, QImage::Format_Grayscale8);
-
-        for (int y = 0; y < curHeight; y++) {
-            uchar *line = img.scanLine(y);
-
-            for (int x = 0; x < stdWidth; x++)
-                *line++ = image.at(y * stdWidth + x);
-        }
-
-        /* TODO support smoothing */
-        QImage scaled = img.scaledToWidth(W);
+        /* TODO support optional smoothing */
+        QImage scaled = preview.scaledToWidth(W);
         painter.drawImage(0, 0, scaled);
     }
 }
