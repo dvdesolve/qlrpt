@@ -45,6 +45,7 @@ QSize LRPTChanWidget::sizeHint() const {
 
 void LRPTChanWidget::renderPixels(QVector<int> pxls) {
     int addHeight = pxls.size() / stdWidth;
+
     QImage new_preview(stdWidth, curHeight + addHeight, QImage::Format_Grayscale8);
 
     /* If old image contains some data - copy it to the top of new one */
@@ -55,13 +56,13 @@ void LRPTChanWidget::renderPixels(QVector<int> pxls) {
         uchar *line = new_preview.scanLine(curHeight + y);
 
         for (int x = 0; x < stdWidth; x++)
-            *line++ = pxls.at(x);
+            *line++ = pxls.at(y * stdWidth + x);
     }
 
     preview = new_preview;
 
     curHeight += addHeight; /* Number of full lines to be rendered */
-    curHeightScaled = (curHeight * W / stdWidth + 1); /* Add extra line */
+    curHeightScaled = ((curHeight * W) / stdWidth + 1); /* Add extra line */
     setMinimumHeight(curHeightScaled);
     resize(W, curHeightScaled);
 

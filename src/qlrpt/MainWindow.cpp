@@ -1009,7 +1009,7 @@ void MainWindow::startStopProcessing() {
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, NULL); /* TODO pass deinterleaver and file objects for processed dump */
+        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, DecoderInterleavedCB->isChecked(), NULL); /* TODO pass file object for processed dump */
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
@@ -1072,7 +1072,7 @@ void MainWindow::startStopProcessing() {
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, NULL); /* TODO pass deinterleaver and file objects for processed dump */
+        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, DecoderInterleavedCB->isChecked(), NULL); /* TODO pass file object for processed dump */
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);

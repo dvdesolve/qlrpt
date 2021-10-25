@@ -29,14 +29,15 @@
 
 /**************************************************************************************************/
 
-DecoderWorker::DecoderWorker(
-        lrpt_decoder_t *decoder,
+DecoderWorker::DecoderWorker(lrpt_decoder_t *decoder,
         int MTU,
         lrpt_dsp_dediffcoder_t *dediffcoder,
+        bool deint,
         lrpt_qpsk_file_t *processedDump) {
     this->decoder = decoder;
     this->MTU = MTU;
     this->dediffcoder = dediffcoder;
+    this->deint = deint;
     this->processedDump = processedDump;
     imgStdWidth = lrpt_decoder_imgwidth(decoder);
 }
@@ -100,19 +101,14 @@ void DecoderWorker::process() {
         }
     }
 
+    /* TODO request remaining pixels */
+
     emit finished(); /* Tell caller about job end */
 }
 
 /**************************************************************************************************/
 
 void DecoderWorker::processChunk() {
-    /* TODO should deinterleave here */
-
-    if (dediffcoder)
-        lrpt_dsp_dediffcoder_exec(dediffcoder, qpskInput);
-
-    /* TODO dump processed QPSK data here */
-
     /* Prepare symbols for drawing on constellation */
     size_t n = lrpt_qpsk_data_length(qpskInput);
 
@@ -123,6 +119,14 @@ void DecoderWorker::processChunk() {
 
     QVector<int> pts(const_pts, const_pts + n);
     emit qpskConst(pts);
+
+    if (deint)
+        lrpt_dsp_deinterleaver_exec(qpskInput, NULL);
+
+    if (dediffcoder)
+        lrpt_dsp_dediffcoder_exec(dediffcoder, qpskInput);
+
+    /* TODO dump processed QPSK data here */
 
     /* Append data to remnants */
     if (n_rem != 0) {

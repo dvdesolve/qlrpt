@@ -40,7 +40,8 @@ public:
             lrpt_decoder_t *decoder,
             int MTU,
             lrpt_dsp_dediffcoder_t *dediffcoder = NULL,
-            lrpt_qpsk_file_t *processedDump = NULL); /* TODO add deinterleaver */
+            bool deint = false,
+            lrpt_qpsk_file_t *processedDump = NULL);
     ~DecoderWorker();
 
 public slots:
@@ -56,6 +57,7 @@ private:
     lrpt_decoder_t *decoder = NULL;
     int MTU;
     lrpt_dsp_dediffcoder_t *dediffcoder = NULL;
+    bool deint = false;
     lrpt_qpsk_file_t *processedDump = NULL;
 
     lrpt_qpsk_data_t *qpskInput = NULL;
