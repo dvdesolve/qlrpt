@@ -60,6 +60,7 @@ void QPSKSourceFileWorker::process() {
         dataRead += n;
 
         emit chunkProcessed(); /* Tell caller about chunk being read */
+        emit readProgress(dataRead); /* Tell caller about total progress during reading source file */
     }
 
     emit finished(); /* Tell caller about job end */

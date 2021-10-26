@@ -324,11 +324,15 @@ void MainWindow::updateUI() {
             SrcFilePath->setDisabled(true);
             SrcFileBrowseBtn->setDisabled(true);
 
+            TotalProgressBar->setValue(0);
+            TotalProgressBar->setDisabled(true);
+
             SrcInfoText->setDisabled(true);
 
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(true);
             DecoderTab->setDisabled(true);
+            PPTab->setDisabled(true);
             DDTab->setDisabled(true);
 
             StatusGB->setDisabled(true);
@@ -368,11 +372,15 @@ void MainWindow::updateUI() {
             SrcFilePath->setDisabled(processing);
             SrcFileBrowseBtn->setDisabled(processing);
 
+            TotalProgressBar->setValue(0);
+            TotalProgressBar->setEnabled(true);
+
             SrcInfoText->setEnabled(true);
 
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(processing);
             DecoderTab->setDisabled(processing);
+            PPTab->setDisabled(processing);
             DDTab->setDisabled(processing);
 
             setDDItems();
@@ -414,11 +422,15 @@ void MainWindow::updateUI() {
             SrcFilePath->setDisabled(processing);
             SrcFileBrowseBtn->setDisabled(processing);
 
+            TotalProgressBar->setValue(0);
+            TotalProgressBar->setEnabled(true);
+
             SrcInfoText->setEnabled(true);
 
             SDRTab->setDisabled(true);
             DemodTab->setDisabled(true);
             DecoderTab->setDisabled(processing);
+            PPTab->setDisabled(processing);
             DDTab->setDisabled(processing);
 
             setDDItems();
@@ -460,6 +472,9 @@ void MainWindow::updateUI() {
             SrcFilePath->setDisabled(true);
             SrcFileBrowseBtn->setDisabled(true);
 
+            TotalProgressBar->setValue(0);
+            TotalProgressBar->setEnabled(true);
+
             SrcInfoText->setEnabled(true);
 
             SDRTab->setEnabled(true);
@@ -478,6 +493,7 @@ void MainWindow::updateUI() {
 
             DemodTab->setDisabled(processing);
             DecoderTab->setDisabled(processing);
+            PPTab->setDisabled(processing);
             DDTab->setDisabled(processing);
 
             setDDItems();
@@ -636,6 +652,8 @@ void MainWindow::showFileInfo(const QString &fileName) {
                 return;
             }
 
+            TotalProgressBar->setMaximum(lrpt_iq_file_length(f));
+
             SrcInfoText->insertPlainText(tr("Source type: I/Q file\n"));
             SrcInfoText->insertPlainText(tr("I/Q file version: %1\n").
                                          arg(QString::number(lrpt_iq_file_version(f))));
@@ -671,6 +689,8 @@ void MainWindow::showFileInfo(const QString &fileName) {
 
                 return;
             }
+
+            TotalProgressBar->setMaximum(lrpt_qpsk_file_length(f));
 
             SrcInfoText->insertPlainText(tr("Source type: QPSK file\n"));
             SrcInfoText->insertPlainText(tr("QPSK file version: %1\n").
@@ -985,6 +1005,7 @@ void MainWindow::startStopProcessing() {
         connect(iqSrcThread, SIGNAL(started()), iqSrcWorker, SLOT(process()));
         connect(iqSrcWorker, SIGNAL(finished()), this, SLOT(finishSrcFileWorker()));
         connect(iqSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
+        connect(iqSrcWorker, SIGNAL(readProgress(int)), this, SLOT(updateReadProgress(int)));
 
         /* Allocate new thread and worker for demodulator */
         qpskSrcThread = new QThread();
@@ -1069,6 +1090,7 @@ void MainWindow::startStopProcessing() {
         connect(qpskSrcThread, SIGNAL(started()), qpskSrcWorker, SLOT(process()));
         connect(qpskSrcWorker, SIGNAL(finished()), this, SLOT(finishSrcFileWorker()));
         connect(qpskSrcWorker, SIGNAL(chunkProcessed()), this, SLOT(updateBuffersIndicators()));
+        connect(qpskSrcWorker, SIGNAL(readProgress(int)), this, SLOT(updateReadProgress(int)));
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
@@ -1096,6 +1118,12 @@ void MainWindow::startStopProcessing() {
 
     /* Reflect changes in UI */
     updateUI();
+}
+
+/**************************************************************************************************/
+
+void MainWindow::updateReadProgress(int len) {
+    TotalProgressBar->setValue(len);
 }
 
 /**************************************************************************************************/

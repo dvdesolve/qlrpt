@@ -152,6 +152,9 @@ private slots:
     /* Handle start/stop processing event */
     void startStopProcessing();
 
+    /* Show source file reading progress */
+    void updateReadProgress(int len);
+
     /* Show buffers utilization status */
     void updateBuffersIndicators();
 

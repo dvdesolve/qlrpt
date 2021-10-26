@@ -45,6 +45,9 @@ private:
     int MTU;
 
     lrpt_qpsk_data_t *qpskData = NULL;
+
+signals:
+    void readProgress(int);
 };
 
 /**************************************************************************************************/

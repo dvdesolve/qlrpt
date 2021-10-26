@@ -45,6 +45,9 @@ private:
     int MTU;
 
     lrpt_iq_data_t *iqData = NULL;
+
+signals:
+    void readProgress(int);
 };
 
 /**************************************************************************************************/

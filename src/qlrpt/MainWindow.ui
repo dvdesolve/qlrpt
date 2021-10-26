@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1200</width>
-    <height>880</height>
+    <height>904</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -51,10 +51,46 @@
              </item>
             </layout>
            </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QPushButton" name="StartStopBtn">
+           <item row="1" column="0">
+            <widget class="QLabel" name="SrcLbl">
              <property name="text">
-              <string>Start</string>
+              <string>Source:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <widget class="QPlainTextEdit" name="SrcInfoText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>130</height>
+              </size>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="SrcFilePathLbl">
+             <property name="text">
+              <string>File path:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QProgressBar" name="TotalProgressBar">
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -92,36 +128,10 @@
              </item>
             </layout>
            </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QPlainTextEdit" name="SrcInfoText">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>130</height>
-              </size>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="SrcFilePathLbl">
+           <item row="0" column="0" colspan="2">
+            <widget class="QPushButton" name="StartStopBtn">
              <property name="text">
-              <string>File path:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="SrcLbl">
-             <property name="text">
-              <string>Source:</string>
+              <string>Start</string>
              </property>
             </widget>
            </item>
@@ -132,41 +142,8 @@
            <string>SDR</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="0" column="2">
-            <widget class="QDoubleSpinBox" name="SDRBandwidthSB">
-             <property name="suffix">
-              <string> kHz</string>
-             </property>
-             <property name="decimals">
-              <number>3</number>
-             </property>
-             <property name="minimum">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>200.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>10.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>120.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Input rate/decimation:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QCheckBox" name="SDRBiasTee">
-             <property name="text">
-              <string>Bias tee</string>
-             </property>
-            </widget>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="SDRInputRateCombB"/>
            </item>
            <item row="1" column="2">
             <widget class="QComboBox" name="SDRDecimationCombB">
@@ -209,20 +186,39 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
-            <widget class="QRadioButton" name="SDRGainAutoRB">
+           <item row="5" column="0">
+            <widget class="QCheckBox" name="SDRBiasTee">
              <property name="text">
-              <string>AGC</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
+              <string>Bias tee</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QRadioButton" name="SDRGainManualRB">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_6">
              <property name="text">
-              <string>Manual</string>
+              <string>Input rate/decimation:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QDoubleSpinBox" name="SDRBandwidthSB">
+             <property name="suffix">
+              <string> kHz</string>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>200.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>10.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>120.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -232,9 +228,6 @@
               <string>Frequency/bandwidth:</string>
              </property>
             </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QComboBox" name="SDRInputRateCombB"/>
            </item>
            <item row="0" column="1">
             <widget class="QDoubleSpinBox" name="SDRFrequencySB">
@@ -258,16 +251,20 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="1" colspan="2">
-            <widget class="QSlider" name="SDRGainSlider">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+           <item row="3" column="0">
+            <widget class="QRadioButton" name="SDRGainAutoRB">
+             <property name="text">
+              <string>AGC</string>
              </property>
-             <property name="tickPosition">
-              <enum>QSlider::TicksBelow</enum>
+             <property name="checked">
+              <bool>true</bool>
              </property>
-             <property name="tickInterval">
-              <number>20</number>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QRadioButton" name="SDRGainManualRB">
+             <property name="text">
+              <string>Manual</string>
              </property>
             </widget>
            </item>
@@ -284,6 +281,32 @@
              </property>
             </spacer>
            </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="4" column="1" colspan="3">
+            <widget class="QSlider" name="SDRGainSlider">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TicksBelow</enum>
+             </property>
+             <property name="tickInterval">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="DemodTab">
@@ -291,114 +314,10 @@
            <string>Demodulator</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="3" column="1">
-            <widget class="QSpinBox" name="DemodRRCOrderSB">
-             <property name="maximum">
-              <number>256</number>
-             </property>
-             <property name="value">
-              <number>32</number>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0" colspan="3">
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="DemodPLLBandwidthSB">
-             <property name="suffix">
-              <string> Hz</string>
-             </property>
-             <property name="decimals">
-              <number>1</number>
-             </property>
-             <property name="minimum">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>500.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>100.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QSpinBox" name="DemodInterpolationFactorSB">
-             <property name="maximum">
-              <number>32</number>
-             </property>
-             <property name="value">
-              <number>4</number>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_10">
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="DemodFilterCB">
              <property name="text">
-              <string>RRC order/alpha:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string>Interpolation factor:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>PLL locked/unlocked threshold:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="2">
-            <widget class="QDoubleSpinBox" name="DemodRRCAlphaSB">
-             <property name="decimals">
-              <number>2</number>
-             </property>
-             <property name="minimum">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>1.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="value">
-              <double>0.600000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDoubleSpinBox" name="DemodPLLLockedSB">
-             <property name="decimals">
-              <number>2</number>
-             </property>
-             <property name="minimum">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>2.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="value">
-              <double>0.800000000000000</double>
+              <string>Filter input samples</string>
              </property>
             </widget>
            </item>
@@ -421,6 +340,75 @@
              </property>
             </widget>
            </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>PLL locked/unlocked threshold:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="DemodPLLLockedSB">
+             <property name="decimals">
+              <number>2</number>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>2.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.800000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>RRC order/alpha:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QSpinBox" name="DemodRRCOrderSB">
+             <property name="maximum">
+              <number>256</number>
+             </property>
+             <property name="value">
+              <number>32</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="DemodPLLBandwidthSB">
+             <property name="suffix">
+              <string> Hz</string>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>500.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>100.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Interpolation factor:</string>
+             </property>
+            </widget>
+           </item>
            <item row="5" column="0">
             <widget class="QCheckBox" name="DemodOffsetCB">
              <property name="text">
@@ -435,12 +423,60 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QCheckBox" name="DemodFilterCB">
-             <property name="text">
-              <string>Filter input samples</string>
+           <item row="3" column="2">
+            <widget class="QDoubleSpinBox" name="DemodRRCAlphaSB">
+             <property name="decimals">
+              <number>2</number>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.600000000000000</double>
              </property>
             </widget>
+           </item>
+           <item row="6" column="0" colspan="3">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="DemodInterpolationFactorSB">
+             <property name="maximum">
+              <number>32</number>
+             </property>
+             <property name="value">
+              <number>4</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -448,25 +484,18 @@
           <attribute name="title">
            <string>Decoder</string>
           </attribute>
-          <layout class="QGridLayout" name="gridLayout_6" columnstretch="0,1">
-           <item row="2" column="0">
-            <widget class="QCheckBox" name="DecoderInterleavedCB">
-             <property name="text">
-              <string>Interleaving</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="DecoderDiffcodedCB">
-             <property name="text">
-              <string>Differential coding</string>
-             </property>
-            </widget>
-           </item>
+          <layout class="QGridLayout" name="gridLayout_6" columnstretch="0,1,0">
            <item row="0" column="0">
             <widget class="QLabel" name="label">
              <property name="text">
               <string>Spacecraft:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="DecoderInterleavedCB">
+             <property name="text">
+              <string>Interleaving</string>
              </property>
             </widget>
            </item>
@@ -492,6 +521,233 @@
              </property>
             </spacer>
            </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="DecoderDiffcodedCB">
+             <property name="text">
+              <string>Differential coding</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="PPTab">
+          <attribute name="title">
+           <string>Postprocessing</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="PPRotateCB">
+             <property name="text">
+              <string>Rotate by 180°</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="PPRectifyCB">
+             <property name="text">
+              <string>Rectify</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="PPNormalizeCB">
+             <property name="text">
+              <string>Normalize</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" colspan="2">
+            <widget class="QCheckBox" name="PPClaheCB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>CLAHE</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QCheckBox" name="PPColorizeCB">
+             <property name="text">
+              <string>Colorize</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1" colspan="2">
+            <widget class="QCheckBox" name="PPInvertCB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Invert channels</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="PPRedChLbl">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Red normal/inverted APID:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="PPRedChSB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimum">
+              <number>64</number>
+             </property>
+             <property name="maximum">
+              <number>69</number>
+             </property>
+             <property name="value">
+              <number>66</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QSpinBox" name="PPRedInvChSB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimum">
+              <number>64</number>
+             </property>
+             <property name="maximum">
+              <number>69</number>
+             </property>
+             <property name="value">
+              <number>69</number>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="PPGreenChLbl">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Green normal/inverted APID:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QSpinBox" name="PPGreenChSB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimum">
+              <number>64</number>
+             </property>
+             <property name="maximum">
+              <number>69</number>
+             </property>
+             <property name="value">
+              <number>65</number>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QSpinBox" name="PPGreenInvChSB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimum">
+              <number>64</number>
+             </property>
+             <property name="maximum">
+              <number>69</number>
+             </property>
+             <property name="value">
+              <number>68</number>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="PPBlueChLbl">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Blue normal/inverted APID:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QSpinBox" name="PPBlueChSB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimum">
+              <number>64</number>
+             </property>
+             <property name="maximum">
+              <number>69</number>
+             </property>
+             <property name="value">
+              <number>64</number>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="2">
+            <widget class="QSpinBox" name="PPBlueInvChSB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimum">
+              <number>64</number>
+             </property>
+             <property name="maximum">
+              <number>69</number>
+             </property>
+             <property name="value">
+              <number>67</number>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0" colspan="4">
+            <spacer name="verticalSpacer_10">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="DDTab">
@@ -499,11 +755,12 @@
            <string>Data dump</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_7">
-           <item row="5" column="0">
-            <widget class="QLineEdit" name="DDDemodFilePath"/>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLineEdit" name="DDFiltFilePath"/>
+           <item row="5" column="1">
+            <widget class="QPushButton" name="DDDemodFileBrowseBtn">
+             <property name="text">
+              <string>Select</string>
+             </property>
+            </widget>
            </item>
            <item row="3" column="1">
             <widget class="QPushButton" name="DDFiltFileBrowseBtn">
@@ -512,30 +769,23 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLineEdit" name="DDRcvFilePath"/>
-           </item>
-           <item row="5" column="1">
-            <widget class="QPushButton" name="DDDemodFileBrowseBtn">
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="DDFiltCB">
              <property name="text">
-              <string>Select</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QCheckBox" name="DDRcvCB">
-             <property name="text">
-              <string>Dump received I/Q data</string>
+              <string>Dump filtered I/Q data</string>
              </property>
             </widget>
            </item>
            <item row="7" column="0">
             <widget class="QLineEdit" name="DDQPSKProcFilePath"/>
            </item>
-           <item row="6" column="0">
-            <widget class="QCheckBox" name="DDQPSKProcCB">
+           <item row="1" column="0">
+            <widget class="QLineEdit" name="DDRcvFilePath"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="DDRcvCB">
              <property name="text">
-              <string>Dump processed QPSK data</string>
+              <string>Dump received I/Q data</string>
              </property>
             </widget>
            </item>
@@ -553,6 +803,19 @@
              </property>
             </widget>
            </item>
+           <item row="5" column="0">
+            <widget class="QLineEdit" name="DDDemodFilePath"/>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLineEdit" name="DDFiltFilePath"/>
+           </item>
+           <item row="6" column="0">
+            <widget class="QCheckBox" name="DDQPSKProcCB">
+             <property name="text">
+              <string>Dump processed QPSK data</string>
+             </property>
+            </widget>
+           </item>
            <item row="4" column="0">
             <widget class="QCheckBox" name="DDDemodCB">
              <property name="text">
@@ -560,12 +823,18 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QCheckBox" name="DDFiltCB">
-             <property name="text">
-              <string>Dump filtered I/Q data</string>
+           <item row="8" column="0" colspan="2">
+            <spacer name="verticalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
-            </widget>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -591,7 +860,7 @@
             <x>0</x>
             <y>0</y>
             <width>1818</width>
-            <height>683</height>
+            <height>707</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout">
@@ -1177,7 +1446,31 @@
     </property>
     <addaction name="AboutAct"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <widget class="QMenu" name="menuQPSKdata">
+     <property name="title">
+      <string>QPSK data</string>
+     </property>
+     <addaction name="DeinterleaveAct"/>
+     <addaction name="DediffcodeAct"/>
+    </widget>
+    <widget class="QMenu" name="menuIQdata">
+     <property name="title">
+      <string>I/Q data</string>
+     </property>
+     <addaction name="FilterAct"/>
+     <addaction name="DemodAct"/>
+    </widget>
+    <addaction name="menuIQdata"/>
+    <addaction name="menuQPSKdata"/>
+    <addaction name="separator"/>
+    <addaction name="PostprocAct"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -1194,6 +1487,41 @@
   <action name="SettingsAct">
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionDeinterleave_QPSK_file">
+   <property name="text">
+    <string>Deinterleave</string>
+   </property>
+  </action>
+  <action name="actionDediffcode">
+   <property name="text">
+    <string>Dediffcode</string>
+   </property>
+  </action>
+  <action name="FilterAct">
+   <property name="text">
+    <string>Filter</string>
+   </property>
+  </action>
+  <action name="DemodAct">
+   <property name="text">
+    <string>Demodulate</string>
+   </property>
+  </action>
+  <action name="DeinterleaveAct">
+   <property name="text">
+    <string>Deinterleave</string>
+   </property>
+  </action>
+  <action name="DediffcodeAct">
+   <property name="text">
+    <string>Dediffcode</string>
+   </property>
+  </action>
+  <action name="PostprocAct">
+   <property name="text">
+    <string>Image postprocessing</string>
    </property>
   </action>
  </widget>
@@ -1244,6 +1572,18 @@
   <tabstop>DecoderSpacecraftCombB</tabstop>
   <tabstop>DecoderDiffcodedCB</tabstop>
   <tabstop>DecoderInterleavedCB</tabstop>
+  <tabstop>PPRotateCB</tabstop>
+  <tabstop>PPRectifyCB</tabstop>
+  <tabstop>PPNormalizeCB</tabstop>
+  <tabstop>PPClaheCB</tabstop>
+  <tabstop>PPColorizeCB</tabstop>
+  <tabstop>PPInvertCB</tabstop>
+  <tabstop>PPRedChSB</tabstop>
+  <tabstop>PPGreenChSB</tabstop>
+  <tabstop>PPBlueChSB</tabstop>
+  <tabstop>PPRedInvChSB</tabstop>
+  <tabstop>PPGreenInvChSB</tabstop>
+  <tabstop>PPBlueInvChSB</tabstop>
   <tabstop>DDRcvCB</tabstop>
   <tabstop>DDRcvFilePath</tabstop>
   <tabstop>DDRcvFileBrowseBtn</tabstop>
