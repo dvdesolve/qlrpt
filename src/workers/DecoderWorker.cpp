@@ -40,11 +40,17 @@ DecoderWorker::DecoderWorker(lrpt_decoder_t *decoder,
     this->deint = deint;
     this->processedDump = processedDump;
     imgStdWidth = lrpt_decoder_imgwidth(decoder);
+    int_chunks.clear();
 }
 
 /**************************************************************************************************/
 
 DecoderWorker::~DecoderWorker() {
+    if (deint) {
+        for (int i = 0; i < int_chunks.size(); i++)
+            lrpt_qpsk_data_free(int_chunks.at(i));
+    }
+
     lrpt_qpsk_data_free(qpskInput);
     lrpt_qpsk_data_free(remnants);
     lrpt_qpsk_data_free(temp);
@@ -70,11 +76,14 @@ void DecoderWorker::process() {
             size_t dataLen = qpskRBUsed->available();
             size_t dataRead = 0;
 
-            /* We should leave at least 3xSFL at the end of RB */
-            size_t extra = (dataLen % (3 * lrpt_decoder_sfl()));
-            dataLen -= extra;
+            if (!deint) {
+                /* We should leave at least 3xSFL at the end of RB for non-interleaved data */
+                size_t extra = (dataLen % ((3 * lrpt_decoder_sfl()) / 2));
+                dataLen -= extra;
+            }
 
             /* Read till QPSK ring buffer become empty (with account to 3xSFL) */
+            /* TODO may be rely on decoder exec function */
             while (dataRead < dataLen) {
                 size_t n = ((dataLen - dataRead) < static_cast<size_t>(MTU)) ?
                             (dataLen - dataRead) :
@@ -87,6 +96,55 @@ void DecoderWorker::process() {
                 processChunk();
 
                 dataRead += n;
+            }
+
+            if (deint) {
+                emit qpskConst(QVector<int>(0));
+
+                QVector<int8_t> soft_data;
+                soft_data.reserve(2 * intlv_len);
+
+                /* Combine all interleaved data chunks into single one */
+                for (int i = 0; i < int_chunks.size(); i++) {
+                    size_t n = lrpt_qpsk_data_length(int_chunks.at(i));
+
+                    QVector<int8_t> sft(2 * n);
+
+                    /* TODO may be free resources ASAP */
+                    lrpt_qpsk_data_to_soft(int_chunks.at(i), sft.data(), n, NULL);
+                    soft_data.append(sft);
+                }
+
+                /* Convert to the liblrpt format */
+                lrpt_qpsk_data_t *intlvd = lrpt_qpsk_data_create_from_soft(soft_data.data(), intlv_len, NULL);
+
+                /* Immediate cleanup */
+                soft_data.clear();
+                soft_data.squeeze(); /* TODO may be necessary in other places where QVectors are used too */
+
+                /* And now we can deinterleave the whole data and then process it chunk-by-chunk as usual */
+                lrpt_dsp_deinterleaver_exec(intlvd, NULL);
+
+                dataLen = lrpt_qpsk_data_length(intlvd);
+                dataRead = 0;
+
+                /* We should leave at least 3xSFL at the end of data buffer for non-interleaved data */
+                size_t extra = (dataLen % ((3 * lrpt_decoder_sfl()) / 2));
+                dataLen -= extra;
+
+                /* Read till the end of QPSK data (with account to 3xSFL) */
+                /* TODO may be rely on decoder exec function */
+                while (dataRead < dataLen) {
+                    size_t n = ((dataLen - dataRead) < static_cast<size_t>(MTU)) ?
+                                (dataLen - dataRead) :
+                                MTU;
+
+                    lrpt_qpsk_data_from_qpsk(qpskInput, intlvd, dataRead, n, NULL);
+
+                    decodeChunk();
+
+                    dataRead += n;
+                }
             }
 
             break;
@@ -120,9 +178,24 @@ void DecoderWorker::processChunk() {
     QVector<int> pts(const_pts, const_pts + n);
     emit qpskConst(pts);
 
-    if (deint)
-        lrpt_dsp_deinterleaver_exec(qpskInput, NULL);
+    if (deint) {
+        /* Create separate chunk of data and store pointer to it */
+        n = lrpt_qpsk_data_length(qpskInput);
 
+        lrpt_qpsk_data_t *chunk = lrpt_qpsk_data_create_from_qpsk(qpskInput, 0, n, NULL);
+
+        intlv_len += n; /* Remember new interleaved data length */
+        int_chunks.append(chunk);
+    }
+    else
+        decodeChunk();
+
+    emit chunkProcessed();
+}
+
+/**************************************************************************************************/
+
+void DecoderWorker::decodeChunk() {
     if (dediffcoder)
         lrpt_dsp_dediffcoder_exec(dediffcoder, qpskInput);
 
@@ -181,7 +254,4 @@ void DecoderWorker::processChunk() {
             delete [] apid_pxls;
         }
     }
-
-    /* TODO we should emit not only this signal but a number of newly available pixels in each APID */
-    emit chunkProcessed();
 }

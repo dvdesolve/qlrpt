@@ -64,10 +64,12 @@ private:
     lrpt_qpsk_data_t *remnants = NULL;
     lrpt_qpsk_data_t *temp = NULL;
     lrpt_qpsk_data_t *oper = NULL;
+    QVector<lrpt_qpsk_data_t *> int_chunks;
     lrpt_image_t *img = NULL;
 
     size_t n_rem = 0;
     size_t n_proc = 0;
+    size_t intlv_len = 0;
 
     int8_t const_pts[2 * QPSKConstPoints]; /* One QPSK symbols equals to 2 int8_t bytes */
 
@@ -75,6 +77,7 @@ private:
     int linesCnt[6] = { 0, 0, 0, 0, 0, 0 };
 
     void processChunk();
+    void decodeChunk();
 
 signals:
     void chunkProcessed();

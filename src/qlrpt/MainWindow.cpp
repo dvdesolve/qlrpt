@@ -244,7 +244,7 @@ void MainWindow::restoreSettings() {
         s.setValue("IO/DecoderChunkSize", x);
     }
 
-    decoderChunkSize = x * lrpt_decoder_sfl();  /* Convert from SFLs */
+    decoderChunkSize = (x * lrpt_decoder_sfl()) / 2;  /* Convert from SFLs to the number of QPSK symbols */
 
     s.sync();
 }
@@ -1297,7 +1297,7 @@ void MainWindow::finishDecoderWorker() {
 
     /* TODO close intermediate dump files */
 
-    /* TODO free ring buffer resources, reset semaphores, clear FFT widget */
+    setGlobalObjects(srcMode);
 
     IQBufferUtilBar->setValue(0);
     QPSKBufferUtilBar->setValue(0);
