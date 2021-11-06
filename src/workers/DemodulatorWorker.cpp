@@ -29,16 +29,13 @@
 
 /**************************************************************************************************/
 
-DemodulatorWorker::DemodulatorWorker(
-        lrpt_demodulator_t *demod,
+DemodulatorWorker::DemodulatorWorker(lrpt_demodulator_t *demod,
         int MTU,
         lrpt_dsp_filter_t *filter,
-        lrpt_iq_file_t *filtDump,
         lrpt_qpsk_file_t *demodDump) {
     this->demod = demod;
     this->MTU = MTU;
     this->filter = filter;
-    this->filtDump = filtDump;
     this->demodDump = demodDump;
 }
 
@@ -104,12 +101,8 @@ void DemodulatorWorker::process() {
 /**************************************************************************************************/
 
 void DemodulatorWorker::processChunk() {
-    if (filter) {
+    if (filter)
         lrpt_dsp_filter_apply(filter, iqInput);
-
-        if (filtDump)
-            lrpt_iq_data_write_to_file(iqInput, filtDump, false, NULL);
-    }
 
     size_t iqN = lrpt_iq_data_length(iqInput);
     lrpt_iq_data_to_doubles(iqInput, fftIQ, 512, NULL);

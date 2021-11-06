@@ -41,6 +41,10 @@
 
 /**************************************************************************************************/
 
+Q_DECLARE_METATYPE(lrpt_decoder_spacecraft_t);
+
+/**************************************************************************************************/
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
@@ -99,7 +103,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     PacketsLbl->setMidLineWidth(0);
     statusbar->addPermanentWidget(PacketsLbl);
 
-    /* TODO populate spacecraft combobox directly and store corresponding data as UserRole */
+    DecoderSpacecraftCombB->addItem(tr("Meteor-M2"), QVariant::fromValue(LRPT_DECODER_SC_METEORM2));
+    DecoderSpacecraftCombB->addItem(tr("Meteor-M2-1"), QVariant::fromValue(LRPT_DECODER_SC_METEORM2_1));
+    DecoderSpacecraftCombB->addItem(tr("Meteor-M2-2"), QVariant::fromValue(LRPT_DECODER_SC_METEORM2_2));
 
     /* Read stored settings */
     restoreSettings();
@@ -122,19 +128,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(SrcFilePath, SIGNAL(textChanged(QString)), this, SLOT(showFileInfo(QString)));
 
     /* Dump data related connections */
-    connect(DDRcvFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseRcvDumpFile()));
-    connect(DDFiltFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseFiltDumpFile()));
-    connect(DDDemodFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseDemodDumpFile()));
-    connect(DDQPSKProcFileBrowseBtn, SIGNAL(clicked()), this, SLOT(browseQPSKProcDumpFile()));
+    connect(DDRcvDirBrowseBtn, SIGNAL(clicked()), this, SLOT(browseRcvDumpDir()));
+    connect(DDDemodDirBrowseBtn, SIGNAL(clicked()), this, SLOT(browseDemodDumpDir()));
+    /* TODO implement directory selection for output images */
 
-    /* Set up connections for data processing checkboxes */
+    /* Set up connections for data processing and dumping checkboxes */
     connect(DemodFilterCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
     connect(DecoderDiffcodedCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
     connect(DecoderInterleavedCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
     connect(DDRcvCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
-    connect(DDFiltCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
     connect(DDDemodCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
-    connect(DDQPSKProcCB, SIGNAL(toggled(bool)), this, SLOT(setDDItems()));
+
+    /* Handle locked/unlocked thresholds for PLL correctly */
+    connect(DemodPLLLockedSB, SIGNAL(valueChanged(double)), this, SLOT(handlePLLThresholds()));
+    connect(DemodPLLUnlockedSB, SIGNAL(valueChanged(double)), this, SLOT(handlePLLThresholds()));
 
     /* Set up connections for live APIDs checkboxes */
     connect(APID64ShowCB, SIGNAL(stateChanged(int)), this, SLOT(setLiveAPIDsImagery()));
@@ -170,6 +177,7 @@ MainWindow::~MainWindow() {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     /* TODO implement */
+    /* TODO save settings here */
     event->accept();
 }
 
@@ -182,69 +190,182 @@ void MainWindow::restoreSettings() {
                 "Paths/LastSrcDir",
                 QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
 
-    int x;
+    int xi;
+    double xf;
 
     /* IQ source file MTU */
-    x = s.value("IO/IQSrcFileMTU", IQSrcFileMTU_DEF).toInt();
+    xi = s.value("IO/IQSrcFileMTU", IQSrcFileMTU_DEF).toInt();
 
-    if ((x < IQSrcFileMTU_MIN) || (x > IQSrcFileMTU_MAX)) {
-        x = IQSrcFileMTU_DEF;
-        s.setValue("IO/IQSrcFileMTU", x);
+    if ((xi < IQSrcFileMTU_MIN) || (xi > IQSrcFileMTU_MAX)) {
+        xi = IQSrcFileMTU_DEF;
+        s.setValue("IO/IQSrcFileMTU", xi);
     }
 
-    iqSrcFileMTU = x * 1024; /* Convert from ksamples/s */
+    iqSrcFileMTU = xi * 1024; /* Convert from ksamples/s */
 
     /* QPSK source file MTU */
-    x = s.value("IO/QPSKSrcFileMTU", QPSKSrcFileMTU_DEF).toInt();
+    xi = s.value("IO/QPSKSrcFileMTU", QPSKSrcFileMTU_DEF).toInt();
 
-    if ((x < QPSKSrcFileMTU_MIN) || (x > QPSKSrcFileMTU_MAX)) {
-        x = QPSKSrcFileMTU_DEF;
-        s.setValue("IO/QPSKSrcFileMTU", x);
+    if ((xi < QPSKSrcFileMTU_MIN) || (xi > QPSKSrcFileMTU_MAX)) {
+        xi = QPSKSrcFileMTU_DEF;
+        s.setValue("IO/QPSKSrcFileMTU", xi);
     }
 
-    qpskSrcFileMTU = x * 1024; /* Convert from ksymbols/s */
+    qpskSrcFileMTU = xi * 1024; /* Convert from ksymbols/s */
 
     /* IQ ring buffer size */
-    x = s.value("IO/IQRBSize", IQRBSize_DEF).toInt();
+    xi = s.value("IO/IQRBSize", IQRBSize_DEF).toInt();
 
-    if ((x < IQRBSize_MIN) || (x > IQRBSize_MAX)) {
-        x = IQRBSize_DEF;
-        s.setValue("IO/IQRBSize", x);
+    if ((xi < IQRBSize_MIN) || (xi > IQRBSize_MAX)) {
+        xi = IQRBSize_DEF;
+        s.setValue("IO/IQRBSize", xi);
     }
 
-    iqRBSize = x * 1024; /* Convert from ksamples/s */
+    iqRBSize = xi * 1024; /* Convert from ksamples/s */
     IQBufferUtilBar->setMaximum(iqRBSize); /* Update maximum of indicator buffer */
 
     /* QPSK ring buffer size */
-    x = s.value("IO/QPSKRBSize", QPSKRBSize_DEF).toInt();
+    xi = s.value("IO/QPSKRBSize", QPSKRBSize_DEF).toInt();
 
-    if ((x < QPSKRBSize_MIN) || (x > QPSKRBSize_MAX)) {
-        x = QPSKRBSize_DEF;
-        s.setValue("IO/QPSKRBSize", x);
+    if ((xi < QPSKRBSize_MIN) || (xi > QPSKRBSize_MAX)) {
+        xi = QPSKRBSize_DEF;
+        s.setValue("IO/QPSKRBSize", xi);
     }
 
-    qpskRBSize = x * 1024; /* Convert from ksymbols/s */
+    qpskRBSize = xi * 1024; /* Convert from ksymbols/s */
     QPSKBufferUtilBar->setMaximum(qpskRBSize); /* Update maximum of indicator buffer */
 
     /* Demodulator chunk size */
-    x = s.value("IO/DemodChunkSize", DemodChunkSize_DEF).toInt();
+    xi = s.value("IO/DemodChunkSize", DemodChunkSize_DEF).toInt();
 
-    if ((x != 0) && ((x < DemodChunkSize_MIN) || (x > DemodChunkSize_MAX))) {
-        x = DemodChunkSize_DEFINIT;
-        s.setValue("IO/DemodChunkSize", x);
+    if ((xi != 0) && ((xi < DemodChunkSize_MIN) || (xi > DemodChunkSize_MAX))) {
+        xi = DemodChunkSize_DEFINIT;
+        s.setValue("IO/DemodChunkSize", xi);
     }
 
-    demodChunkSize = x * 1024; /* Convert from ksamples/s */
+    demodChunkSize = xi * 1024; /* Convert from ksamples/s */
 
     /* Decoder chunk size */
-    x = s.value("IO/DecoderChunkSize", DecoderChunkSize_DEF).toInt();
+    xi = s.value("IO/DecoderChunkSize", DecoderChunkSize_DEF).toInt();
 
-    if ((x < DecoderChunkSize_MIN) || (x > DecoderChunkSize_MAX)) {
-        x = DecoderChunkSize_DEF;
-        s.setValue("IO/DecoderChunkSize", x);
+    if ((xi < DecoderChunkSize_MIN) || (xi > DecoderChunkSize_MAX)) {
+        xi = DecoderChunkSize_DEF;
+        s.setValue("IO/DecoderChunkSize", xi);
     }
 
-    decoderChunkSize = (x * lrpt_decoder_sfl()) / 2;  /* Convert from SFLs to the number of QPSK symbols */
+    decoderChunkSize = (xi * lrpt_decoder_sfl()) / 2;  /* Convert from SFLs to the number of QPSK symbols */
+
+    /* SDR frequency */
+    xf = s.value("SDR/Frequency", SDRFrequency_DEF).toDouble();
+
+    if ((xf < SDRFrequency_MIN) || (xf > SDRFrequency_MAX)) {
+        xf = SDRFrequency_DEF;
+        s.setValue("SDR/Frequency", xf);
+    }
+
+    SDRFrequencySB->setValue(xf);
+
+    /* SDR bandwidth */
+    xf = s.value("SDR/Bandwidth", SDRBandwidth_DEF).toDouble();
+
+    if ((xf < SDRBandwidth_MIN) || (xf > SDRBandwidth_MAX)) {
+        xf = SDRBandwidth_DEF;
+        s.setValue("SDR/Bandwidth", xf);
+    }
+
+    SDRBandwidthSB->setValue(xf);
+
+    /* Whether to use I/Q sample filtering during demodulation */
+    DemodFilterCB->setChecked(s.value("Demodulator/Filter", true).toBool());
+
+    /* Filter ripple level (in percents) */
+    xf = s.value("Demodulator/FilterRipple", DemodFilterRipple_DEF).toDouble();
+
+    if ((xf < DemodFilterRipple_MIN) || (xf > DemodFilterRipple_MAX)) {
+        xf = DemodFilterRipple_DEF;
+        s.setValue("Demodulator/FilterRipple", xf);
+    }
+
+    filterRipple = xf;
+
+    /* Number of filter poles */
+    xi = s.value("Demodulator/FilterPoles", DemodFilterPoles_DEF).toInt();
+
+    if ((xi < DemodFilterPoles_MIN) || (xi > DemodFilterPoles_MAX) || ((xi % 2) != 0)) {
+        xi = DemodFilterPoles_DEF;
+        s.setValue("Demodulator/FilterPoles", xi);
+    }
+
+    filterPoles = xi;
+
+    /* PLL locked threshold */
+    xf = s.value("Demodulator/PLLLocked", DemodPLLLocked_DEF).toDouble();
+
+    if ((xf < DemodPLLLocked_MIN) || (xf > DemodPLLLocked_MAX)) {
+        xf = DemodPLLLocked_DEF;
+        s.setValue("Demodulator/PLLLocked", xf);
+    }
+
+    DemodPLLLockedSB->setValue(xf);
+
+    /* PLL unlocked threshold */
+    xf = s.value("Demodulator/PLLUnlocked", DemodPLLUnlocked_DEF).toDouble();
+
+    if ((xf < DemodPLLUnlocked_MIN) || (xf > DemodPLLUnlocked_MAX)) {
+        xf = DemodPLLUnlocked_DEF;
+        s.setValue("Demodulator/PLLUnlocked", xf);
+    }
+
+    DemodPLLUnlockedSB->setValue(xf);
+
+    /* RRC order */
+    xi = s.value("Demodulator/RRCOrder", DemodRRCOrder_DEF).toInt();
+
+    if ((xi < DemodRRCOrder_MIN) || (xi > DemodRRCOrder_MAX)) {
+        xi = DemodRRCOrder_DEF;
+        s.setValue("Demodulator/RRCOrder", xi);
+    }
+
+    DemodRRCOrderSB->setValue(xi);
+
+    /* RRC alpha */
+    xf = s.value("Demodulator/RRCAlpha", DemodRRCAlpha_DEF).toDouble();
+
+    if ((xf < DemodRRCAlpha_MIN) || (xf > DemodRRCAlpha_MAX)) {
+        xf = DemodRRCAlpha_DEF;
+        s.setValue("Demodulator/RRCAlpha", xf);
+    }
+
+    DemodRRCAlphaSB->setValue(xf);
+
+    /* Interpolation factor */
+    xi = s.value("Demodulator/RRCOrder", DemodRRCOrder_DEF).toInt();
+
+    if ((xi < DemodRRCOrder_MIN) || (xi > DemodRRCOrder_MAX)) {
+        xi = DemodRRCOrder_DEF;
+        s.setValue("Demodulator/RRCOrder", xi);
+    }
+
+    DemodRRCOrderSB->setValue(xi);
+
+    /* TODO bind with spacecraft type */
+    /* Whether to use offset QPSK demodulator */
+    DemodOffsetCB->setChecked(s.value("Demodulator/OQPSK", false).toBool());
+
+    /* Spacecraft type */
+    lrpt_decoder_spacecraft_t xsc =
+            s.value("Decoder/Spacecraft",
+                    QVariant::fromValue(LRPT_DECODER_SC_METEORM2)).value<lrpt_decoder_spacecraft_t>();
+
+    DecoderSpacecraftCombB->setCurrentIndex(DecoderSpacecraftCombB->findData(xsc));
+
+    /* TODO bind with spacecraft type */
+    /* Differential coding */
+    DecoderDiffcodedCB->setChecked(s.value("Decoder/Diffcoding", false).toBool());
+
+    /* TODO bind with spacecraft type */
+    /* Interleaving */
+    DecoderInterleavedCB->setChecked(s.value("Decoder/Interleaving", false).toBool());
 
     s.sync();
 }
@@ -338,13 +459,9 @@ void MainWindow::updateUI() {
             StatusGB->setDisabled(true);
             WaterfallGB->setDisabled(true);
             ConstellationGB->setDisabled(true);
-            IQBufferUtilLbl->setDisabled(true);
             IQBufferUtilBar->setDisabled(true);
-            QPSKBufferUtilLbl->setDisabled(true);
             QPSKBufferUtilBar->setDisabled(true);
-            LockQualityLbl->setDisabled(true);
             LockQualityBar->setDisabled(true);
-            SignalQualityLbl->setDisabled(true);
             SignalQualityBar->setDisabled(true);
             LRPTGB->setDisabled(true);
 
@@ -388,13 +505,9 @@ void MainWindow::updateUI() {
             StatusGB->setEnabled(processing);
             WaterfallGB->setEnabled(true);
             ConstellationGB->setEnabled(true);
-            IQBufferUtilLbl->setEnabled(true);
             IQBufferUtilBar->setEnabled(true);
-            QPSKBufferUtilLbl->setEnabled(true);
             QPSKBufferUtilBar->setEnabled(true);
-            LockQualityLbl->setEnabled(true);
             LockQualityBar->setEnabled(true);
-            SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
             LRPTGB->setEnabled(processing);
 
@@ -438,13 +551,9 @@ void MainWindow::updateUI() {
             StatusGB->setEnabled(processing);
             WaterfallGB->setDisabled(true);
             ConstellationGB->setEnabled(true);
-            IQBufferUtilLbl->setDisabled(true);
             IQBufferUtilBar->setDisabled(true);
-            QPSKBufferUtilLbl->setEnabled(true);
             QPSKBufferUtilBar->setEnabled(true);
-            LockQualityLbl->setDisabled(true);
             LockQualityBar->setDisabled(true);
-            SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
             LRPTGB->setEnabled(processing);
 
@@ -501,13 +610,9 @@ void MainWindow::updateUI() {
             StatusGB->setEnabled(processing);
             WaterfallGB->setEnabled(true);
             ConstellationGB->setEnabled(true);
-            IQBufferUtilLbl->setEnabled(true);
             IQBufferUtilBar->setEnabled(true);
-            QPSKBufferUtilLbl->setEnabled(true);
             QPSKBufferUtilBar->setEnabled(true);
-            LockQualityLbl->setEnabled(true);
             LockQualityBar->setEnabled(true);
-            SignalQualityLbl->setEnabled(true);
             SignalQualityBar->setEnabled(true);
             LRPTGB->setEnabled(processing);
 
@@ -730,21 +835,8 @@ void MainWindow::setDDItems() {
     bool rcvEnabled = (srcMode == SDR_RECEIVER) ? true : false;
 
     DDRcvCB->setEnabled(rcvEnabled);
-    DDRcvFilePath->setEnabled(rcvEnabled && DDRcvCB->isChecked());
-    DDRcvFileBrowseBtn->setEnabled(rcvEnabled && DDRcvCB->isChecked());
-
-    bool filtEnabled;
-
-    if (
-            ((srcMode == IQ_FILE) || (srcMode == SDR_RECEIVER)) &&
-            DemodFilterCB->isChecked())
-        filtEnabled = true;
-    else
-        filtEnabled = false;
-
-    DDFiltCB->setEnabled(filtEnabled);
-    DDFiltFilePath->setEnabled(filtEnabled && DDFiltCB->isChecked());
-    DDFiltFileBrowseBtn->setEnabled(filtEnabled && DDFiltCB->isChecked());
+    DDRcvDirPath->setEnabled(rcvEnabled && DDRcvCB->isChecked());
+    DDRcvDirBrowseBtn->setEnabled(rcvEnabled && DDRcvCB->isChecked());
 
     bool demodEnabled;
 
@@ -754,26 +846,23 @@ void MainWindow::setDDItems() {
         demodEnabled = false;
 
     DDDemodCB->setEnabled(demodEnabled);
-    DDDemodFilePath->setEnabled(demodEnabled && DDDemodCB->isChecked());
-    DDDemodFileBrowseBtn->setEnabled(demodEnabled && DDDemodCB->isChecked());
-
-    bool qpskprocEnabled;
-
-    if (
-            ((srcMode == IQ_FILE) || (srcMode == QPSK_FILE) || (srcMode == SDR_RECEIVER)) &&
-            (DecoderDiffcodedCB->isChecked() || DecoderInterleavedCB->isChecked()))
-        qpskprocEnabled = true;
-    else
-        qpskprocEnabled = false;
-
-    DDQPSKProcCB->setEnabled(qpskprocEnabled);
-    DDQPSKProcFilePath->setEnabled(qpskprocEnabled && DDQPSKProcCB->isChecked());
-    DDQPSKProcFileBrowseBtn->setEnabled(qpskprocEnabled && DDQPSKProcCB->isChecked());
+    DDDemodDirPath->setEnabled(demodEnabled && DDDemodCB->isChecked());
+    DDDemodDirBrowseBtn->setEnabled(demodEnabled && DDDemodCB->isChecked());
 }
 
 /**************************************************************************************************/
 
-void MainWindow::browseRcvDumpFile() {
+void MainWindow::handlePLLThresholds() {
+    if (DemodPLLLockedSB->value() >= DemodPLLUnlockedSB->value())
+        DemodPLLThresholdsLbl->setStyleSheet("QLabel { color: #ff0000 }");
+    else
+        DemodPLLThresholdsLbl->setStyleSheet("");
+}
+
+/**************************************************************************************************/
+
+void MainWindow::browseRcvDumpDir() {
+    /* TODO browse for directory */
     QString fileName = QFileDialog::getSaveFileName(
                 this,
                 tr("Specify dump file to save"),
@@ -784,7 +873,7 @@ void MainWindow::browseRcvDumpFile() {
         if (QFileInfo(fileName).suffix() != "iq")
             fileName += ".iq";
 
-        DDRcvFilePath->setText(fileName);
+        DDRcvDirPath->setText(fileName);
 
         /* Store last directory */
         lastRcvDumpFileDir = QFileInfo(fileName).absolutePath();
@@ -798,32 +887,8 @@ void MainWindow::browseRcvDumpFile() {
 
 /**************************************************************************************************/
 
-void MainWindow::browseFiltDumpFile() {
-    QString fileName = QFileDialog::getSaveFileName(
-                this,
-                tr("Specify dump file to save"),
-                lastFiltDumpFileDir,
-                tr("LRPT I/Q data files (*.iq)"));
-
-    if (!fileName.isEmpty()) { /* TODO disable start-stop button in other case */
-        if (QFileInfo(fileName).suffix() != "iq")
-            fileName += ".iq";
-
-        DDFiltFilePath->setText(fileName);
-
-        /* Store last directory */
-        lastFiltDumpFileDir = QFileInfo(fileName).absolutePath();
-
-        QSettings s("desolve", "qlrpt");
-
-        s.setValue("Paths/LastFiltDumpDir", lastFiltDumpFileDir);
-        s.sync();
-    }
-}
-
-/**************************************************************************************************/
-
-void MainWindow::browseDemodDumpFile() {
+void MainWindow::browseDemodDumpDir() {
+    /* TODO browse for directory */
     QString fileName = QFileDialog::getSaveFileName(
                 this,
                 tr("Specify dump file to save"),
@@ -834,7 +899,7 @@ void MainWindow::browseDemodDumpFile() {
         if (QFileInfo(fileName).suffix() != "qpsk")
             fileName += ".qpsk";
 
-        DDDemodFilePath->setText(fileName);
+        DDDemodDirPath->setText(fileName);
 
         /* Store last directory */
         lastDemodDumpFileDir = QFileInfo(fileName).absolutePath();
@@ -842,31 +907,6 @@ void MainWindow::browseDemodDumpFile() {
         QSettings s("desolve", "qlrpt");
 
         s.setValue("Paths/LastDemodDumpDir", lastDemodDumpFileDir);
-        s.sync();
-    }
-}
-
-/**************************************************************************************************/
-
-void MainWindow::browseQPSKProcDumpFile() { /* TODO disable start-stop button in other case */
-    QString fileName = QFileDialog::getSaveFileName(
-                this,
-                tr("Specify dump file to save"),
-                lastQPSKProcDumpFileDir,
-                tr("LRPT QPSK data files (*.qpsk)"));
-
-    if (!fileName.isEmpty()) {
-        if (QFileInfo(fileName).suffix() != "qpsk")
-            fileName += ".qpsk";
-
-        DDQPSKProcFilePath->setText(fileName);
-
-        /* Store last directory */
-        lastQPSKProcDumpFileDir = QFileInfo(fileName).absolutePath();
-
-        QSettings s("desolve", "qlrpt");
-
-        s.setValue("Paths/LastQPSKProcDumpDir", lastQPSKProcDumpFileDir);
         s.sync();
     }
 }
@@ -912,7 +952,7 @@ void MainWindow::startStopProcessing() {
         LogText->insertPlainText(tr("Processing started at %1 UTC\n").
                 arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss")));
     }
-    else
+    else /* TODO print final summary */
         LogText->insertPlainText(tr("Processing finished at %1 UTC\n\n").
                 arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss")));
 
@@ -938,33 +978,19 @@ void MainWindow::startStopProcessing() {
                     NULL); /* TODO error reporting */
 
         /* Initialize Chebyshev filter (if requested) */
-        /* TODO may be store filter params in application settings */
         if (DemodFilterCB->isChecked())
             chebFilter = lrpt_dsp_filter_init(
                         lrpt_iq_file_bandwidth(iqSrcFile),
                         lrpt_iq_file_samplerate(iqSrcFile),
-                        5.0,
-                        6,
+                        filterRipple,
+                        filterPoles,
                         LRPT_DSP_FILTER_TYPE_LOWPASS,
                         NULL); /* TODO error reporting */
 
-        /* Open filtered I/Q file for writing (if requested) */
-        if (DDFiltCB->isChecked() && DDFiltFilePath->isEnabled() && !DDFiltFilePath->text().isEmpty()) {
-            fileNameUTF8 = DDFiltFilePath->text().toUtf8();
-            fileNameCString = fileNameUTF8.data();
-
-            ddFiltFile = lrpt_iq_file_open_w_v1(
-                        fileNameCString,
-                        lrpt_iq_file_is_offsetted(iqSrcFile),
-                        lrpt_iq_file_samplerate(iqSrcFile),
-                        lrpt_iq_file_bandwidth(iqSrcFile),
-                        lrpt_iq_file_devicename(iqSrcFile),
-                        NULL); /* TODO error reporting */
-        }
-
+        /* TODO add timestamp and unique name */
         /* Open demodulated QPSK file for writing (if requested) */
-        if (DDDemodCB->isChecked() && DDDemodFilePath->isEnabled() && !DDDemodFilePath->text().isEmpty()) {
-            fileNameUTF8 = DDDemodFilePath->text().toUtf8();
+        if (DDDemodCB->isChecked() && DDDemodDirPath->isEnabled() && !DDDemodDirPath->text().isEmpty()) {
+            fileNameUTF8 = DDDemodDirPath->text().toUtf8();
             fileNameCString = fileNameUTF8.data();
 
             ddDemodFile = lrpt_qpsk_file_open_w_v1(
@@ -977,10 +1003,7 @@ void MainWindow::startStopProcessing() {
         }
 
         /* Initialize LRPT decoder */
-        lrpt_decoder_spacecraft_t sc = LRPT_DECODER_SC_METEORM2;
-
-        if (DecoderSpacecraftCombB->currentIndex() == 0)
-            sc = LRPT_DECODER_SC_METEORM2;
+        lrpt_decoder_spacecraft_t sc = DecoderSpacecraftCombB->currentData().value<lrpt_decoder_spacecraft_t>();
 
         LRPTChan64Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
         LRPTChan65Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
@@ -1012,7 +1035,6 @@ void MainWindow::startStopProcessing() {
         qpskSrcWorker = new DemodulatorWorker(demodulator,
                     (demodChunkSize == 0) ? (DemodChunkSize_DEFINIT * 1024) : demodChunkSize,
                     chebFilter,
-                    ddFiltFile,
                     ddDemodFile);
 
         /* Move worker into separate thread and set up connections */
@@ -1030,7 +1052,7 @@ void MainWindow::startStopProcessing() {
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, DecoderInterleavedCB->isChecked(), NULL); /* TODO pass file object for processed dump */
+        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, DecoderInterleavedCB->isChecked());
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
@@ -1062,10 +1084,7 @@ void MainWindow::startStopProcessing() {
         qpskSrcFile = lrpt_qpsk_file_open_r(fileNameCString, NULL); /* TODO error reporting */
 
         /* Initialize LRPT decoder */
-        lrpt_decoder_spacecraft_t sc = LRPT_DECODER_SC_METEORM2;
-
-        if (DecoderSpacecraftCombB->currentIndex() == 0)
-            sc = LRPT_DECODER_SC_METEORM2;
+        lrpt_decoder_spacecraft_t sc = DecoderSpacecraftCombB->currentData().value<lrpt_decoder_spacecraft_t>();
 
         LRPTChan64Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
         LRPTChan65Widget->setStdWidth(lrpt_decoder_spacecraft_imgwidth(sc));
@@ -1094,7 +1113,7 @@ void MainWindow::startStopProcessing() {
 
         /* Allocate new thread and worker for decoder */
         decoderThread = new QThread();
-        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, DecoderInterleavedCB->isChecked(), NULL); /* TODO pass file object for processed dump */
+        decoderWorker = new DecoderWorker(decoder, decoderChunkSize, dediffcoder, DecoderInterleavedCB->isChecked());
 
         /* Move worker into separate thread and set up connections */
         decoderWorker->moveToThread(decoderThread);
@@ -1292,8 +1311,6 @@ void MainWindow::finishDemodulatorWorker() {
     chebFilter = NULL;
 
     /* Close intermediate dump files */
-    lrpt_iq_file_close(ddFiltFile);
-    ddFiltFile = NULL;
     lrpt_qpsk_file_close(ddDemodFile);
     ddDemodFile = NULL;
 

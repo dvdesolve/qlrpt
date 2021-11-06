@@ -49,6 +49,42 @@
 #define DecoderChunkSize_MIN    1
 #define DecoderChunkSize_MAX    100
 
+#define SDRFrequency_DEF        137100.0
+#define SDRFrequency_MIN        130000.0
+#define SDRFrequency_MAX        140000.0
+
+#define SDRBandwidth_DEF        120.0
+#define SDRBandwidth_MIN        90.0
+#define SDRBandwidth_MAX        200.0
+
+#define DemodFilterRipple_DEF    5.0
+#define DemodFilterRipple_MIN    0.0
+#define DemodFilterRipple_MAX    100.0
+
+#define DemodFilterPoles_DEF     6
+#define DemodFilterPoles_MIN     2
+#define DemodFilterPoles_MAX     252
+
+#define DemodPLLLocked_DEF       0.80
+#define DemodPLLLocked_MIN       0.1
+#define DemodPLLLocked_MAX       2.0
+
+#define DemodPLLUnlocked_DEF     0.83
+#define DemodPLLUnlocked_MIN     0.1
+#define DemodPLLUnlocked_MAX     2.0
+
+#define DemodRRCOrder_DEF       32
+#define DemodRRCOrder_MIN       0
+#define DemodRRCOrder_MAX       256
+
+#define DemodRRCAlpha_DEF       0.6
+#define DemodRRCAlpha_MIN       0.0
+#define DemodRRCAlpha_MAX       1.0
+
+#define DemodInterpFactor_DEF   4
+#define DemodInterpFactor_MIN   1
+#define DemodInterpFactor_MAX   32
+
 /* TODO use custom settings */
 #define QPSKConstPoints         512
 

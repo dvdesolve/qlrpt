@@ -32,13 +32,11 @@
 DecoderWorker::DecoderWorker(lrpt_decoder_t *decoder,
         int MTU,
         lrpt_dsp_dediffcoder_t *dediffcoder,
-        bool deint,
-        lrpt_qpsk_file_t *processedDump) {
+        bool deint) {
     this->decoder = decoder;
     this->MTU = MTU;
     this->dediffcoder = dediffcoder;
     this->deint = deint;
-    this->processedDump = processedDump;
     imgStdWidth = lrpt_decoder_imgwidth(decoder);
     int_chunks.clear();
 }

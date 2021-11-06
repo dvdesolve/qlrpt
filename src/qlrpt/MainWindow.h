@@ -73,6 +73,9 @@ private:
 
     int decoderChunkSize; /* MTU for decoder */
 
+    double filterRipple; /* Chebyshev filter ripple level, % */
+    int filterPoles; /* Number of Chebyshev filter poles */
+
     /* Workers and core objects */
     IQSourceAbstractWorker *iqSrcWorker = nullptr;
     QThread *iqSrcThread = nullptr;
@@ -84,7 +87,6 @@ private:
     lrpt_qpsk_file_t *qpskSrcFile = NULL;
     lrpt_demodulator_t *demodulator = NULL;
     lrpt_dsp_filter_t *chebFilter = NULL;
-    lrpt_iq_file_t *ddFiltFile = NULL;
     lrpt_qpsk_file_t *ddDemodFile = NULL;
 
     DecoderWorker *decoderWorker = nullptr;
@@ -92,7 +94,6 @@ private:
     lrpt_decoder_t *decoder = NULL;
     lrpt_dsp_dediffcoder_t *dediffcoder = NULL;
     lrpt_image_t *lrptImage = NULL;
-    lrpt_qpsk_file_t *ddQPSKProcFile = NULL;
 
     /* State flags and variables */
     SrcType srcMode = NO_SRC;
@@ -140,11 +141,12 @@ private slots:
     /* Handle enabled/disabled state for data dump items */
     void setDDItems();
 
+    /* Handle locked/unlocked thresholds for PLL correctly */
+    void handlePLLThresholds();
+
     /* Select paths for dump files */
-    void browseRcvDumpFile();
-    void browseFiltDumpFile();
-    void browseDemodDumpFile();
-    void browseQPSKProcDumpFile();
+    void browseRcvDumpDir();
+    void browseDemodDumpDir();
 
     /* Set live LRPT imagery area */
     void setLiveAPIDsImagery();

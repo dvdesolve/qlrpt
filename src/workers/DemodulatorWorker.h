@@ -38,7 +38,6 @@ public:
             lrpt_demodulator_t *demod,
             int MTU,
             lrpt_dsp_filter_t *filter = NULL,
-            lrpt_iq_file_t *filtDump = NULL,
             lrpt_qpsk_file_t *demodDump = NULL);
     ~DemodulatorWorker();
 
@@ -53,7 +52,6 @@ private:
     lrpt_demodulator_t *demod = NULL;
     int MTU;
     lrpt_dsp_filter_t *filter = NULL;
-    lrpt_iq_file_t *filtDump = NULL;
     lrpt_qpsk_file_t *demodDump = NULL;
 
     lrpt_iq_data_t *iqInput = NULL;
