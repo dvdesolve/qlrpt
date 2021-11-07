@@ -54,7 +54,7 @@ void IQSourceFileWorker::process() {
         size_t n = lrpt_iq_data_length(iqData);
 
         iqRBFree->acquire(n);
-        lrpt_iq_rb_push(iqRB, iqData, n, NULL);
+        lrpt_iq_rb_push(iqRB, iqData, 0, n, NULL);
         iqRBUsed->release(n);
 
         dataRead += n;

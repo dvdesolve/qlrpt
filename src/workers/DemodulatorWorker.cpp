@@ -105,7 +105,7 @@ void DemodulatorWorker::processChunk() {
         lrpt_dsp_filter_apply(filter, iqInput);
 
     size_t iqN = lrpt_iq_data_length(iqInput);
-    lrpt_iq_data_to_doubles(iqInput, fftIQ, 512, NULL);
+    lrpt_iq_data_to_doubles(fftIQ, iqInput, 0, 512, NULL);
 
     int dec = 0;
     double si = 0.0, sq = 0.0;
