@@ -1,0 +1,19 @@
+fft params as global decls
+
+set checkboxes and other settings upon loading src files
+rb size greater than mtu check in settings!
+two modes for ring buffers - discard and overwrite
+
+sdr ppm fix
+
+customizable lrpt preview image width
+customizable filter parameters
+separate dialog with resulting image manipulation or just for extra tuning
+jpeg/png tagging
+
+abi compliance checker
+check valgrind functionality with explicit optimizations in qt
+fsanitize-ubsan, fsanitize-asan, fsanitize-msan
+
+tle data show sat params
+frequency tracking via sgp/sdp
